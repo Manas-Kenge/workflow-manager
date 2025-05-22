@@ -1,0 +1,37 @@
+[repository]
+name = "workflow-manager"
+managed_by_uv = false
+changelog = "CHANGELOG.md"
+version = "version.txt"
+compose = "docker-compose.yml"
+
+[repository.towncrier]
+section = "Project"
+settings = "towncrier.toml"
+
+[backend]
+path = "backend"
+
+[backend.package]
+name = "workflow.manager"
+path = "backend"
+changelog = "backend/CHANGELOG.md"
+towncrier_settings = "backend/pyproject.toml"
+base_package = "Products.CMFPlone"
+publish = false
+
+[frontend]
+path = "frontend"
+
+[frontend.package]
+name = "volto-workflow-manager"
+path = "frontend/packages/volto-workflow-manager"
+changelog = "frontend/packages/volto-workflow-manager/CHANGELOG.md"
+towncrier_settings = "frontend/packages/volto-workflow-manager/towncrier.toml"
+base_package = "@plone/volto"
+publish = false
+
+[cookieplone]
+template = "project"
+template_version = "684d5c7f43a6ebc3184e2a0106b0160820a96e66"
+generated_date = "2025-05-22 07:54:51"
