@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from plone.app.registry.browser.controlpanel import ControlPanelFormWrapper
 from plone.app.registry.browser.controlpanel import RegistryEditForm
 from plone.restapi.controlpanels import RegistryConfigletPanel

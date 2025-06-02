@@ -5,7 +5,7 @@
 
 <!-- -*- extra stuff goes here -*- -->
 
-  <records interface="workflow.manager.controlpanels.control_panel.controlpanel.IControlPanel"
+  <records interface="workflow.manager.controlpanel.control_panel.controlpanel.IControlPanel"
            prefix="workflow.manager.control_panel" />
 
 
