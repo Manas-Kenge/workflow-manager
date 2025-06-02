@@ -2,12 +2,11 @@
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:plone="http://namespaces.plone.org/plone"
-    i18n_domain="workflow.manager"
-    >
+    i18n_domain="workflow.manager">
 
   <!-- -*- extra stuff goes here -*- -->
-   <include
-        package=".control_panel"
-    />
+
+  <include package=".services" />
+
 
 </configure>

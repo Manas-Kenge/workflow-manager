@@ -4,6 +4,7 @@
   <!-- -*- extra stuff goes here -*- -->
     <configlet 
         i18n:attributes="title"
+        remove="True" 
         title="Workflow Manager" 
         action_id="workflowmanager"
         appId="workflow.manager" 
@@ -12,7 +13,7 @@
         url_expr="string:${portal_url}/@@workflowmanager"
         icon_expr="string:"
         visible="True" 
-        >
+    >
     <permission>workflow.manager: Manage Workflows</permission>
   </configlet>
 

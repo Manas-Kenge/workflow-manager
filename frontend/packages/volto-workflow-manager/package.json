@@ -27,13 +27,24 @@
     "release-alpha": "release-it --preRelease=alpha"
   },
   "addons": [],
-  "dependencies": {},
+  "dependencies": {
+    "@adobe/react-spectrum": "^3.42.0",
+    "@reduxjs/toolkit": "^2.8.2",
+    "@types/redux": "^3.6.0",
+    "@xyflow/react": "^12.6.4",
+    "lucide-react": "^0.511.0",
+    "react-aria-components": "^1.9.0",
+    "react-redux": "8.1.2",
+    "redux": "4.2.1"
+  },
   "peerDependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@plone/scripts": "^3.6.1",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
     "release-it": "^17.1.1"
   }
 }
