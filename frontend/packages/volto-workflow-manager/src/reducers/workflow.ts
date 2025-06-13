@@ -1,33 +1,79 @@
-import { AnyAction } from 'redux';
+import type { AnyAction } from 'redux';
 
 import {
   GET_WORKFLOWS,
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
+  UPDATE_WORKFLOW_STATE,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
+  RENAME_WORKFLOW,
 } from '../actions/workflow';
 
-interface WorkflowState {
+// Define proper types for your workflow data
+export interface Workflow {
+  id: string;
+  title?: string;
+  description?: string;
+  // Add other properties that your workflow objects have
+  // Based on typical workflow structures, you might have:
+  states?: WorkflowState[];
+  transitions?: WorkflowTransition[];
+  created?: string;
+  modified?: string;
+  [key: string]: any; // For any additional properties
+}
+
+export interface WorkflowState {
+  id: string;
+  title: string;
+  description?: string;
+  isInitial?: boolean;
+  isFinal?: boolean;
+  permissions?: string[];
+  transitions?: string[];
+}
+
+export interface WorkflowTransition {
+  id: string;
+  title: string;
+  from_state?: string;
+  to_state?: string;
+}
+
+export interface ValidationError {
+  error: string;
+  state_id?: string;
+  transition_id?: string;
+}
+
+export interface ValidationErrors {
+  state_errors: ValidationError[];
+  transition_errors?: ValidationError[];
+  general_errors?: ValidationError[];
+}
+
+// Define the shape of your Redux state
+interface WorkflowReduxState {
   workflows: {
-    error: any;
-    items: any[];
+    error: string | null;
+    items: Workflow[];
     loaded: boolean;
     loading: boolean;
   };
   validation: {
-    errors: any;
+    errors: ValidationErrors | null;
     loading: boolean;
   };
   operation: {
-    error: any;
+    error: string | null;
     loading: boolean;
     result: any;
   };
 }
 
-const initialState: WorkflowState = {
+const initialState: WorkflowReduxState = {
   workflows: {
     error: null,
     items: [],
@@ -46,9 +92,9 @@ const initialState: WorkflowState = {
 };
 
 export default function workflow(
-  state: WorkflowState = initialState,
+  state: WorkflowReduxState = initialState,
   action: AnyAction,
-): WorkflowState {
+): WorkflowReduxState {
   switch (action.type) {
     case `${GET_WORKFLOWS}_PENDING`:
       return {
@@ -86,6 +132,7 @@ export default function workflow(
     // Add Workflow
     case `${ADD_WORKFLOW}_PENDING`:
     case `${DELETE_WORKFLOW}_PENDING`:
+    case `${UPDATE_WORKFLOW_STATE}_PENDING`:
     case `${UPDATE_WORKFLOW_SECURITY}_PENDING`:
     case `${ASSIGN_WORKFLOW}_PENDING`:
       return {
@@ -112,9 +159,39 @@ export default function workflow(
         },
       };
 
+    case `${UPDATE_WORKFLOW_STATE}_SUCCESS`:
+      return {
+        ...state,
+        // Update the items array in the workflows state
+        workflows: {
+          ...state.workflows,
+          items: state.workflows.items.map((wf) => {
+            // Find the workflow that contains the state we just edited
+            if (wf.id === action.workflowId) {
+              return {
+                ...wf,
+                // Now, find and replace the updated state in its `states` array
+                states: wf.states?.map((st) =>
+                  st.id === action.state.id ? action.state : st,
+                ),
+              };
+            }
+            // Return other workflows unmodified
+            return wf;
+          }),
+        },
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: null,
+          result: action.result,
+        },
+      };
+
     case `${ADD_WORKFLOW}_FAIL`:
     case `${DELETE_WORKFLOW}_FAIL`:
     case `${UPDATE_WORKFLOW_SECURITY}_FAIL`:
+    case `${UPDATE_WORKFLOW_STATE}_FAIL`:
     case `${ASSIGN_WORKFLOW}_FAIL`:
       return {
         ...state,
@@ -160,3 +237,5 @@ export default function workflow(
       return state;
   }
 }
+
+export type { WorkflowReduxState };

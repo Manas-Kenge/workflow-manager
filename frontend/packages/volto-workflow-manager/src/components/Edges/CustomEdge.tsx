@@ -1,63 +1,90 @@
 import React from 'react';
-import { X } from 'lucide-react';
-import {
-  BezierEdge,
-  EdgeLabelRenderer,
-  getBezierPath,
-  useReactFlow,
-} from '@xyflow/react';
+import { BezierEdge, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
-import { Button } from 'react-aria-components';
 
-export default function CustomEdge(props: EdgeProps) {
+// Define the shape of data that your workflow transition edges will have
+interface WorkflowTransitionEdgeData {
+  [key: string]: unknown;
+  label?: string;
+  highlighted?: boolean;
+  transitionId?: string;
+  // Add other properties your workflow transitions might have
+  description?: string;
+  conditions?: string[];
+  permissions?: string[];
+  automatic?: boolean;
+}
+
+// Type the EdgeProps to specify what data structure you expect
+interface CustomEdgeProps extends EdgeProps {
+  data?: WorkflowTransitionEdgeData;
+}
+
+const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
   const {
-    id,
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
+    data,
+    id,
+    selected,
   } = props;
 
-  const { setEdges } = useReactFlow();
-
-  const [labelX, labelY] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
+    curvature: 0.25,
   });
-
-  const onEdgeClick = () => {
-    setEdges((edges) => edges.filter((edge) => edge.id !== id));
-  };
 
   return (
     <>
-      <BezierEdge {...props} />
-      <EdgeLabelRenderer>
-        <Button
-          className="nodrag nopan"
-          onPress={onEdgeClick}
-          style={{
-            position: 'absolute',
-            transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
-            background: 'transparent',
-            border: 'none',
-            color: 'red',
-            cursor: 'pointer',
-            padding: '4px',
-            borderRadius: '4px',
-            pointerEvents: 'all',
-          }}
-          aria-label="Delete Edge"
-        >
-          <X size={16} />
-        </Button>
-      </EdgeLabelRenderer>
+      <BezierEdge
+        path={edgePath}
+        {...props}
+        style={{
+          stroke: data?.highlighted
+            ? '#ff6b6b'
+            : selected
+              ? '#0078d4'
+              : '#b1b1b7',
+          strokeWidth: data?.highlighted ? 3 : selected ? 2 : 1,
+          ...props.style,
+        }}
+      />
+      {data?.label && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              fontSize: 12,
+              fontWeight: 700,
+              background: 'white',
+              padding: '2px 6px',
+              borderRadius: 3,
+              border: '1px solid #ccc',
+              color: data.highlighted ? '#ff6b6b' : '#333',
+            }}
+            className="nodrag nopan"
+            title={data.description || data.label}
+          >
+            {data.label}
+            {data.automatic && (
+              <span style={{ color: '#0078d4', marginLeft: 4 }}>⚡</span>
+            )}
+          </div>
+        </EdgeLabelRenderer>
+      )}
     </>
   );
-}
+};
+
+export default CustomEdge;
+export type { WorkflowTransitionEdgeData, CustomEdgeProps };

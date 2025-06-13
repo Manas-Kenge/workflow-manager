@@ -1553,9 +1553,15 @@ importers:
       '@adobe/react-spectrum':
         specifier: ^3.42.0
         version: 3.42.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@plone/components':
+        specifier: ^3.0.2
+        version: 3.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.14(prettier@3.2.5))
       '@reduxjs/toolkit':
         specifier: ^2.8.2
         version: 2.8.2(react-redux@8.1.2(@types/react-dom@18.3.7(@types/react@18.3.22))(@types/react@18.3.22)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
+      '@spectrum-icons/workflow':
+        specifier: ^4.2.22
+        version: 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/redux':
         specifier: ^3.6.0
         version: 3.6.0
@@ -1577,9 +1583,15 @@ importers:
       react-redux:
         specifier: 8.1.2
         version: 8.1.2(@types/react-dom@18.3.7(@types/react@18.3.22))(@types/react@18.3.22)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1)
+      react-router-dom:
+        specifier: 5.2.0
+        version: 5.2.0(react@18.2.0)
       redux:
         specifier: 4.2.1
         version: 4.2.1
+      semantic-ui-react:
+        specifier: 2.1.5
+        version: 2.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@plone/scripts':
         specifier: ^3.6.1
@@ -2913,14 +2925,26 @@ packages:
   '@internationalized/date@3.8.1':
     resolution: {integrity: sha512-PgVE6B6eIZtzf9Gu5HvJxRK3ufUFz9DhspELuhW/N0GuMGMTLvPQNRkHP2hTuP9lblOk+f+1xi96sPiPXANXAA==}
 
+  '@internationalized/date@3.8.2':
+    resolution: {integrity: sha512-/wENk7CbvLbkUvX1tu0mwq49CVkkWpkXubGel6birjRPyo6uQ4nQpnq5xZu823zRCwwn82zgHrvgF1vZyvmVgA==}
+
   '@internationalized/message@3.1.7':
     resolution: {integrity: sha512-gLQlhEW4iO7DEFPf/U7IrIdA3UyLGS0opeqouaFwlMObLUzwexRjbygONHDVbC9G9oFLXsLyGKYkJwqXw/QADg==}
+
+  '@internationalized/message@3.1.8':
+    resolution: {integrity: sha512-Rwk3j/TlYZhn3HQ6PyXUV0XP9Uv42jqZGNegt0BXlxjE6G3+LwHjbQZAGHhCnCPdaA6Tvd3ma/7QzLlLkJxAWA==}
 
   '@internationalized/number@3.6.2':
     resolution: {integrity: sha512-E5QTOlMg9wo5OrKdHD6edo1JJlIoOsylh0+mbf0evi1tHJwMZfJSaBpGtnJV9N7w3jeiioox9EG/EWRWPh82vg==}
 
+  '@internationalized/number@3.6.3':
+    resolution: {integrity: sha512-p+Zh1sb6EfrfVaS86jlHGQ9HA66fJhV9x5LiE5vCbZtXEHAuhcmUZUdZ4WrFpUBfNalr2OkAJI5AcKEQF+Lebw==}
+
   '@internationalized/string@3.2.6':
     resolution: {integrity: sha512-LR2lnM4urJta5/wYJVV7m8qk5DrMZmLRTuFhbQO5b9/sKLHgty6unQy1Li4+Su2DWydmB4aZdS5uxBRXIq2aAw==}
+
+  '@internationalized/string@3.2.7':
+    resolution: {integrity: sha512-D4OHBjrinH+PFZPvfCXvG28n2LSykWcJ7GIioQL+ok0LON15SdfoUssoHzzOUmVZLbRoREsQXVzA6r8JKsbP6A==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3456,6 +3480,15 @@ packages:
     resolution: {integrity: sha512-ROFF39F6ZrnzSUEmQQZUar0Jt4xVoP9WnDRdWwF4NNcXs3xBTLgBUDoOwW141y1jP+S8nahIbdxbFC7IShw9Iw==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
+  '@plone/components@3.0.2':
+    resolution: {integrity: sha512-BLxq4HMcmGux+CD6nOyl0YOqpTiB4yz/h4y/dcGSH3EwhxB3vaEq/Vcoss4qlzHJFfguemNPehJPGP8tq/Z6ww==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   '@plone/scripts@3.10.1':
     resolution: {integrity: sha512-U4RUHX+9YmVAMJX6uY/7KMSzcHimovK2paGVlz4WBicyp9hwCdOQ/9oCvq2wBLWHWAFUXlVjsWyHz03fotrgAA==}
     hasBin: true
@@ -3606,6 +3639,12 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
+  '@react-aria/i18n@3.12.10':
+    resolution: {integrity: sha512-1j00soQ2W0nTgzaaIsGFdMF/5aN60AEdCJPhmXGZiuWdWzMxObN9LQ9vdzYPTjTqyqMdSaSp9DZKs5I26Xovpw==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
   '@react-aria/i18n@3.12.9':
     resolution: {integrity: sha512-Fim0FLfY05kcpIILdOtqcw58c3sksvmVY8kICSwKCuSek4wYfwJdU28p/sRptw4adJhqN8Cbssvkf/J8zL2GgA==}
     peerDependencies:
@@ -3723,6 +3762,12 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
+  '@react-aria/ssr@3.9.9':
+    resolution: {integrity: sha512-2P5thfjfPy/np18e5wD4WPt8ydNXhij1jwA8oehxZTFqlgVMGXzcWKxTb4RtJrLFsqPO7RUQTiY8QJk0M4Vy2g==}
+    engines: {node: '>= 12'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
   '@react-aria/switch@3.7.3':
     resolution: {integrity: sha512-tFdJmcHaLgW23cS2R713vcJdVbsjDTRk8OLdG/sMziPBY3C00/exuSIb57xTS7KrE0hBYfnLJQTcmDNqdM8+9Q==}
     peerDependencies:
@@ -3785,6 +3830,12 @@ packages:
 
   '@react-aria/utils@3.29.0':
     resolution: {integrity: sha512-jSOrZimCuT1iKNVlhjIxDkAhgF7HSp3pqyT6qjg/ZoA0wfqCi/okmrMPiWSAKBnkgX93N8GYTLT3CIEO6WZe9Q==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@react-aria/utils@3.29.1':
+    resolution: {integrity: sha512-yXMFVJ73rbQ/yYE/49n5Uidjw7kh192WNN9PNQGV0Xoc7EJUlSOxqhnpHmYTyO0EotJ8fdM1fMH8durHjUSI8g==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -3942,6 +3993,13 @@ packages:
 
   '@react-spectrum/icon@3.8.5':
     resolution: {integrity: sha512-Ur496FvvGCRMhOSnW/d10TAbUCuseMw5kB81nIQWlqHZaMJL14fJMo3z0v0NXJFVPpQus0q6Xe4IJlU9mAj7CQ==}
+    peerDependencies:
+      '@react-spectrum/provider': ^3.0.0
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@react-spectrum/icon@3.8.6':
+    resolution: {integrity: sha512-b4jMBYm3s5wLN5ew4iVQhec/BDv2ZEas394Udk1HkrQb96FkUeb2iYTzsSpIB2hIYnCUIHsZFcXWRG3lBtI/sQ==}
     peerDependencies:
       '@react-spectrum/provider': ^3.0.0
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -4170,6 +4228,12 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
+  '@react-spectrum/utils@3.12.6':
+    resolution: {integrity: sha512-9Ry6O8thFAEd/vDd05sx/7PMmv/FuiTlcxDzexsr9022Fqtq0IF1qwNFZYJxkhEBgptsx+/92fvj1YCvuumxOg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+      react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
   '@react-spectrum/view@3.6.19':
     resolution: {integrity: sha512-m6qSOwCvEIZL83StUftrefYAvB8n/ZQl6XuJ22y72Lm4tUO/siucLFUmK1/TtpQuqS0mklIrKKT90hA2H/k+nw==}
     peerDependencies:
@@ -4235,6 +4299,9 @@ packages:
 
   '@react-stately/flags@3.1.1':
     resolution: {integrity: sha512-XPR5gi5LfrPdhxZzdIlJDz/B5cBf63l4q6/AzNqVWFKgd0QqY5LvWJftXkklaIUpKSJkIKQb8dphuZXDtkWNqg==}
+
+  '@react-stately/flags@3.1.2':
+    resolution: {integrity: sha512-2HjFcZx1MyQXoPqcBGALwWWmgFVUk2TuKVIQxCbRq7fPyWXIl6VHcakCLurdtYC2Iks7zizvz0Idv48MQ38DWg==}
 
   '@react-stately/form@3.1.4':
     resolution: {integrity: sha512-A6GOaZ9oEIo5/XOE+JT9Z8OBt0osIOfes4EcIxGS1C9ght/Smg0gNcIJ2/Wle8qmro4RoJcza2yJ+EglVOuE0w==}
@@ -4329,6 +4396,11 @@ packages:
 
   '@react-stately/utils@3.10.6':
     resolution: {integrity: sha512-O76ip4InfTTzAJrg8OaZxKU4vvjMDOpfA/PGNOytiXwBbkct2ZeZwaimJ8Bt9W1bj5VsZ81/o/tW4BacbdDOMA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@react-stately/utils@3.10.7':
+    resolution: {integrity: sha512-cWvjGAocvy4abO9zbr6PW6taHgF24Mwy/LbQ4TC4Aq3tKdKDntxyD+sh7AkSRfJRT2ccMVaHVv2+FfHThd3PKQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
@@ -4505,6 +4577,11 @@ packages:
 
   '@react-types/shared@3.29.1':
     resolution: {integrity: sha512-KtM+cDf2CXoUX439rfEhbnEdAgFZX20UP2A35ypNIawR7/PFFPjQDWyA2EnClCcW/dLWJDEPX2U8+EJff8xqmQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@react-types/shared@3.30.0':
+    resolution: {integrity: sha512-COIazDAx1ncDg046cTJ8SFYsX8aS3lB/08LDnbkH/SkdYrFPWDlXMrO/sUam8j1WWM+PJ+4d1mj7tODIKNiFog==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
@@ -4798,8 +4875,8 @@ packages:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
       react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
 
-  '@spectrum-icons/workflow@4.2.21':
-    resolution: {integrity: sha512-PojyoIKHnAwOVM84IkZnxI0WSM+r9qw6mppPmy5dnUCXNetuK9SAejG7QFRXP7ERi45wy19XLWvot9/uTM2BsQ==}
+  '@spectrum-icons/workflow@4.2.22':
+    resolution: {integrity: sha512-Yxqnfiw75g5tjygtw1B0E86yXhs5I/wSy4DbLLjheMvzqP+MlNu6I6rB74yCztyreR9/skDvEOsD/Gyd+SRr2g==}
     peerDependencies:
       '@react-spectrum/provider': ^3.0.0
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
@@ -16599,7 +16676,16 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.17
 
+  '@internationalized/date@3.8.2':
+    dependencies:
+      '@swc/helpers': 0.5.17
+
   '@internationalized/message@3.1.7':
+    dependencies:
+      '@swc/helpers': 0.5.17
+      intl-messageformat: 10.7.16
+
+  '@internationalized/message@3.1.8':
     dependencies:
       '@swc/helpers': 0.5.17
       intl-messageformat: 10.7.16
@@ -16608,7 +16694,15 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.17
 
+  '@internationalized/number@3.6.3':
+    dependencies:
+      '@swc/helpers': 0.5.17
+
   '@internationalized/string@3.2.6':
+    dependencies:
+      '@swc/helpers': 0.5.17
+
+  '@internationalized/string@3.2.7':
     dependencies:
       '@swc/helpers': 0.5.17
 
@@ -17493,6 +17587,19 @@ snapshots:
 
   '@pkgr/core@0.2.4': {}
 
+  '@plone/components@3.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.14(prettier@3.2.5))':
+    dependencies:
+      '@react-aria/utils': 3.29.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-spectrum/utils': 3.12.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@storybook/test': 8.6.14(storybook@8.6.14(prettier@3.2.5))
+      clsx: 2.1.1
+      react: 18.2.0
+      react-aria-components: 1.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    optionalDependencies:
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - storybook
+
   '@plone/scripts@3.10.1':
     dependencies:
       '@babel/core': 7.27.1
@@ -17796,6 +17903,19 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
+  '@react-aria/i18n@3.12.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@internationalized/date': 3.8.2
+      '@internationalized/message': 3.1.8
+      '@internationalized/number': 3.6.3
+      '@internationalized/string': 3.2.7
+      '@react-aria/ssr': 3.9.9(react@18.2.0)
+      '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-types/shared': 3.30.0(react@18.2.0)
+      '@swc/helpers': 0.5.17
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   '@react-aria/i18n@3.12.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@internationalized/date': 3.8.1
@@ -18031,6 +18151,11 @@ snapshots:
       '@swc/helpers': 0.5.17
       react: 18.2.0
 
+  '@react-aria/ssr@3.9.9(react@18.2.0)':
+    dependencies:
+      '@swc/helpers': 0.5.17
+      react: 18.2.0
+
   '@react-aria/switch@3.7.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/toggle': 3.11.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -18172,6 +18297,17 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
+  '@react-aria/utils@3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@react-aria/ssr': 3.9.9(react@18.2.0)
+      '@react-stately/flags': 3.1.2
+      '@react-stately/utils': 3.10.7(react@18.2.0)
+      '@react-types/shared': 3.30.0(react@18.2.0)
+      '@swc/helpers': 0.5.17
+      clsx: 2.1.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   '@react-aria/virtualizer@4.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/i18n': 3.12.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -18242,7 +18378,7 @@ snapshots:
       '@react-types/actiongroup': 3.4.17(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
       '@spectrum-icons/ui': 3.6.16(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@spectrum-icons/workflow': 4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@spectrum-icons/workflow': 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18426,7 +18562,7 @@ snapshots:
       '@react-spectrum/utils': 3.12.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-types/contextualhelp': 3.2.18(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
-      '@spectrum-icons/workflow': 4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@spectrum-icons/workflow': 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18452,7 +18588,7 @@ snapshots:
       '@react-types/datepicker': 3.12.1(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
       '@spectrum-icons/ui': 3.6.16(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@spectrum-icons/workflow': 4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@spectrum-icons/workflow': 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18540,6 +18676,16 @@ snapshots:
       '@react-spectrum/provider': 3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-spectrum/utils': 3.12.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
+      '@swc/helpers': 0.5.17
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@react-spectrum/icon@3.8.6(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-spectrum/provider': 3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-spectrum/utils': 3.12.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-types/shared': 3.30.0(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18711,7 +18857,7 @@ snapshots:
       '@react-types/overlays': 3.8.15(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
       '@spectrum-icons/ui': 3.6.16(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@spectrum-icons/workflow': 4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@spectrum-icons/workflow': 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -18746,7 +18892,7 @@ snapshots:
       '@react-types/numberfield': 3.8.11(react@18.2.0)
       '@react-types/shared': 3.29.1(react@18.2.0)
       '@spectrum-icons/ui': 3.6.16(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@spectrum-icons/workflow': 4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@spectrum-icons/workflow': 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -19075,6 +19221,17 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
+  '@react-spectrum/utils@3.12.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@react-aria/i18n': 3.12.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-aria/ssr': 3.9.9(react@18.2.0)
+      '@react-aria/utils': 3.29.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-types/shared': 3.30.0(react@18.2.0)
+      '@swc/helpers': 0.5.17
+      clsx: 2.1.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   '@react-spectrum/view@3.6.19(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@react-aria/utils': 3.29.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -19185,6 +19342,10 @@ snapshots:
       react: 18.2.0
 
   '@react-stately/flags@3.1.1':
+    dependencies:
+      '@swc/helpers': 0.5.17
+
+  '@react-stately/flags@3.1.2':
     dependencies:
       '@swc/helpers': 0.5.17
 
@@ -19342,6 +19503,11 @@ snapshots:
       react: 18.2.0
 
   '@react-stately/utils@3.10.6(react@18.2.0)':
+    dependencies:
+      '@swc/helpers': 0.5.17
+      react: 18.2.0
+
+  '@react-stately/utils@3.10.7(react@18.2.0)':
     dependencies:
       '@swc/helpers': 0.5.17
       react: 18.2.0
@@ -19532,6 +19698,10 @@ snapshots:
       react: 18.2.0
 
   '@react-types/shared@3.29.1(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+
+  '@react-types/shared@3.30.0(react@18.2.0)':
     dependencies:
       react: 18.2.0
 
@@ -19830,10 +20000,10 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@spectrum-icons/workflow@4.2.21(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@spectrum-icons/workflow@4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@adobe/react-spectrum-workflow': 2.3.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-spectrum/icon': 3.8.5(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@react-spectrum/icon': 3.8.6(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@react-spectrum/provider': 3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@swc/helpers': 0.5.17
       react: 18.2.0

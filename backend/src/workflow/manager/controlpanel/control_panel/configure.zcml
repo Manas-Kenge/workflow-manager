@@ -14,9 +14,6 @@
     />
 
   <include package="plone.restapi"  />
-  <adapter
-    factory=".controlpanel.ControlPanelConfigletPanel"
-    name="control_panel" />
 
 
 </configure>
