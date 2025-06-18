@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useLocation, useHistory } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   Heading,
   Text,
@@ -22,16 +21,29 @@ import {
   MenuTrigger,
   Menu,
 } from '@adobe/react-spectrum';
+import MoreSmallList from '@spectrum-icons/workflow/MoreSmallList';
+import ThemeProvider from '../../Provider';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+
+// Import action creators
 import {
   getWorkflows,
   addWorkflow,
   deleteWorkflow,
   renameWorkflow,
-} from '../../actions';
+} from '../../actions/workflow';
+
+// Import selectors
+import {
+  selectAllWorkflows,
+  selectWorkflowsLoading,
+  selectWorkflowsError,
+  selectOperationLoading,
+  clearError,
+} from '../../features/workflow/workflowSlice';
+
 import CreateWorkflow from '../Workflow/CreateWorkflow';
 import WorkflowView from '../Workflow/WorkflowView';
-import ThemeProvider from '../../Provider';
-import MoreSmallList from '@spectrum-icons/workflow/MoreSmallList';
 
 const plone_shipped_workflows = [
   'folder_workflow',
@@ -44,147 +56,142 @@ const plone_shipped_workflows = [
   'comment_one_state_workflow',
 ];
 
-interface WorkflowItem {
+interface WorkflowTableItem {
   id: string;
   title: string;
   description: string;
-  assignedTypes: string | null;
 }
 
-const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
-  const dispatch = useDispatch();
-  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [workflowToRename, setWorkflowToRename] = useState(null);
-  const [newTitle, setNewTitle] = useState('');
-
-  const workflowItems: WorkflowItem[] = workflows.map((workflow) => ({
-    id: workflow.id,
-    title: workflow.title || workflow.id,
-    description: workflow.description || 'No description available',
-    assignedTypes:
-      workflow.assigned_types?.length > 0
-        ? `Assigned to: ${workflow.assigned_types.join(', ')}`
-        : null,
-  }));
-
-  const handleAction = (key, item) => {
-    if (key === 'edit') {
-      handleWorkflowClick(item.id);
-    } else if (key === 'delete') {
-      dispatch(deleteWorkflow(item.id));
-    } else if (key === 'rename') {
-      setWorkflowToRename(item);
-      setNewTitle(item.title);
-      setRenameDialogOpen(true);
-    }
-  };
-
-  const handleRename = () => {
-    dispatch(renameWorkflow(workflowToRename.id, newTitle));
-    setRenameDialogOpen(false);
-  };
-
+const WorkflowTable: React.FC<{
+  workflows: WorkflowTableItem[];
+  onAction: (key: string, item: WorkflowTableItem) => void;
+}> = ({ workflows, onAction }) => {
   return (
-    <>
-      <TableView
-        flex
-        aria-label="Example table with dynamic content"
-        onAction={(key) => isClickable && handleWorkflowClick(key)}
-      >
-        <TableHeader>
-          <Column isRowHeader>Title</Column>
-          <Column isRowHeader>Description</Column>
-          <Column align="end">Actions</Column>
-        </TableHeader>
-        <TableBody items={workflowItems}>
-          {(item) => (
-            <Row key={item.id}>
-              <Cell>{item.title}</Cell>
-              <Cell>{item.description}</Cell>
-              <Cell>
-                <MenuTrigger>
-                  <ActionButton aria-label="Workflow actions" isQuiet>
-                    <MoreSmallList />
-                  </ActionButton>
-                  <Menu onAction={(key) => handleAction(key, item)}>
-                    <Item key="edit">Edit</Item>
-                    <Item key="rename">Rename</Item>
-                    <Item key="delete">Delete</Item>
-                  </Menu>
-                </MenuTrigger>
-              </Cell>
-            </Row>
-          )}
-        </TableBody>
-      </TableView>
-
-      {renameDialogOpen && (
-        <DialogTrigger isOpen isDismissable>
-          <></>
-          <AlertDialog
-            title="Rename Workflow"
-            primaryActionLabel="Rename"
-            secondaryActionLabel="Cancel"
-            onPrimaryAction={handleRename}
-            onSecondaryAction={() => setRenameDialogOpen(false)}
-          >
-            <Flex direction="column" gap="size-150">
-              <Text>
-                Enter a new name for workflow "{workflowToRename?.title}"
-              </Text>
-              <input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
-                }}
-              />
-            </Flex>
-          </AlertDialog>
-        </DialogTrigger>
-      )}
-    </>
+    <TableView flex aria-label="Table of user-defined workflows">
+      <TableHeader>
+        <Column isRowHeader>Title</Column>
+        <Column isRowHeader>Description</Column>
+        <Column align="end" width={100}>
+          Actions
+        </Column>
+      </TableHeader>
+      <TableBody items={workflows}>
+        {(item) => (
+          <Row key={item.id}>
+            <Cell>{item.title}</Cell>
+            <Cell>{item.description}</Cell>
+            <Cell>
+              <MenuTrigger>
+                <ActionButton aria-label="Workflow actions" isQuiet>
+                  <MoreSmallList />
+                </ActionButton>
+                <Menu onAction={(key) => onAction(key as string, item)}>
+                  <Item key="edit">Edit</Item>
+                  <Item key="rename">Rename</Item>
+                  <Item key="delete" textValue="Delete">
+                    <Text>
+                      <span style={{ color: 'red' }}>Delete</span>
+                    </Text>
+                  </Item>
+                </Menu>
+              </MenuTrigger>
+            </Cell>
+          </Row>
+        )}
+      </TableBody>
+    </TableView>
   );
 };
 
-const WorkflowControlPanel = () => {
-  const dispatch = useDispatch();
+const ControlPanel = () => {
+  const dispatch = useAppDispatch();
   const history = useHistory();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const selectedWorkflow = searchParams.get('workflow');
+  const selectedWorkflowId = searchParams.get('workflow');
 
-  const {
-    items: workflows,
-    loading,
-    error,
-  } = useSelector((state) => state.workflow.workflows);
-  const [modalOpen, setModalOpen] = useState(false);
+  const workflows = useAppSelector(selectAllWorkflows);
+  const loading = useAppSelector(selectWorkflowsLoading);
+  const error = useAppSelector(selectWorkflowsError);
+  const operationLoading = useAppSelector(selectOperationLoading);
+
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [workflowToRename, setWorkflowToRename] =
+    useState<WorkflowTableItem | null>(null);
+  const [newTitle, setNewTitle] = useState('');
 
   useEffect(() => {
     dispatch(getWorkflows());
   }, [dispatch]);
 
-  const handleCreateWorkflow = async (cloneFromWorkflow, workflowName) => {
-    const result = dispatch(addWorkflow(cloneFromWorkflow, workflowName));
-    if (result?.workflow_id) {
-      dispatch(getWorkflows());
-      history.push(
-        `/controlpanel/workflowmanager?workflow=${result.workflow_id}`,
-      );
+  // Refresh workflows after operations complete
+  useEffect(() => {
+    // If an operation just completed successfully (was loading, now not loading, no error)
+    if (!operationLoading && !error) {
+      // Small delay to ensure backend is updated
+      const timeoutId = setTimeout(() => {
+        dispatch(getWorkflows());
+      }, 500);
+      return () => clearTimeout(timeoutId);
     }
-    setModalOpen(false);
+  }, [operationLoading, error, dispatch]);
+
+  const handleCreateWorkflow = (cloneFrom: string, name: string) => {
+    dispatch(addWorkflow(cloneFrom, name));
   };
 
-  const handleWorkflowClick = (workflowId) => {
-    history.push(`/controlpanel/workflowmanager?workflow=${workflowId}`);
+  const handleTableAction = (key: string, item: WorkflowTableItem) => {
+    switch (key) {
+      case 'edit':
+        history.push(`/controlpanel/workflowmanager?workflow=${item.id}`);
+        break;
+      case 'delete':
+        dispatch(deleteWorkflow(item.id));
+        break;
+      case 'rename':
+        setWorkflowToRename(item);
+        setNewTitle(item.title);
+        setRenameDialogOpen(true);
+        break;
+    }
   };
 
-  if (selectedWorkflow) {
-    return <WorkflowView workflowId={selectedWorkflow} />;
+  const handleRenameConfirm = () => {
+    if (workflowToRename && newTitle.trim()) {
+      // Fixed: Pass separate parameters, not an object
+      dispatch(renameWorkflow(workflowToRename.id, newTitle.trim()));
+    }
+    setRenameDialogOpen(false);
+    setWorkflowToRename(null);
+    setNewTitle('');
+  };
+
+  const handleRenameCancel = () => {
+    setRenameDialogOpen(false);
+    setWorkflowToRename(null);
+    setNewTitle('');
+  };
+
+  // Clear errors when component unmounts or when user dismisses them
+  useEffect(() => {
+    return () => {
+      if (error) {
+        dispatch(clearError());
+      }
+    };
+  }, [error, dispatch]);
+
+  if (selectedWorkflowId) {
+    return <WorkflowView workflowId={selectedWorkflowId} />;
   }
+
+  const userWorkflows = (workflows || [])
+    .filter((wf) => !plone_shipped_workflows.includes(wf.id))
+    .map((wf) => ({
+      id: wf.id,
+      title: wf.title || wf.id,
+      description: wf.description || 'No description available.',
+    }));
 
   return (
     <View width="100%" padding="size-400">
@@ -192,56 +199,85 @@ const WorkflowControlPanel = () => {
         <Well>
           <Heading level={1}>Workflow Manager</Heading>
         </Well>
-
         <Well marginTop="size-300">
           <CreateWorkflow
             workflows={workflows || []}
             onCreate={handleCreateWorkflow}
           />
 
-          {loading && (
+          {(loading || operationLoading) && (
             <Flex alignItems="center" gap="size-200" marginTop="size-300">
               <ProgressCircle
-                aria-label="Loading workflows..."
+                aria-label={loading ? 'Loading workflows...' : 'Processing...'}
                 isIndeterminate
               />
-              <Text>Loading Workflows...</Text>
+              <Text>{loading ? 'Loading Workflows...' : 'Processing...'}</Text>
             </Flex>
           )}
 
-          {/* Error State */}
           {error && (
-            <DialogTrigger>
-              <ActionButton marginTop="size-300">
-                Error Loading Workflows
+            <Flex alignItems="center" gap="size-200" marginTop="size-300">
+              <Text>
+                <span style={{ color: 'red' }}>
+                  Error: {error.message || 'Operation failed.'}
+                </span>
+              </Text>
+              <ActionButton onPress={() => dispatch(clearError())}>
+                Dismiss
               </ActionButton>
-              {(close) => (
-                <AlertDialog
-                  title="Error"
-                  variant="error"
-                  primaryActionLabel="Close"
-                  onPrimaryAction={close}
-                >
-                  {error.message}
-                </AlertDialog>
-              )}
-            </DialogTrigger>
+            </Flex>
           )}
 
-          <Heading level={2} marginBottom="size-200">
-            Please select your workflow
+          <Heading level={2} marginTop="size-400" marginBottom="size-200">
+            Your Workflows ({userWorkflows.length})
           </Heading>
+
           <WorkflowTable
-            workflows={workflows.filter(
-              (workflow) => !plone_shipped_workflows.includes(workflow.id),
-            )}
-            handleWorkflowClick={handleWorkflowClick}
-            isClickable={true}
+            workflows={userWorkflows}
+            onAction={handleTableAction}
           />
         </Well>
       </Form>
+
+      <DialogTrigger
+        isOpen={renameDialogOpen}
+        isDismissable
+        onOpenChange={setRenameDialogOpen}
+      >
+        <div />
+        <AlertDialog
+          title="Rename Workflow"
+          primaryActionLabel="Rename"
+          secondaryActionLabel="Cancel"
+          onPrimaryAction={handleRenameConfirm}
+          onSecondaryAction={handleRenameCancel}
+        >
+          <Flex direction="column" gap="size-150">
+            <Text>
+              Enter a new name for workflow "{workflowToRename?.title}"
+            </Text>
+            <input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleRenameConfirm();
+                }
+                if (e.key === 'Escape') {
+                  handleRenameCancel();
+                }
+              }}
+              style={{
+                padding: '8px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+              }}
+            />
+          </Flex>
+        </AlertDialog>
+      </DialogTrigger>
     </View>
   );
 };
 
-export default ThemeProvider(WorkflowControlPanel);
+export default ThemeProvider(ControlPanel);

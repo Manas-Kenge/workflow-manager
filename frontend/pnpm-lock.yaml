@@ -1553,18 +1553,15 @@ importers:
       '@adobe/react-spectrum':
         specifier: ^3.42.0
         version: 3.42.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@plone/components':
-        specifier: ^3.0.2
-        version: 3.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.14(prettier@3.2.5))
       '@reduxjs/toolkit':
         specifier: ^2.8.2
         version: 2.8.2(react-redux@8.1.2(@types/react-dom@18.3.7(@types/react@18.3.22))(@types/react@18.3.22)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1))(react@18.2.0)
       '@spectrum-icons/workflow':
         specifier: ^4.2.22
         version: 4.2.22(@react-spectrum/provider@3.10.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@types/redux':
-        specifier: ^3.6.0
-        version: 3.6.0
+      '@types/react-redux':
+        specifier: ^7.1.33
+        version: 7.1.34
       '@xyflow/react':
         specifier: ^12.6.4
         version: 12.6.4(@types/react@18.3.22)(immer@10.1.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -1589,9 +1586,6 @@ importers:
       redux:
         specifier: 4.2.1
         version: 4.2.1
-      semantic-ui-react:
-        specifier: 2.1.5
-        version: 2.1.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@plone/scripts':
         specifier: ^3.6.1
@@ -3479,15 +3473,6 @@ packages:
   '@pkgr/core@0.2.4':
     resolution: {integrity: sha512-ROFF39F6ZrnzSUEmQQZUar0Jt4xVoP9WnDRdWwF4NNcXs3xBTLgBUDoOwW141y1jP+S8nahIbdxbFC7IShw9Iw==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
-
-  '@plone/components@3.0.2':
-    resolution: {integrity: sha512-BLxq4HMcmGux+CD6nOyl0YOqpTiB4yz/h4y/dcGSH3EwhxB3vaEq/Vcoss4qlzHJFfguemNPehJPGP8tq/Z6ww==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
 
   '@plone/scripts@3.10.1':
     resolution: {integrity: sha512-U4RUHX+9YmVAMJX6uY/7KMSzcHimovK2paGVlz4WBicyp9hwCdOQ/9oCvq2wBLWHWAFUXlVjsWyHz03fotrgAA==}
@@ -5483,10 +5468,6 @@ packages:
 
   '@types/react@18.3.22':
     resolution: {integrity: sha512-vUhG0YmQZ7kL/tmKLrD3g5zXbXXreZXB3pmROW8bg3CnLnpjkRVwUlLne7Ufa2r9yJ8+/6B73RzhAek5TBKh2Q==}
-
-  '@types/redux@3.6.0':
-    resolution: {integrity: sha512-ic+60DXHW5seNyqFvfr7Sk5cnXs+HsF9tIeIaxjOuSP5kzgDXC+AzKTYmjAfuLx4Sccm/0vjwBQj3OOkUkwOqg==}
-    deprecated: This is a stub types definition for Redux (https://github.com/reactjs/redux). Redux provides its own type definitions, so you don't need @types/redux installed!
 
   '@types/resolve@1.20.6':
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -17587,19 +17568,6 @@ snapshots:
 
   '@pkgr/core@0.2.4': {}
 
-  '@plone/components@3.0.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(storybook@8.6.14(prettier@3.2.5))':
-    dependencies:
-      '@react-aria/utils': 3.29.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@react-spectrum/utils': 3.12.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      '@storybook/test': 8.6.14(storybook@8.6.14(prettier@3.2.5))
-      clsx: 2.1.1
-      react: 18.2.0
-      react-aria-components: 1.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-    optionalDependencies:
-      react-dom: 18.2.0(react@18.2.0)
-    transitivePeerDependencies:
-      - storybook
-
   '@plone/scripts@3.10.1':
     dependencies:
       '@babel/core': 7.27.1
@@ -20871,10 +20839,6 @@ snapshots:
     dependencies:
       '@types/prop-types': 15.7.14
       csstype: 3.1.3
-
-  '@types/redux@3.6.0':
-    dependencies:
-      redux: 4.2.1
 
   '@types/resolve@1.20.6': {}
 

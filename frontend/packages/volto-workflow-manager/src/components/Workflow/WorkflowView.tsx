@@ -1,4 +1,22 @@
+// --- START OF FILE WorkflowView.tsx ---
+
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import {
+  selectAllWorkflows,
+  selectValidationLoading,
+  selectValidationResult,
+  clearValidationResult,
+  type WorkflowState,
+} from '../../features/workflow/workflowSlice';
+// Import action creators
+import {
+  deleteWorkflow,
+  validateWorkflow,
+  updateWorkflowState, // [ADDED]
+} from '../../actions/workflow';
+import WorkflowGraph from './WorkflowGraph';
 import {
   Button,
   ButtonGroup,
@@ -20,18 +38,8 @@ import UserAdd from '@spectrum-icons/workflow/UserAdd';
 import Delete from '@spectrum-icons/workflow/Delete';
 import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy';
 import TopBar from './Topbar';
-import WorkflowGraph from './WorkflowGraph';
 import Toolbox from './Toolbox';
 import '@xyflow/react/dist/style.css';
-import {
-  deleteWorkflow,
-  getWorkflows,
-  validateWorkflow,
-  updateWorkflowState,
-} from '../../actions';
-import { useHistory } from 'react-router-dom';
-import type { WorkflowState } from '../../reducers/workflow';
-import { useAppSelector, useAppDispatch } from '../../types'; // Adjust path as needed
 
 interface WorkflowViewProps {
   workflowId: string;
@@ -47,12 +55,10 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
   const [advancedMode, setAdvancedMode] = useState<boolean>(false);
   const [description, setDescription] = useState<string>('');
 
-  // Now these will be properly typed!
-  const workflows = useAppSelector((state) => state.workflow.workflows.items);
-  const workflow = useAppSelector((state) =>
-    state.workflow.workflows.items.find((w) => w.id === workflowId),
-  );
-  const validation = useAppSelector((state) => state.workflow.validation);
+  const workflows = useAppSelector(selectAllWorkflows);
+  const validation = useAppSelector(selectValidationResult); // [ADDED]
+  const validationLoading = useAppSelector(selectValidationLoading); // [ADDED]
+  const workflow = workflows.find((w) => w.id === workflowId);
 
   useEffect(() => {
     if (workflow) {
@@ -60,32 +66,32 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
     }
   }, [workflow]);
 
+  // [ADDED] Clear validation results when unmounting
+  useEffect(() => {
+    return () => {
+      dispatch(clearValidationResult());
+    };
+  }, [dispatch]);
+
   const handleHighlightState = (stateId: string) => {
     setHighlightedState(stateId);
-    // Clear highlight after animation
     setTimeout(() => setHighlightedState(null), 3000);
   };
 
   const handleHighlightTransition = (transitionId: string) => {
     setHighlightedTransition(transitionId);
-    // Clear highlight after animation
     setTimeout(() => setHighlightedTransition(null), 3000);
   };
 
   const handleDeleteWorkflow = async () => {
-    const result = await dispatch(deleteWorkflow(workflowId));
-    // You might need to adjust this condition based on your action structure
-    if (result && !result.error) {
-      dispatch(getWorkflows());
-      history.push(`/controlpanel/workflowmanager`);
-    }
+    await dispatch(deleteWorkflow(workflowId));
+    history.push(`/controlpanel/workflowmanager`);
   };
 
-  const handleSaveState = (updatedState: WorkflowState) => {
-    // Dispatch the action with the current workflow's ID and the new state data
-    dispatch(updateWorkflowState(workflowId, updatedState));
+  // [ADDED] Handle saving a state change from the Toolbox
+  const handleSaveState = (state: WorkflowState) => {
+    dispatch(updateWorkflowState(workflowId, state));
   };
-
 
   if (!workflow) {
     return (
@@ -99,6 +105,12 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
       </Form>
     );
   }
+
+  const validationHasErrors =
+    validation &&
+    (validation.state_errors.length > 0 ||
+      validation.transition_errors.length > 0 ||
+      validation.initial_state_error);
 
   return (
     <View width="100%" padding="size-400" margin="0">
@@ -138,7 +150,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
             </Button>
             <Button
               variant="secondary"
-              onPress={() => dispatch(validateWorkflow(workflowId))}
+              onPress={() => dispatch(validateWorkflow(workflowId))} // [MODIFIED]
             >
               <CheckmarkCircle size="S" />
               Sanity Check
@@ -167,7 +179,8 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
         </Flex>
       </View>
 
-      {validation.loading && (
+      {/* [MODIFIED] Enabled validation loading indicator */}
+      {validationLoading && (
         <View
           backgroundColor="gray-100"
           borderRadius="medium"
@@ -184,14 +197,14 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
         </View>
       )}
 
-      {validation.errors && (
-        <DialogTrigger>
+      {/* [MODIFIED] Enabled validation results dialog */}
+      {validation && (
+        <DialogTrigger
+          isDismissable
+          onOpenChange={() => dispatch(clearValidationResult())}
+        >
           <ActionButton
-            variant={
-              validation.errors.state_errors.length > 0
-                ? 'negative'
-                : 'secondary'
-            }
+            variant={validationHasErrors ? 'negative' : 'secondary'}
             marginBottom="size-300"
           >
             View Validation Results
@@ -199,22 +212,28 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
           {(close) => (
             <AlertDialog
               title="Validation Results"
-              variant={
-                validation.errors.state_errors.length > 0
-                  ? 'warning'
-                  : 'information'
-              }
+              variant={validationHasErrors ? 'warning' : 'information'}
               primaryActionLabel="Close"
               onPrimaryAction={close}
             >
-              {validation.errors.state_errors.length > 0 ? (
+              {!validationHasErrors ? (
+                <Text>No validation errors found.</Text>
+              ) : (
                 <View>
-                  {validation.errors.state_errors.map((err, index) => (
-                    <Text key={index}>{err.error}</Text>
+                  {validation.initial_state_error && (
+                    <Text>Error: The initial state is invalid.</Text>
+                  )}
+                  {validation.state_errors.map((err, index) => (
+                    <Text key={`state-err-${index}`}>
+                      State "{err.title}": {err.error}
+                    </Text>
+                  ))}
+                  {validation.transition_errors.map((err, index) => (
+                    <Text key={`trans-err-${index}`}>
+                      Transition "{err.title}": {err.error}
+                    </Text>
                   ))}
                 </View>
-              ) : (
-                <Text>No validation errors found.</Text>
               )}
             </AlertDialog>
           )}
@@ -233,7 +252,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
               workflow={workflow}
               onHighlightState={handleHighlightState}
               onHighlightTransition={handleHighlightTransition}
-              onSaveState={handleSaveState}
+              onSaveState={handleSaveState} // [MODIFIED] Pass the handler
             />
           </View>
           <View gridArea="content" height="100%">

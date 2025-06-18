@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+// src/components/Workflow/CreateWorkflow.tsx
+
+import React, { useState, useEffect } from 'react';
 import {
   Button,
   ButtonGroup,
@@ -15,15 +17,33 @@ import {
 } from '@adobe/react-spectrum';
 import ThemeProvider from '../../Provider';
 
-const CreateWorkflow = ({ workflows, onCreate }) => {
-  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const [workflowName, setWorkflowName] = useState('');
+interface Workflow {
+  id: string;
+  title?: string;
+}
 
-  const handleCreate = (close) => {
-    if (workflowName && onCreate) {
+interface CreateWorkflowProps {
+  workflows: Workflow[];
+  onCreate: (cloneFrom: string, name: string) => void;
+}
+
+const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
+  workflows,
+  onCreate,
+}) => {
+  const [workflowName, setWorkflowName] = useState('');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
+
+  // Set a default "clone from" selection when workflows are loaded
+  useEffect(() => {
+    if (!selectedWorkflow && workflows && workflows.length > 0) {
+      setSelectedWorkflow(workflows[0].id);
+    }
+  }, [workflows, selectedWorkflow]);
+
+  const handleCreate = (close: () => void) => {
+    if (workflowName && selectedWorkflow && onCreate) {
       onCreate(selectedWorkflow, workflowName);
-      // Reset form
-      setSelectedWorkflow('');
       setWorkflowName('');
       close();
     }
@@ -36,31 +56,29 @@ const CreateWorkflow = ({ workflows, onCreate }) => {
         {(close) => (
           <Dialog>
             <Content>
-              {/* Header */}
-              <Heading level={1}>Create new workflow</Heading>
+              <Heading level={1}>Create New Workflow</Heading>
               <Text slot="description" marginBottom="size-300">
-                This will add a new transition to the workflow.
+                Create a new workflow by cloning an existing one.
               </Text>
-              <Divider
-                marginTop="size-200"
-                marginBottom="size-200"
-                UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
-              />
-              {/* Clone From Section */}
+              <Divider marginTop="size-200" marginBottom="size-200" />
+
               <View marginBottom="size-300">
                 <Heading level={3} marginBottom="size-100">
-                  Clone from
+                  Clone From
                 </Heading>
                 <Text marginBottom="size-200">
-                  Select the workflow you'd like to use as the basis for the new
-                  workflow you're creating.
+                  Select the workflow to use as a template.
                 </Text>
+
                 <Picker
+                  aria-label="Select a workflow to clone"
                   selectedKey={selectedWorkflow}
-                  onSelectionChange={(selected) =>
-                    setSelectedWorkflow(selected)
+                  onSelectionChange={(key) =>
+                    setSelectedWorkflow(key as string)
                   }
                   width="100%"
+                  isRequired
+                  necessityIndicator="icon"
                 >
                   {workflows?.map((workflow) => (
                     <Item key={workflow.id}>{workflow.title}</Item>
@@ -68,16 +86,15 @@ const CreateWorkflow = ({ workflows, onCreate }) => {
                 </Picker>
               </View>
 
-              {/* Workflow Name Section */}
               <View marginBottom="size-300">
                 <Heading level={3} marginBottom="size-100">
-                  Workflow Name
+                  New Workflow Name
                 </Heading>
                 <Text marginBottom="size-200">
-                  An id will be generated from this title.
+                  An ID will be generated automatically from this title.
                 </Text>
                 <TextField
-                  defaultValue="Enter value"
+                  aria-label="New workflow name"
                   value={workflowName}
                   onChange={setWorkflowName}
                   isRequired
@@ -86,7 +103,6 @@ const CreateWorkflow = ({ workflows, onCreate }) => {
                 />
               </View>
 
-              {/* Action Buttons */}
               <ButtonGroup>
                 <Button variant="secondary" onPress={close}>
                   Cancel
@@ -94,7 +110,7 @@ const CreateWorkflow = ({ workflows, onCreate }) => {
                 <Button
                   variant="accent"
                   onPress={() => handleCreate(close)}
-                  isDisabled={!workflowName}
+                  isDisabled={!workflowName || !selectedWorkflow}
                 >
                   Add
                 </Button>

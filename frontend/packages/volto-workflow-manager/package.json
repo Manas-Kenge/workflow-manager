@@ -31,7 +31,7 @@
     "@adobe/react-spectrum": "^3.42.0",
     "@reduxjs/toolkit": "^2.8.2",
     "@spectrum-icons/workflow": "^4.2.22",
-    "@types/redux": "^3.6.0",
+    "@types/react-redux": "^7.1.33",
     "@xyflow/react": "^12.6.4",
     "lucide-react": "^0.511.0",
     "react-aria-components": "^1.9.0",
