@@ -7,7 +7,8 @@ import {
   Text,
   View,
 } from '@adobe/react-spectrum';
-import AddCircle from '@spectrum-icons/workflow/AddCircle';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import add from '@plone/volto/icons/add.svg';
 
 const TopBar = ({
   workflows,
@@ -44,7 +45,7 @@ const TopBar = ({
         </Picker>
 
         <Button variant="accent" onPress={onCreateWorkflow}>
-          <AddCircle size="S" />
+          <Icon name={add} size="20px" />
           Create a new workflow
         </Button>
       </Flex>

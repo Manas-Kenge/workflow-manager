@@ -1,1 +1,4 @@
-export { default as workflow } from './workflow';
+import workflow from './workflow';
+import state from './state';
+
+export { workflow, state };

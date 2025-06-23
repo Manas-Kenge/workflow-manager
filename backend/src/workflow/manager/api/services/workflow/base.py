@@ -1,281 +1,184 @@
-from Products.CMFCore.utils import getToolByName
-import json
-from urllib.parse import urlencode
+# -*- coding: utf-8 -*-
+"""
+A stateless helper base class for workflow API services.
 
+This class provides shared business logic and utility methods for accessing
+workflow data. It is initialized by the API service with the relevant IDs
+(workflow, state, etc.) which are extracted from the URL path. This makes
+it a clean, reusable, and testable utility.
+"""
 from AccessControl import Unauthorized
-
-from zope.component import getUtility, getMultiAdapter
-from zope.schema.interfaces import IVocabularyFactory
 from Products.CMFCore.utils import getToolByName
 from plone.memoize.view import memoize
-
-from workflow.manager.api.services.workflow.layout import GraphLayout
-from workflow.manager.permissions import (
-    managed_permissions,
-    allowed_guard_permissions,
-)
 from workflow.manager.actionmanager import ActionManager
-from workflow.manager import _
+from workflow.manager.permissions import (
+    allowed_guard_permissions,
+    managed_permissions,
+)
+from zope.component import getMultiAdapter
+from zope.schema.interfaces import IVocabularyFactory
+from zope.component import getUtility
+import json
 
-plone_shipped_workflows = [
-    "folder_workflow",
-    "intranet_folder_workflow",
-    "intranet_workflow",
-    "one_state_workflow",
-    "plone_workflow",
-    "simple_publication_workflow",
-    "comment_review_workflow",
-]
 
 class Base:
-    def __init__(self, context, request):
+    """A stateless helper for workflow API services."""
+
+    def __init__(self, context, request, workflow_id=None, state_id=None, transition_id=None):
+        """
+        Initialize with context, request, and specific IDs from the service.
+        """
         self.context = context
         self.request = request
+        self._workflow_id = workflow_id
+        self._state_id = state_id
+        self._transition_id = transition_id
 
-    debug = False
-    errors = {}
-    next_id = None  # the id of the next workflow to be viewed
-    label = _("Workflow Manager")
-    description = _("Manage your custom workflows TTW.")
-
-    @property
-    @memoize
-    def managed_permissions(self):
-        return managed_permissions(self.selected_workflow.getId())
-
-    @property
-    @memoize
-    def actions(self):
-        return ActionManager()
-
-    @property
-    @memoize
-    def allowed_guard_permissions(self):
-        return allowed_guard_permissions(self.selected_workflow.getId())
+    # --- Core Plone Tool Properties ---
 
     @property
     @memoize
     def portal(self):
-        utool = getToolByName(self.context, "portal_url")
-        return utool.getPortalObject()
+        """Returns the portal object."""
+        return getToolByName(self.context, "portal_url").getPortalObject()
 
     @property
     @memoize
     def portal_workflow(self):
+        """Returns the portal_workflow tool."""
         return getToolByName(self.context, "portal_workflow")
 
-    @property
-    @memoize
-    def available_workflows(self):
-        return [w for w in self.workflows if w.id not in plone_shipped_workflows]
-
-    @property
-    @memoize
-    def workflows(self):
-        pw = self.portal_workflow
-        ids = pw.portal_workflow.listWorkflows()
-        return [pw[id] for id in sorted(ids)]
+    # --- Selected Object Properties (Driven by __init__) ---
 
     @property
     @memoize
     def selected_workflow(self):
-        selected = self.request.get("selected-workflow")
-        if isinstance(selected, list) and selected:
-            selected = selected[0]
-        return (
-            self.portal_workflow.get(selected)
-            if selected in self.portal_workflow.objectIds()
-            else None
-        )
+        """Gets the workflow object based on the ID provided at initialization."""
+        if self._workflow_id and self._workflow_id in self.portal_workflow.objectIds():
+            return self.portal_workflow.get(self._workflow_id)
+        return None
 
     @property
     @memoize
     def selected_state(self):
-        state = self.request.get("selected-state")
-        if isinstance(state, list) and state:
-            state = state[0]
-
+        """Gets the state object based on the IDs provided at initialization."""
         workflow = self.selected_workflow
-        if workflow and state in workflow.states.objectIds():
-            return workflow.states.get(state)
-
+        if workflow and self._state_id and self._state_id in workflow.states.objectIds():
+            return workflow.states.get(self._state_id)
         return None
 
     @property
     @memoize
     def selected_transition(self):
-        transition = self.request.get("selected-transition")
-        if isinstance(transition, list) and transition:
-            transition = transition[0]
-
+        """Gets the transition object based on the IDs provided at initialization."""
         workflow = self.selected_workflow
-        if workflow and transition in workflow.transitions.objectIds():
-            return workflow.transitions.get(transition)
-
+        if workflow and self._transition_id and self._transition_id in workflow.transitions.objectIds():
+            return workflow.transitions.get(self._transition_id)
         return None
+
+    # --- Available Object Listings ---
 
     @property
     @memoize
     def available_states(self):
-        return (
-            sorted(
-                self.selected_workflow.states.objectValues(),
-                key=lambda x: x.title.lower(),
-            )
-            if self.selected_workflow
-            else []
+        """Returns sorted states for the selected workflow."""
+        if not self.selected_workflow:
+            return []
+        return sorted(
+            self.selected_workflow.states.objectValues(),
+            key=lambda x: x.title.lower(),
         )
 
     @property
     @memoize
     def available_transitions(self):
-        return (
-            sorted(
-                self.selected_workflow.transitions.objectValues(),
-                key=lambda x: x.title.lower(),
-            )
-            if self.selected_workflow
-            else []
+        """Returns sorted transitions for the selected workflow."""
+        if not self.selected_workflow:
+            return []
+        return sorted(
+            self.selected_workflow.transitions.objectValues(),
+            key=lambda x: x.title.lower(),
         )
 
+    # --- Utility Methods and Properties ---
+
+    @property
+    @memoize
+    def actions(self):
+        """Returns the ActionManager utility."""
+        return ActionManager()
+
     def authorize(self):
+        """Verifies the CSRF token for state-changing requests."""
         authenticator = getMultiAdapter(
             (self.context, self.request), name="authenticator"
         )
         if not authenticator.verify():
-            raise Unauthorized
+            raise Unauthorized("CSRF token validation failed")
 
-    def render_transitions_template(self):
-        return self.workflow_transitions_template(
-            available_states=self.available_states,
-            available_transitions=self.available_transitions)
+    def get_state(self, state_id):
+        """Safely gets a state by its ID from the selected workflow."""
+        if self.selected_workflow and state_id in self.selected_workflow.states.objectIds():
+            return self.selected_workflow.states[state_id]
+        return None
 
-    def get_transition(self, id):
-        if id in self.selected_workflow.transitions.objectIds():
-            return self.selected_workflow.transitions[id]
+    def get_transition(self, transition_id):
+        """Safely gets a transition by its ID from the selected workflow."""
+        if self.selected_workflow and transition_id in self.selected_workflow.transitions.objectIds():
+            return self.selected_workflow.transitions[transition_id]
+        return None
+
+    @property
+    @memoize
+    def managed_permissions(self):
+        """Returns permissions managed by this workflow."""
+        if not self.selected_workflow:
+            return []
+        return managed_permissions(self.selected_workflow.getId())
+
+    @property
+    @memoize
+    def allowed_guard_permissions(self):
+        """Returns permissions allowed in transition guards."""
+        if not self.selected_workflow:
+            return []
+        return allowed_guard_permissions(self.selected_workflow.getId())
 
     @property
     @memoize
     def assignable_types(self):
+        """Returns a list of all user-friendly content types."""
         vocab_factory = getUtility(IVocabularyFactory,
             name="plone.app.vocabularies.ReallyUserFriendlyTypes")
-        types = []
-        for v in vocab_factory(self.context):
-            types.append(dict(id=v.value, title=v.title))
-
-        def _key(v):
-            return v['title']
-
-        types.sort(key=_key)
-        return types
-
-    @property
-    def assigned_types(self):
-        types = []
-        try:
-            chain = self.portal_workflow.listChainOverrides()
-            nondefault = [info[0] for info in chain]
-            for type_ in self.assignable_types:
-                if type_['id'] in nondefault:
-                    chain = self.portal_workflow.getChainForPortalType(
-                        type_['id'])
-                    if len(chain) > 0 and chain[0] == \
-                     self.selected_workflow.id:
-                        types.append(type_)
-        except:
-            pass
-
-        return types
-
-    def get_transition_list(self, state):
-        transitions = state.getTransitions()
-        return [t for t in self.available_transitions if t.id in transitions]
-
-    def get_state(self, id):
-        if id in self.selected_workflow.states.objectIds():
-            return self.selected_workflow.states[id]
-        else:
-            return None
-
-    def get_transition_paths(self, state=None):
-
-        if state is not None:
-            states = [state,]
-        else:
-            states = self.available_states
-
-        paths = dict()
-        transitions = self.available_transitions
-        for state in states:
-
-            stateId = state.id
-
-            for trans in state.transitions:
-                current_transition = self.get_transition(trans)
-                if current_transition is not None:
-                    if current_transition.id is not None and current_transition.new_state_id is not None:
-
-                        nextState = current_transition.new_state_id
-
-                        if stateId not in paths:
-                            paths[stateId] = dict()
-
-                        if nextState not in paths[stateId]:
-                           paths[stateId][nextState] = dict()
-
-                        paths[state.id][nextState][current_transition.id] = current_transition.title
-
-        return json.dumps(paths)
-
-    def get_graphLayout(self, workflow):
-        gl = GraphLayout(self.context, self.request, workflow.id)
-        return gl.getLayout()
-
-    def get_debug_mode(self):
-        return self.debug
-    
-    def get_transition_paths(self, state=None):
-        states = [state] if state else self.available_states
-        paths = {}
-        for state in states:
-            stateId = state.id
-            paths[stateId] = {
-                trans.new_state_id: {trans.id: trans.title}
-                for trans in map(self.get_transition, state.transitions)
-                if trans and trans.new_state_id
-            }
-        return json.dumps(paths)
-
-    @property
-    @memoize
-    def next_url(self):
-        return self.get_url()
-
-    def get_url(
-        self, relative=None, workflow=None, transition=None, state=None, **kwargs
-    ):
-        url = (
-            f"{self.context.absolute_url()}/@@workflowmanager"
-            if not relative
-            else f"{self.context.absolute_url()}/{relative.lstrip('/')}"
+        return sorted(
+            [{"id": v.value, "title": v.title} for v in vocab_factory(self.context)],
+            key=lambda v: v['title']
         )
-        params = {
-            "selected-workflow": (
-                workflow.id
-                if workflow
-                else (
-                    self.next_id
-                    or (self.selected_workflow.id if self.selected_workflow else None)
-                )
-            ),
-            "selected-transition": transition.id if transition else None,
-            "selected-state": state.id if state else None,
-            **kwargs,
-        }
-        params = {k: v for k, v in params.items() if v is not None}
-        return f"{url}?{urlencode(params)}" if params else url
 
-    @property
-    @memoize
-    def context_state(self):
-        return getMultiAdapter((self.context, self.request), name="plone_portal_state")
+    def get_assigned_types_for(self, workflow_id):
+        """Returns a list of content type IDs assigned to a workflow."""
+        assigned = []
+        for p_type, chain in self.portal_workflow.listChainOverrides():
+            if workflow_id in chain:
+                assigned.append(p_type)
+        return assigned
+
+    def getGroups(self):
+        """Gets a list of all groups in the portal."""
+        # This is a simplified version of the original getGroups.
+        # The original was tied to Acquisition, which is less common now.
+        acl_users = getToolByName(self.context, 'acl_users')
+        return sorted(
+            [
+                {'id': g.getId(), 'title': g.getProperty('title') or g.getId()}
+                for g in acl_users.source_groups.getGroups()
+            ],
+            key=lambda g: g['title'].lower()
+        )
+
+    # --- Removed Methods ---
+    # The following methods were removed as they are specific to classic
+    # Plone page templates and not used by REST API services:
+    # - handle_response, wrap_template, render_*
+    # - get_url, next_url
+    # - context_state

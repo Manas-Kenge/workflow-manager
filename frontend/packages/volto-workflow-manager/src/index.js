@@ -1,5 +1,5 @@
-import WorkflowControlPanel from './components/Controlpanel/ControlPanel';
-import { workflow } from './reducers';
+import WorkflowControlPanel from './components/Controlpanel/WorkflowPanel';
+import { workflow, state } from './reducers';
 
 const applyConfig = (config) => {
   config.settings.isMultilingual = false;
@@ -23,6 +23,11 @@ const applyConfig = (config) => {
   config.addonReducers = {
     ...config.addonReducers,
     workflow,
+    state,
+  };
+  config.views = {
+    ...config.views,
+    contentTypesViews: {},
   };
   return config;
 };

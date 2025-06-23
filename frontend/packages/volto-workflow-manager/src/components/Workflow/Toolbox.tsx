@@ -12,8 +12,10 @@ import {
   Flex,
   DialogTrigger,
 } from '@adobe/react-spectrum';
-import GraphBarVertical from '@spectrum-icons/workflow/GraphBarVertical';
-import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import save from '@plone/volto/icons/save.svg';
+import nav from '@plone/volto/icons/nav.svg';
+
 import StateEditDialog from '../State/StateEditDialog';
 
 const Toolbox = ({
@@ -52,14 +54,14 @@ const Toolbox = ({
 
       <View marginTop="size-200">
         <Button variant="primary" width="100%">
-          <GraphBarVertical size="S" />
+          <Icon name={nav} size="20px" />
           Reorder Graph
         </Button>
       </View>
 
       <View marginTop="size-200">
         <Button variant="primary" width="100%">
-          <SaveFloppy size="S" />
+          <Icon name={save} size="20px" />
           Save Layout
         </Button>
       </View>

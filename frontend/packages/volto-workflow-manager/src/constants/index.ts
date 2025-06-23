@@ -1,0 +1,13 @@
+export const GET_WORKFLOWS = 'GET_WORKFLOWS' as const;
+export const ADD_WORKFLOW = 'ADD_WORKFLOW' as const;
+export const DELETE_WORKFLOW = 'DELETE_WORKFLOW' as const;
+export const UPDATE_WORKFLOW_SECURITY = 'UPDATE_WORKFLOW_SECURITY' as const;
+export const UPDATE_WORKFLOW_STATE = 'UPDATE_WORKFLOW_STATE';
+export const ASSIGN_WORKFLOW = 'ASSIGN_WORKFLOW' as const;
+export const VALIDATE_WORKFLOW = 'VALIDATE_WORKFLOW' as const;
+export const RENAME_WORKFLOW = 'RENAME_WORKFLOW' as const;
+
+export const GET_STATE = 'GET_STATE';
+export const ADD_STATE = 'ADD_STATE';
+export const UPDATE_STATE = 'UPDATE_STATE';
+export const DELETE_STATE = 'DELETE_STATE';

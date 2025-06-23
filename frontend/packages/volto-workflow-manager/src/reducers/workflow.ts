@@ -5,24 +5,19 @@ import {
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
-  UPDATE_WORKFLOW_STATE,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
-  RENAME_WORKFLOW,
-} from '../actions/workflow';
+} from '../constants';
 
 // Define proper types for your workflow data
 export interface Workflow {
   id: string;
-  title?: string;
-  description?: string;
-  // Add other properties that your workflow objects have
-  // Based on typical workflow structures, you might have:
-  states?: WorkflowState[];
-  transitions?: WorkflowTransition[];
-  created?: string;
-  modified?: string;
-  [key: string]: any; // For any additional properties
+  title: string;
+  description: string;
+  assigned_types: string[];
+  initial_state: string;
+  states: WorkflowState[];
+  transitions: WorkflowTransition[];
 }
 
 export interface WorkflowState {
@@ -132,7 +127,6 @@ export default function workflow(
     // Add Workflow
     case `${ADD_WORKFLOW}_PENDING`:
     case `${DELETE_WORKFLOW}_PENDING`:
-    case `${UPDATE_WORKFLOW_STATE}_PENDING`:
     case `${UPDATE_WORKFLOW_SECURITY}_PENDING`:
     case `${ASSIGN_WORKFLOW}_PENDING`:
       return {
@@ -159,39 +153,9 @@ export default function workflow(
         },
       };
 
-    case `${UPDATE_WORKFLOW_STATE}_SUCCESS`:
-      return {
-        ...state,
-        // Update the items array in the workflows state
-        workflows: {
-          ...state.workflows,
-          items: state.workflows.items.map((wf) => {
-            // Find the workflow that contains the state we just edited
-            if (wf.id === action.workflowId) {
-              return {
-                ...wf,
-                // Now, find and replace the updated state in its `states` array
-                states: wf.states?.map((st) =>
-                  st.id === action.state.id ? action.state : st,
-                ),
-              };
-            }
-            // Return other workflows unmodified
-            return wf;
-          }),
-        },
-        operation: {
-          ...state.operation,
-          loading: false,
-          error: null,
-          result: action.result,
-        },
-      };
-
     case `${ADD_WORKFLOW}_FAIL`:
     case `${DELETE_WORKFLOW}_FAIL`:
     case `${UPDATE_WORKFLOW_SECURITY}_FAIL`:
-    case `${UPDATE_WORKFLOW_STATE}_FAIL`:
     case `${ASSIGN_WORKFLOW}_FAIL`:
       return {
         ...state,

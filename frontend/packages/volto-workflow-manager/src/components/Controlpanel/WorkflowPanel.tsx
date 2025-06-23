@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
+  Button,
+  ButtonGroup,
   Heading,
   Text,
   ProgressCircle,
@@ -21,6 +23,9 @@ import {
   TableView,
   MenuTrigger,
   Menu,
+  Dialog,
+  TextField,
+  Content,
 } from '@adobe/react-spectrum';
 import {
   getWorkflows,
@@ -31,7 +36,8 @@ import {
 import CreateWorkflow from '../Workflow/CreateWorkflow';
 import WorkflowView from '../Workflow/WorkflowView';
 import ThemeProvider from '../../Provider';
-import MoreSmallList from '@spectrum-icons/workflow/MoreSmallList';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import more from '@plone/volto/icons/more.svg';
 
 const plone_shipped_workflows = [
   'folder_workflow',
@@ -53,6 +59,7 @@ interface WorkflowItem {
 
 const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
   const dispatch = useDispatch();
+  // State to control the DialogTrigger's open state
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [workflowToRename, setWorkflowToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
@@ -80,8 +87,9 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
   };
 
   const handleRename = () => {
-    dispatch(renameWorkflow(workflowToRename.id, newTitle));
-    setRenameDialogOpen(false);
+    if (workflowToRename) {
+      dispatch(renameWorkflow(workflowToRename.id, newTitle));
+    }
   };
 
   return (
@@ -104,7 +112,7 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
               <Cell>
                 <MenuTrigger>
                   <ActionButton aria-label="Workflow actions" isQuiet>
-                    <MoreSmallList />
+                    <Icon name={more} size="20px" />
                   </ActionButton>
                   <Menu onAction={(key) => handleAction(key, item)}>
                     <Item key="edit">Edit</Item>
@@ -118,33 +126,44 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
         </TableBody>
       </TableView>
 
-      {renameDialogOpen && (
-        <DialogTrigger isOpen isDismissable>
-          <></>
-          <AlertDialog
-            title="Rename Workflow"
-            primaryActionLabel="Rename"
-            secondaryActionLabel="Cancel"
-            onPrimaryAction={handleRename}
-            onSecondaryAction={() => setRenameDialogOpen(false)}
-          >
-            <Flex direction="column" gap="size-150">
-              <Text>
-                Enter a new name for workflow "{workflowToRename?.title}"
-              </Text>
-              <input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc',
+      <DialogTrigger
+        isOpen={renameDialogOpen}
+        onOpenChange={setRenameDialogOpen}
+        isDismissable
+      >
+        <ActionButton isHidden>Hidden Trigger</ActionButton>
+        {(close) => (
+          <Dialog>
+            <Heading>Rename Workflow</Heading>
+            <Content>
+              <Flex direction="column" gap="size-150">
+                <Text>
+                  Enter a new name for workflow "{workflowToRename?.title}"
+                </Text>
+                <TextField
+                  label="New workflow name"
+                  value={newTitle}
+                  onChange={setNewTitle}
+                />
+              </Flex>
+            </Content>
+            <ButtonGroup>
+              <Button variant="secondary" onPress={close}>
+                Cancel
+              </Button>
+              <Button
+                variant="accent"
+                onPress={() => {
+                  handleRename();
+                  close();
                 }}
-              />
-            </Flex>
-          </AlertDialog>
-        </DialogTrigger>
-      )}
+              >
+                Rename
+              </Button>
+            </ButtonGroup>
+          </Dialog>
+        )}
+      </DialogTrigger>
     </>
   );
 };

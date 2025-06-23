@@ -1,13 +1,14 @@
 import type { WorkflowState } from '../reducers/workflow';
-
-export const GET_WORKFLOWS = 'GET_WORKFLOWS' as const;
-export const ADD_WORKFLOW = 'ADD_WORKFLOW' as const;
-export const DELETE_WORKFLOW = 'DELETE_WORKFLOW' as const;
-export const UPDATE_WORKFLOW_SECURITY = 'UPDATE_WORKFLOW_SECURITY' as const;
-export const UPDATE_WORKFLOW_STATE = 'UPDATE_WORKFLOW_STATE';
-export const ASSIGN_WORKFLOW = 'ASSIGN_WORKFLOW' as const;
-export const VALIDATE_WORKFLOW = 'VALIDATE_WORKFLOW' as const;
-export const RENAME_WORKFLOW = 'RENAME_WORKFLOW' as const;
+import {
+  GET_WORKFLOWS,
+  ADD_WORKFLOW,
+  DELETE_WORKFLOW,
+  UPDATE_WORKFLOW_STATE,
+  ASSIGN_WORKFLOW,
+  UPDATE_WORKFLOW_SECURITY,
+  VALIDATE_WORKFLOW,
+  RENAME_WORKFLOW,
+} from '../constants';
 
 export function getWorkflows() {
   return {
@@ -47,20 +48,14 @@ export function deleteWorkflow(workflowId: string) {
   };
 }
 
-// Add this constant with your others
-
-// Add this action creator function
-// It prepares the request for your API middleware
 export function updateWorkflowState(workflowId: string, state: WorkflowState) {
   return {
     type: UPDATE_WORKFLOW_STATE,
-    // This structure assumes you have middleware that handles API requests
     request: {
-      op: 'put', // Or 'patch'
-      path: `/api/@workflow/${workflowId}/states/${state.id}`, // Example API path
+      op: 'put',
+      path: `/api/@workflow/${workflowId}/states/${state.id}`,
       data: state,
     },
-    // Pass the data along for the reducer to use on success
     workflowId,
     state,
   };

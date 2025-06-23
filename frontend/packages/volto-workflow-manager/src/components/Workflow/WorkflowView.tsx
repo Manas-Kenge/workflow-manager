@@ -1,8 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  Button,
-  ButtonGroup,
-  Switch,
   ProgressCircle,
   AlertDialog,
   DialogTrigger,
@@ -13,25 +10,15 @@ import {
   Flex,
   Grid,
 } from '@adobe/react-spectrum';
-import AddCircle from '@spectrum-icons/workflow/AddCircle';
-import LinkOut from '@spectrum-icons/workflow/LinkOut';
-import CheckmarkCircle from '@spectrum-icons/workflow/CheckmarkCircle';
-import UserAdd from '@spectrum-icons/workflow/UserAdd';
-import Delete from '@spectrum-icons/workflow/Delete';
-import SaveFloppy from '@spectrum-icons/workflow/SaveFloppy';
-import TopBar from './Topbar';
+import TopBar from './WorkflowHeader';
 import WorkflowGraph from './WorkflowGraph';
 import Toolbox from './Toolbox';
 import '@xyflow/react/dist/style.css';
-import {
-  deleteWorkflow,
-  getWorkflows,
-  validateWorkflow,
-  updateWorkflowState,
-} from '../../actions';
+import { updateWorkflowState } from '../../actions';
 import { useHistory } from 'react-router-dom';
 import type { WorkflowState } from '../../reducers/workflow';
-import { useAppSelector, useAppDispatch } from '../../types'; // Adjust path as needed
+import { useAppSelector, useAppDispatch } from '../../types';
+import ActionsToolbar from './ActionsToolbar';
 
 interface WorkflowViewProps {
   workflowId: string;
@@ -44,7 +31,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
   const [highlightedTransition, setHighlightedTransition] = useState<
     string | null
   >(null);
-  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
+
   const [description, setDescription] = useState<string>('');
 
   // Now these will be properly typed!
@@ -72,20 +59,10 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
     setTimeout(() => setHighlightedTransition(null), 3000);
   };
 
-  const handleDeleteWorkflow = async () => {
-    const result = await dispatch(deleteWorkflow(workflowId));
-    // You might need to adjust this condition based on your action structure
-    if (result && !result.error) {
-      dispatch(getWorkflows());
-      history.push(`/controlpanel/workflowmanager`);
-    }
-  };
-
   const handleSaveState = (updatedState: WorkflowState) => {
     // Dispatch the action with the current workflow's ID and the new state data
     dispatch(updateWorkflowState(workflowId, updatedState));
   };
-
 
   if (!workflow) {
     return (
@@ -126,45 +103,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
         padding="size-300"
         marginBottom="size-300"
       >
-        <Flex justifyContent="space-between" alignItems="center">
-          <ButtonGroup>
-            <Button variant="accent">
-              <AddCircle size="S" />
-              Add State
-            </Button>
-            <Button variant="secondary">
-              <LinkOut size="S" />
-              Add Transition
-            </Button>
-            <Button
-              variant="secondary"
-              onPress={() => dispatch(validateWorkflow(workflowId))}
-            >
-              <CheckmarkCircle size="S" />
-              Sanity Check
-            </Button>
-            <Button variant="secondary">
-              <UserAdd size="S" />
-              Assign
-            </Button>
-            <Button
-              variant="negative"
-              style="fill"
-              onPress={handleDeleteWorkflow}
-            >
-              <Delete size="S" />
-              Delete
-            </Button>
-          </ButtonGroup>
-
-          <Switch isSelected={advancedMode} onChange={setAdvancedMode}>
-            Advanced mode
-          </Switch>
-          <Button variant="secondary">
-            <SaveFloppy size="S" />
-            Save
-          </Button>
-        </Flex>
+        <ActionsToolbar workflowId={workflow.id} />
       </View>
 
       {validation.loading && (

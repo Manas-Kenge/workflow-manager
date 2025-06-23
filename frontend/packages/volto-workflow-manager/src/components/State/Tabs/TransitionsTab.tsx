@@ -8,7 +8,8 @@ import {
   View,
   Flex,
 } from '@adobe/react-spectrum';
-import Add from '@spectrum-icons/workflow/Add';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import add from '@plone/volto/icons/add.svg';
 
 type Transition = {
   id: string;
@@ -59,7 +60,7 @@ const TransitionsTab: React.FC<TransitionsTabProps> = ({
       </Flex>
 
       <ActionButton onPress={onAddTransitionClick} aria-label="Add transition">
-        <Add />
+        <Icon name={add} size="20px" />
         Add transition
       </ActionButton>
     </View>
