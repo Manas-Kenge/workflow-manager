@@ -42,7 +42,7 @@ import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 import add from '@plone/volto/icons/add.svg';
-import blank from '@plone/volto/icons/blank.svg';
+
 
 const plone_shipped_workflows = [
   'folder_workflow',
