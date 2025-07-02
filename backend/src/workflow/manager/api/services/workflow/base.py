@@ -10,12 +10,14 @@ it a clean, reusable, and testable utility.
 from AccessControl import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from plone.memoize.view import memoize
+from plone.protect.interfaces import IDisableCSRFProtection
 from workflow.manager.actionmanager import ActionManager
 from workflow.manager.permissions import (
     allowed_guard_permissions,
     managed_permissions,
 )
 from zope.component import getMultiAdapter
+from zope.interface import alsoProvides
 from zope.schema.interfaces import IVocabularyFactory
 from zope.component import getUtility
 import json
@@ -109,12 +111,53 @@ class Base:
         return ActionManager()
 
     def authorize(self):
-        """Verifies the CSRF token for state-changing requests."""
+        """
+        Verifies the CSRF token for state-changing requests.
+        """
         authenticator = getMultiAdapter(
             (self.context, self.request), name="authenticator"
         )
         if not authenticator.verify():
             raise Unauthorized("CSRF token validation failed")
+
+    def disable_csrf_protection(self):
+        """
+        Disables CSRF protection for the current request.
+        """
+        alsoProvides(self.request, IDisableCSRFProtection)
+
+    def get_csrf_token(self):
+        """
+        Gets the current CSRF token for the request.
+        """
+        authenticator = getMultiAdapter(
+            (self.context, self.request), name="authenticator"
+        )
+        return authenticator.token()
+
+    def validate_csrf_token(self, token):
+        """
+        Validates a specific CSRF token.
+        """
+        try:
+            authenticator = getMultiAdapter(
+                (self.context, self.request), name="authenticator"
+            )
+            # Temporarily set the token in the request
+            original_token = self.request.form.get('_authenticator')
+            self.request.form['_authenticator'] = token
+            
+            result = authenticator.verify()
+            
+            # Restore original token
+            if original_token is not None:
+                self.request.form['_authenticator'] = original_token
+            else:
+                self.request.form.pop('_authenticator', None)
+                
+            return result
+        except Exception:
+            return False
 
     def get_state(self, state_id):
         """Safely gets a state by its ID from the selected workflow."""
@@ -165,8 +208,6 @@ class Base:
 
     def getGroups(self):
         """Gets a list of all groups in the portal."""
-        # This is a simplified version of the original getGroups.
-        # The original was tied to Acquisition, which is less common now.
         acl_users = getToolByName(self.context, 'acl_users')
         return sorted(
             [
@@ -175,10 +216,3 @@ class Base:
             ],
             key=lambda g: g['title'].lower()
         )
-
-    # --- Removed Methods ---
-    # The following methods were removed as they are specific to classic
-    # Plone page templates and not used by REST API services:
-    # - handle_response, wrap_template, render_*
-    # - get_url, next_url
-    # - context_state

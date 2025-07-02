@@ -7,9 +7,9 @@ import {
   UPDATE_WORKFLOW_SECURITY,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
+  CLEAR_LAST_CREATED_WORKFLOW,
 } from '../constants';
 
-// Define proper types for your workflow data
 export interface Workflow {
   id: string;
   title: string;
@@ -33,20 +33,19 @@ export interface WorkflowState {
 export interface WorkflowTransition {
   id: string;
   title: string;
-  from_state?: string;
-  to_state?: string;
+  new_state: string;
 }
 
 export interface ValidationError {
+  id?: string;
+  title?: string;
   error: string;
-  state_id?: string;
-  transition_id?: string;
 }
 
 export interface ValidationErrors {
   state_errors: ValidationError[];
-  transition_errors?: ValidationError[];
-  general_errors?: ValidationError[];
+  transition_errors: ValidationError[];
+  initial_state_error: boolean;
 }
 
 // Define the shape of your Redux state
@@ -64,8 +63,9 @@ interface WorkflowReduxState {
   operation: {
     error: string | null;
     loading: boolean;
-    result: any;
+    result: any; // Simplified - can be different shapes based on operation
   };
+  lastCreatedWorkflowId: string | null;
 }
 
 const initialState: WorkflowReduxState = {
@@ -84,6 +84,7 @@ const initialState: WorkflowReduxState = {
     loading: false,
     result: null,
   },
+  lastCreatedWorkflowId: null,
 };
 
 export default function workflow(
@@ -91,6 +92,7 @@ export default function workflow(
   action: AnyAction,
 ): WorkflowReduxState {
   switch (action.type) {
+    // Get Workflows
     case `${GET_WORKFLOWS}_PENDING`:
       return {
         ...state,
@@ -107,7 +109,7 @@ export default function workflow(
         workflows: {
           ...state.workflows,
           error: null,
-          items: action.result.workflows || [],
+          items: action.result?.workflows || [],
           loaded: true,
           loading: false,
         },
@@ -117,7 +119,7 @@ export default function workflow(
         ...state,
         workflows: {
           ...state.workflows,
-          error: action.error,
+          error: action.error || 'Failed to load workflows',
           items: [],
           loading: false,
           loaded: false,
@@ -126,8 +128,120 @@ export default function workflow(
 
     // Add Workflow
     case `${ADD_WORKFLOW}_PENDING`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: true,
+          error: null,
+          result: null,
+        },
+        lastCreatedWorkflowId: null,
+      };
+    case `${ADD_WORKFLOW}_SUCCESS`:
+      // Backend returns { status, workflow_id, message }
+      const workflowId = action.result?.workflow_id;
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: null,
+          result: action.result,
+        },
+        lastCreatedWorkflowId: workflowId || null,
+        // Clear loaded state to force refresh after creation
+        workflows: {
+          ...state.workflows,
+          loaded: false,
+        },
+      };
+    case `${ADD_WORKFLOW}_FAIL`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: action.error || 'Failed to create workflow',
+          result: null,
+        },
+        lastCreatedWorkflowId: null,
+      };
+
+    // Delete Workflow
     case `${DELETE_WORKFLOW}_PENDING`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: true,
+          error: null,
+          result: null,
+        },
+      };
+    case `${DELETE_WORKFLOW}_SUCCESS`:
+      // Use meta.workflowId from action creator instead of parsing path
+      const deletedWorkflowId =
+        action.meta?.workflowId || action.request?.path?.split('/').pop();
+      return {
+        ...state,
+        workflows: {
+          ...state.workflows,
+          items: deletedWorkflowId
+            ? state.workflows.items.filter((wf) => wf.id !== deletedWorkflowId)
+            : state.workflows.items,
+        },
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: null,
+          result: action.result,
+        },
+      };
+    case `${DELETE_WORKFLOW}_FAIL`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: action.error || 'Failed to delete workflow',
+          result: null,
+        },
+      };
+
+    // Update Workflow Security
     case `${UPDATE_WORKFLOW_SECURITY}_PENDING`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: true,
+          error: null,
+          result: null,
+        },
+      };
+    case `${UPDATE_WORKFLOW_SECURITY}_SUCCESS`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: null,
+          result: action.result,
+        },
+      };
+    case `${UPDATE_WORKFLOW_SECURITY}_FAIL`:
+      return {
+        ...state,
+        operation: {
+          ...state.operation,
+          loading: false,
+          error: action.error || 'Failed to update workflow security',
+          result: null,
+        },
+      };
+
+    // Assign Workflow
     case `${ASSIGN_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -138,35 +252,48 @@ export default function workflow(
           result: null,
         },
       };
-
-    case `${ADD_WORKFLOW}_SUCCESS`:
-    case `${DELETE_WORKFLOW}_SUCCESS`:
-    case `${UPDATE_WORKFLOW_SECURITY}_SUCCESS`:
     case `${ASSIGN_WORKFLOW}_SUCCESS`:
+      // Backend returns { status, workflow, type, message }
+      const assignResult = action.result;
       return {
         ...state,
         operation: {
           ...state.operation,
           loading: false,
           error: null,
-          result: action.result,
+          result: assignResult,
+        },
+        // Update the assigned_types in the workflow items
+        workflows: {
+          ...state.workflows,
+          items: state.workflows.items.map((workflow) => {
+            if (workflow.id === assignResult?.workflow) {
+              // Only add if not already present
+              const newType = assignResult.type;
+              const alreadyAssigned = workflow.assigned_types.includes(newType);
+              return {
+                ...workflow,
+                assigned_types: alreadyAssigned
+                  ? workflow.assigned_types
+                  : [...workflow.assigned_types, newType],
+              };
+            }
+            return workflow;
+          }),
         },
       };
-
-    case `${ADD_WORKFLOW}_FAIL`:
-    case `${DELETE_WORKFLOW}_FAIL`:
-    case `${UPDATE_WORKFLOW_SECURITY}_FAIL`:
     case `${ASSIGN_WORKFLOW}_FAIL`:
       return {
         ...state,
         operation: {
           ...state.operation,
           loading: false,
-          error: action.error,
+          error: action.error || 'Failed to assign workflow',
           result: null,
         },
       };
-    // Validation
+
+    // Validation (Sanity Check)
     case `${VALIDATE_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -174,27 +301,36 @@ export default function workflow(
           ...state.validation,
           loading: true,
           errors: null,
+          error: null,
         },
       };
-
     case `${VALIDATE_WORKFLOW}_SUCCESS`:
+      // Backend returns { status, workflow, errors, message }
       return {
         ...state,
         validation: {
           ...state.validation,
           loading: false,
-          errors: action.result.errors,
+          errors: action.result?.errors || null,
+          error: null,
         },
       };
-
     case `${VALIDATE_WORKFLOW}_FAIL`:
       return {
         ...state,
         validation: {
           ...state.validation,
           loading: false,
-          errors: action.error,
+          errors: null,
+          error: action.error || 'Failed to validate workflow',
         },
+      };
+
+    // Clear last created workflow ID
+    case CLEAR_LAST_CREATED_WORKFLOW:
+      return {
+        ...state,
+        lastCreatedWorkflowId: null,
       };
 
     default:

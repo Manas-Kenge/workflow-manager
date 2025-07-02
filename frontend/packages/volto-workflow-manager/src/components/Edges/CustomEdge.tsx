@@ -2,20 +2,17 @@ import React from 'react';
 import { BezierEdge, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 
-// Define the shape of data that your workflow transition edges will have
 interface WorkflowTransitionEdgeData {
   [key: string]: unknown;
   label?: string;
   highlighted?: boolean;
   transitionId?: string;
-  // Add other properties your workflow transitions might have
   description?: string;
   conditions?: string[];
   permissions?: string[];
   automatic?: boolean;
 }
 
-// Type the EdgeProps to specify what data structure you expect
 interface CustomEdgeProps extends EdgeProps {
   data?: WorkflowTransitionEdgeData;
 }
@@ -71,14 +68,12 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
               borderRadius: 3,
               border: '1px solid #ccc',
               color: data.highlighted ? '#ff6b6b' : '#333',
+              pointerEvents: 'none',
             }}
             className="nodrag nopan"
             title={data.description || data.label}
           >
             {data.label}
-            {data.automatic && (
-              <span style={{ color: '#0078d4', marginLeft: 4 }}>⚡</span>
-            )}
           </div>
         </EdgeLabelRenderer>
       )}
