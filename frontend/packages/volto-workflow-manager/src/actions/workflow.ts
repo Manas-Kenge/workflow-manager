@@ -25,7 +25,7 @@ export function addWorkflow(cloneFromWorkflow: string, workflowName: string) {
     type: ADD_WORKFLOW,
     request: {
       op: 'post',
-      path: '/@workflow-add',
+      path: '/@workflows',
       data: {
         'clone-from-workflow': cloneFromWorkflow,
         'workflow-name': workflowName,

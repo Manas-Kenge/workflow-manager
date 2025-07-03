@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { deleteWorkflow, getWorkflows, validateWorkflow } from '../../actions';
 import { useAppDispatch } from '../../types';
-import { Button, ButtonGroup, Flex, Switch } from '@adobe/react-spectrum';
+import { Button, ButtonGroup, Flex } from '@adobe/react-spectrum';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
-import save from '@plone/volto/icons/save.svg';
 import add from '@plone/volto/icons/add.svg';
 import adduser from '@plone/volto/icons/add-user.svg';
 import deleteIcon from '@plone/volto/icons/delete.svg';
 import checkboxChecked from '@plone/volto/icons/checkbox-checked.svg';
 import blank from '@plone/volto/icons/blank.svg';
-import CreateState from '../State/CreateState';
+import CreateState from '../States/CreateState';
 
 const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const [advancedMode, setAdvancedMode] = useState<boolean>(false);
   const [isCreateStateOpen, setCreateStateOpen] = useState(false);
 
   const handleDeleteWorkflow = async () => {
@@ -58,14 +56,6 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             Delete
           </Button>
         </ButtonGroup>
-
-        <Switch isSelected={advancedMode} onChange={setAdvancedMode}>
-          Advanced mode
-        </Switch>
-        <Button variant="secondary">
-          <Icon name={save} size="20px" />
-          Save
-        </Button>
       </Flex>
 
       <CreateState

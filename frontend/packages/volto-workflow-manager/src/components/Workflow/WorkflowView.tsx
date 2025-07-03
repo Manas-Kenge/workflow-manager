@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Button,
   ProgressCircle,
   AlertDialog,
   DialogTrigger,
@@ -11,58 +12,30 @@ import {
   Grid,
 } from '@adobe/react-spectrum';
 import TopBar from './WorkflowHeader';
-import WorkflowGraph from './WorkflowGraph';
+import WorkflowGraph from '../Graph/WorkflowGraph';
 import Toolbox from './Toolbox';
 import '@xyflow/react/dist/style.css';
-import { updateWorkflowState } from '../../actions';
-import { useHistory } from 'react-router-dom';
-import type { WorkflowState } from '../../reducers/workflow';
+import { useHistory, Link } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../types';
 import ActionsToolbar from './ActionsToolbar';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import editing from '@plone/volto/icons/editing.svg';
+import back from '@plone/volto/icons/back.svg';
+import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
+import { createPortal } from 'react-dom';
+import { useClient } from '@plone/volto/hooks/client/useClient';
 
 interface WorkflowViewProps {
   workflowId: string;
 }
 
-const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
-  const dispatch = useAppDispatch();
-  const history = useHistory();
-  const [highlightedState, setHighlightedState] = useState<string | null>(null);
-  const [highlightedTransition, setHighlightedTransition] = useState<
-    string | null
-  >(null);
-
-  const [description, setDescription] = useState<string>('');
-
-  // Now these will be properly typed!
+const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
+  const isClient = useClient();
   const workflows = useAppSelector((state) => state.workflow.workflows.items);
   const workflow = useAppSelector((state) =>
     state.workflow.workflows.items.find((w) => w.id === workflowId),
   );
   const validation = useAppSelector((state) => state.workflow.validation);
-
-  useEffect(() => {
-    if (workflow) {
-      setDescription(workflow.description || '');
-    }
-  }, [workflow]);
-
-  const handleHighlightState = (stateId: string) => {
-    setHighlightedState(stateId);
-    // Clear highlight after animation
-    setTimeout(() => setHighlightedState(null), 3000);
-  };
-
-  const handleHighlightTransition = (transitionId: string) => {
-    setHighlightedTransition(transitionId);
-    // Clear highlight after animation
-    setTimeout(() => setHighlightedTransition(null), 3000);
-  };
-
-  const handleSaveState = (updatedState: WorkflowState) => {
-    // Dispatch the action with the current workflow's ID and the new state data
-    dispatch(updateWorkflowState(workflowId, updatedState));
-  };
 
   if (!workflow) {
     return (
@@ -81,38 +54,19 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
     <View width="100%" padding="size-400" margin="0">
       <View
         padding="size-200"
-        backgroundColor="gray-100"
         borderColor="gray-300"
         borderWidth="thin"
         borderRadius="medium"
       >
-        <TopBar
-          workflows={workflows}
-          selectedWorkflowId={workflow.id}
-          onSelectWorkflow={(id: string) =>
-            history.push(`/controlpanel/workflowmanager?workflow=${id}`)
-          }
-          onCreateWorkflow={() =>
-            history.push(`/controlpanel/workflowmanager/create`)
-          }
-        />
+        <TopBar workflows={workflows} selectedWorkflowId={workflow.id} />
       </View>
 
-      <View
-        backgroundColor="gray-100"
-        padding="size-300"
-        marginBottom="size-300"
-      >
+      <View padding="size-300" marginBottom="size-300">
         <ActionsToolbar workflowId={workflow.id} />
       </View>
 
       {validation.loading && (
-        <View
-          backgroundColor="gray-100"
-          borderRadius="medium"
-          padding="size-300"
-          marginBottom="size-300"
-        >
+        <View borderRadius="medium" padding="size-300" marginBottom="size-300">
           <Flex alignItems="center" gap="size-200">
             <ProgressCircle
               aria-label="Validating workflow..."
@@ -160,28 +114,16 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
         </DialogTrigger>
       )}
 
-      <View backgroundColor="gray-100" borderRadius="medium">
+      <View borderRadius="medium">
         <Grid
-          areas={['sidebar content']}
-          columns={['1fr', '3fr']}
+          areas={['content']}
+          columns={['1fr']}
           gap="size-300"
           height="500px"
         >
-          <View gridArea="sidebar">
-            <Toolbox
-              workflow={workflow}
-              onHighlightState={handleHighlightState}
-              onHighlightTransition={handleHighlightTransition}
-              onSaveState={handleSaveState}
-            />
-          </View>
           <View gridArea="content" height="100%">
             {workflow ? (
-              <WorkflowGraph
-                workflow={workflow}
-                highlightedState={highlightedState}
-                highlightedTransition={highlightedTransition}
-              />
+              <WorkflowGraph workflow={workflow} />
             ) : (
               <Flex alignItems="center" justifyContent="center" height="100%">
                 <Flex alignItems="center" gap="size-200">
@@ -196,6 +138,40 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }) => {
           </View>
         </Grid>
       </View>
+      {isClient &&
+        createPortal(
+          <Toolbar
+            pathname={props.pathname}
+            hideDefaultViewButtons
+            inner={
+              <>
+                <Link to="/controlpanel/workflowmanager" className="item">
+                  <Icon
+                    name={back}
+                    className="circled"
+                    size="30px"
+                    title="back"
+                  />
+                </Link>
+                <Button
+                  id="toolbar-editing-state"
+                  className="editing-state"
+                  aria-label="Add State"
+                  onPress={() => setCreateStateOpen(true)}
+                >
+                  <Icon
+                    name={editing}
+                    className="circled"
+                    size="30px"
+                    title="editing-state"
+                  />
+                </Button>
+              </>
+            }
+          />,
+          document.getElementById('toolbar'),
+        )}
+      {createPortal(<Toolbox />, document.getElementById('sidebar'))}
     </View>
   );
 };

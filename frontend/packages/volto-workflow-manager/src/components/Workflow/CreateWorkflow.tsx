@@ -4,7 +4,6 @@ import {
   ButtonGroup,
   Content,
   Dialog,
-  DialogTrigger,
   Divider,
   Heading,
   Item,
@@ -15,95 +14,82 @@ import {
 } from '@adobe/react-spectrum';
 import ThemeProvider from '../../Provider';
 
-const CreateWorkflow = ({ workflows, onCreate }) => {
+const CreateWorkflow = ({ workflows, onCreate, close }) => {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [workflowName, setWorkflowName] = useState('');
 
-  const handleCreate = (close) => {
+  const handleCreate = () => {
     if (workflowName && onCreate) {
       onCreate(selectedWorkflow, workflowName);
-      // Reset form
+      // Reset form state
       setSelectedWorkflow('');
       setWorkflowName('');
-      close();
+      // Don't call close() here - let the parent handle it
     }
   };
 
   return (
-    <div>
-      <DialogTrigger isDismissable>
-        <Button variant="accent">Create New Workflow</Button>
-        {(close) => (
-          <Dialog>
-            <Content>
-              {/* Header */}
-              <Heading level={1}>Create new workflow</Heading>
-              <Text slot="description" marginBottom="size-300">
-                This will add a new transition to the workflow.
-              </Text>
-              <Divider
-                marginTop="size-200"
-                marginBottom="size-200"
-                UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
-              />
-              {/* Clone From Section */}
-              <View marginBottom="size-300">
-                <Heading level={3} marginBottom="size-100">
-                  Clone from
-                </Heading>
-                <Text marginBottom="size-200">
-                  Select the workflow you'd like to use as the basis for the new
-                  workflow you're creating.
-                </Text>
-                <Picker
-                  selectedKey={selectedWorkflow}
-                  onSelectionChange={(selected) =>
-                    setSelectedWorkflow(selected)
-                  }
-                  width="100%"
-                >
-                  {workflows?.map((workflow) => (
-                    <Item key={workflow.id}>{workflow.title}</Item>
-                  ))}
-                </Picker>
-              </View>
+    <Dialog>
+      <Content>
+        <Heading level={1}>Create new workflow</Heading>
+        <Divider
+          marginTop="size-200"
+          marginBottom="size-200"
+          UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
+        />
+        {/* Clone From */}
+        <View marginBottom="size-300">
+          <Heading level={3} marginBottom="size-100">
+            Clone from
+          </Heading>
+          <Text marginBottom="size-200">
+            Select the workflow you'd like to use as the basis for the new
+            workflow you're creating.
+          </Text>
+          <Picker
+            selectedKey={selectedWorkflow}
+            onSelectionChange={(selected) => setSelectedWorkflow(selected)}
+            width="100%"
+          >
+            {workflows?.map((workflow) => (
+              <Item key={workflow.id}>{workflow.title}</Item>
+            ))}
+          </Picker>
+        </View>
 
-              {/* Workflow Name Section */}
-              <View marginBottom="size-300">
-                <Heading level={3} marginBottom="size-100">
-                  Workflow Name
-                </Heading>
-                <Text marginBottom="size-200">
-                  An id will be generated from this title.
-                </Text>
-                <TextField
-                  defaultValue="Enter value"
-                  value={workflowName}
-                  onChange={setWorkflowName}
-                  isRequired
-                  necessityIndicator="icon"
-                  width="100%"
-                />
-              </View>
+        {/* Workflow Name */}
+        <View marginBottom="size-300">
+          <Heading level={3} marginBottom="size-100">
+            Workflow Name
+          </Heading>
+          <Text marginBottom="size-200">
+            An id will be generated from this title.
+          </Text>
+          <TextField
+            defaultValue="Enter value"
+            value={workflowName}
+            onChange={setWorkflowName}
+            isRequired
+            necessityIndicator="icon"
+            width="100%"
+          />
+        </View>
 
-              {/* Action Buttons */}
-              <ButtonGroup>
-                <Button variant="secondary" onPress={close}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="accent"
-                  onPress={() => handleCreate(close)}
-                  isDisabled={!workflowName}
-                >
-                  Add
-                </Button>
-              </ButtonGroup>
-            </Content>
-          </Dialog>
-        )}
-      </DialogTrigger>
-    </div>
+        {/* Buttons */}
+        <ButtonGroup>
+          <Button variant="secondary" onPress={close}>
+            Cancel
+          </Button>
+          <Button
+            variant="accent"
+            onPress={handleCreate}
+            isDisabled={!workflowName}
+          >
+            Add
+          </Button>
+        </ButtonGroup>
+      </Content>
+    </Dialog>
   );
 };
 

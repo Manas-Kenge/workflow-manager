@@ -15,10 +15,10 @@ import {
   type OnEdgesChange,
   type DefaultEdgeOptions,
 } from '@xyflow/react';
-import CustomEdge from '../Edges/CustomEdge';
-import CustomNode from '../Nodes/CustomNode';
-import type { WorkflowStateNodeData } from '../Nodes/CustomNode';
-import type { WorkflowTransitionEdgeData } from '../Edges/CustomEdge';
+import CustomEdge from './Edges/CustomEdge';
+import CustomNode from './Nodes/CustomNode';
+import type { WorkflowStateNodeData } from './Nodes/CustomNode';
+import type { WorkflowTransitionEdgeData } from './Edges/CustomEdge';
 import '@xyflow/react/dist/style.css';
 
 const fitViewOptions: FitViewOptions = { padding: 0.2 };

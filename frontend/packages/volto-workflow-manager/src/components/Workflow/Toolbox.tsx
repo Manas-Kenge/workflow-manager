@@ -1,158 +1,63 @@
 import React, { useState } from 'react';
+import Sidebar from '@plone/volto/components/manage/Sidebar/Sidebar';
 import {
-  Heading,
-  Picker,
-  Button,
-  ButtonGroup,
+  Tabs,
+  TabList,
+  TabPanels,
   Item,
+  Picker,
   View,
   Text,
-  Switch,
-  Divider,
-  Flex,
-  DialogTrigger,
 } from '@adobe/react-spectrum';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import save from '@plone/volto/icons/save.svg';
-import nav from '@plone/volto/icons/nav.svg';
 
-import StateEditDialog from '../State/StateEditDialog';
+const Toolbox = () => {
+  const [selectedTab, setSelectedTab] = useState('states');
 
-const Toolbox = ({
-  workflow,
-  onHighlightState,
-  onHighlightTransition,
-  onSaveState,
-}) => {
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedTransition, setSelectedTransition] = useState(null);
-  const [designMode, setDesignMode] = useState(true);
+  const states = ['Draft', 'Published', 'Archived'];
+  const transitions = ['Publish', 'Retract', 'Submit'];
 
-  const handleFindState = () => {
-    if (selectedState) onHighlightState(selectedState);
+  const toolboxTab = {
+    id: 'toolbox',
+    title: 'Toolbox',
+    sidebarTab: () => (
+      <View padding="size-200" overflow="auto" height="100%">
+        <Tabs
+          aria-label="Workflow Toolbox Tabs"
+          selectedKey={selectedTab}
+          onSelectionChange={setSelectedTab}
+        >
+          <TabList>
+            <Item key="states">States</Item>
+            <Item key="transitions">Transitions</Item>
+          </TabList>
+          <TabPanels>
+            <Item key="states">
+              <Text>Manage Workflow States</Text>
+              <Picker label="Select a state" width="100%" marginTop="size-200">
+                {states.map((s) => (
+                  <Item key={s}>{s}</Item>
+                ))}
+              </Picker>
+            </Item>
+            <Item key="transitions">
+              <Text>Manage Workflow Transitions</Text>
+              <Picker
+                label="Select a transition"
+                width="100%"
+                marginTop="size-200"
+              >
+                {transitions.map((t) => (
+                  <Item key={t}>{t}</Item>
+                ))}
+              </Picker>
+            </Item>
+          </TabPanels>
+        </Tabs>
+      </View>
+    ),
   };
 
-  const handleFindTransition = () => {
-    if (selectedTransition) onHighlightTransition(selectedTransition);
-  };
-
-  if (!workflow) return null;
-
-  return (
-    <View
-      padding="size-200"
-      borderWidth="thin"
-      borderColor="gray-300"
-      borderRadius="medium"
-    >
-      <Flex justifyContent="space-between" alignItems="center">
-        <Heading level={4}>Toolbox</Heading>
-        <Switch isSelected={designMode} onChange={setDesignMode}>
-          Design mode
-        </Switch>
-      </Flex>
-
-      <View marginTop="size-200">
-        <Button variant="primary" width="100%">
-          <Icon name={nav} size="20px" />
-          Reorder Graph
-        </Button>
-      </View>
-
-      <View marginTop="size-200">
-        <Button variant="primary" width="100%">
-          <Icon name={save} size="20px" />
-          Save Layout
-        </Button>
-      </View>
-
-      <Divider
-        marginTop="size-200"
-        marginBottom="size-200"
-        UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
-      />
-
-      <Text UNSAFE_style={{ fontWeight: 600 }}>States</Text>
-      <Picker
-        placeholder="Select state"
-        selectedKey={selectedState}
-        onSelectionChange={setSelectedState}
-        width="100%"
-        marginTop="size-100"
-      >
-        {workflow.states.map((state) => (
-          <Item key={state.id}>{state.title}</Item>
-        ))}
-      </Picker>
-
-      <View marginTop="size-200">
-        <ButtonGroup>
-          <DialogTrigger>
-            <Button variant="secondary" isDisabled={!selectedState}>
-              Edit
-            </Button>
-            {(close) => (
-              <StateEditDialog
-                onClose={close}
-                selectedState={workflow.states.find(
-                  (s) => s.id === selectedState,
-                )}
-                onSave={onSaveState} // Pass the handler to the dialog
-              />
-            )}
-          </DialogTrigger>
-          <Button
-            variant="accent"
-            onPress={handleFindState}
-            isDisabled={!selectedState}
-          >
-            Find
-          </Button>
-          <Button variant="secondary" onPress={() => setSelectedState(null)}>
-            Clear
-          </Button>
-        </ButtonGroup>
-      </View>
-
-      <Divider
-        marginTop="size-200"
-        marginBottom="size-200"
-        UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
-      />
-
-      <Text UNSAFE_style={{ fontWeight: 600 }}>Transitions</Text>
-      <Picker
-        placeholder="Select transition"
-        selectedKey={selectedTransition}
-        onSelectionChange={setSelectedTransition}
-        width="100%"
-        marginTop="size-100"
-      >
-        {workflow.transitions.map((trans) => (
-          <Item key={trans.id}>{trans.title}</Item>
-        ))}
-      </Picker>
-
-      <View marginTop="size-200">
-        <ButtonGroup>
-          <Button variant="secondary">Edit</Button>
-          <Button
-            variant="accent"
-            onPress={handleFindTransition}
-            isDisabled={!selectedTransition}
-          >
-            Find
-          </Button>
-          <Button
-            variant="secondary"
-            onPress={() => setSelectedTransition(null)}
-          >
-            Clear
-          </Button>
-        </ButtonGroup>
-      </View>
-    </View>
-  );
+  return <Sidebar tabs={[toolboxTab]} />;
 };
 
 export default Toolbox;
