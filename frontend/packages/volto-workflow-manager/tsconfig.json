@@ -17,7 +17,7 @@
       "volto-workflow-manager/*": ["./src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/components/ControlPanels/WorkflowControlPanel.jsx", "src/components/Workflow/Graph/WorkflowEdge.jsx", "src/components/Workflow/Graph/WorkflowGraph.jsx"],
+  "include": ["**/*.ts", "**/*.tsx", "src/components/ControlPanels/WorkflowControlPanel.jsx", "src/components/Workflow/Graph/WorkflowEdge.jsx", "src/components/Workflow/Graph/WorkflowGraph.jsx", "src/components/Controlpanel/WorkflowPanel.tsx"],
   "exclude": [
     "node_modules",
     "build",

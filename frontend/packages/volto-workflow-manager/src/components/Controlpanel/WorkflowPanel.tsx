@@ -39,6 +39,11 @@ import WorkflowView from '../Workflow/WorkflowView';
 import ThemeProvider from '../../Provider';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import more from '@plone/volto/icons/more.svg';
+import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
+import { createPortal } from 'react-dom';
+import { useClient } from '@plone/volto/hooks/client/useClient';
+import add from '@plone/volto/icons/add.svg';
+
 
 const plone_shipped_workflows = [
   'folder_workflow',
@@ -64,7 +69,7 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
   const [workflowToRename, setWorkflowToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
 
-  const workflowItems: WorkflowItem[] = workflows.map((workflow) => ({
+  const workflowItems : WorkflowItem[]= workflows.map((workflow) => ({
     id: workflow.id,
     title: workflow.title || workflow.id,
     description: workflow.description || 'No description available',
@@ -168,13 +173,16 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
   );
 };
 
-const WorkflowControlPanel = () => {
+const WorkflowControlPanel = (props) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
   const location = useLocation();
+  const isClient = useClient();
   const searchParams = new URLSearchParams(location.search);
-  const selectedWorkflow = searchParams.get('workflow');
+  const [isCreateStateOpen, setCreateStateOpen] = useState(false);
 
+  const selectedWorkflow = searchParams.get('workflow');
+  console.log('props', props);
   const {
     items: workflows,
     loading,
@@ -235,59 +243,87 @@ const WorkflowControlPanel = () => {
       : 'Loading Workflows...';
 
   return (
-    <View width="100%" padding="size-400">
-      <Form width="100%">
-        <Well>
-          <Heading level={1}>Workflow Manager</Heading>
-        </Well>
+    <div id="page-controlpanel" className="ui container">
+      <View width="100%" padding="size-400">
+        <Form width="100%">
+          <Well>
+            <Heading level={1}>Workflow Manager</Heading>
+          </Well>
 
-        <Well marginTop="size-300">
-          <CreateWorkflow
-            workflows={workflows || []}
-            onCreate={handleCreateWorkflow}
-          />
+          <Well marginTop="size-300">
+            <CreateWorkflow
+              workflows={workflows || []}
+              onCreate={handleCreateWorkflow}
+            />
 
-          {showLoading && (
-            <Flex alignItems="center" gap="size-200" marginTop="size-300">
-              <ProgressCircle aria-label={loadingText} isIndeterminate />
-              <Text>{loadingText}</Text>
-            </Flex>
-          )}
-
-          {/* Error State */}
-          {(error || operationError) && (
-            <DialogTrigger>
-              <ActionButton marginTop="size-300">
-                {operationError
-                  ? 'Error Creating Workflow'
-                  : 'Error Loading Workflows'}
-              </ActionButton>
-              {(close) => (
-                <AlertDialog
-                  title="Error"
-                  variant="error"
-                  primaryActionLabel="Close"
-                  onPrimaryAction={close}
-                >
-                  {operationError?.message || error?.message}
-                </AlertDialog>
-              )}
-            </DialogTrigger>
-          )}
-
-          <Heading level={2} marginBottom="size-200">
-            Please select your workflow
-          </Heading>
-          <WorkflowTable
-            workflows={workflows.filter(
-              (workflow) => !plone_shipped_workflows.includes(workflow.id),
+            {loading && (
+              <Flex alignItems="center" gap="size-200" marginTop="size-300">
+                <ProgressCircle
+                  aria-label="Loading workflows..."
+                  isIndeterminate
+                />
+                <Text>Loading Workflows...</Text>
+              </Flex>
             )}
-            handleWorkflowClick={handleWorkflowClick}
-            isClickable={true}
-          />
-        </Well>
-      </Form>
-    </View>
+
+            {/* Error State */}
+            {error && (
+              <DialogTrigger>
+                <ActionButton marginTop="size-300">
+                  Error Loading Workflows
+                </ActionButton>
+                {(close) => (
+                  <AlertDialog
+                    title="Error"
+                    variant="error"
+                    primaryActionLabel="Close"
+                    onPrimaryAction={close}
+                  >
+                    {error.message}
+                  </AlertDialog>
+                )}
+              </DialogTrigger>
+            )}
+
+            <Heading level={2} marginBottom="size-200">
+              Please select your workflow
+            </Heading>
+            <WorkflowTable
+              workflows={workflows.filter(
+                (workflow) => !plone_shipped_workflows.includes(workflow.id),
+              )}
+              handleWorkflowClick={handleWorkflowClick}
+              isClickable={true}
+            />
+          </Well>
+        </Form>
+        {isClient &&
+          createPortal(
+            <Toolbar
+              pathname={props.pathname}
+              hideDefaultViewButtons
+              inner={
+                <>
+                  <Button
+                    id="toolbar-add-state"
+                    className="add-state"
+                    aria-label="Add State"
+                    onPress={() => setCreateStateOpen(true)}
+                  >
+                    <Icon
+                      name={add}
+                      className="circled"
+                      size="30px"
+                      title="add-state"
+                    />
+                  </Button>
+                </>
+              }
+            />,
+            document.getElementById('toolbar'),
+          )}
+      </View>
+    </div>
   );
 };
 
