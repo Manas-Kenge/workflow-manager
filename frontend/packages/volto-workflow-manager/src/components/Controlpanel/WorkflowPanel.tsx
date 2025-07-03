@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+// import { useSelector, useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../../types';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   Button,
@@ -63,8 +64,7 @@ interface WorkflowItem {
 }
 
 const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
-  const dispatch = useDispatch();
-  // State to control the DialogTrigger's open state
+  const dispatch = useAppDispatch();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [workflowToRename, setWorkflowToRename] = useState(null);
   const [newTitle, setNewTitle] = useState('');
@@ -174,7 +174,7 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
 };
 
 const WorkflowControlPanel = (props) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const history = useHistory();
   const location = useLocation();
   const isClient = useClient();
@@ -187,21 +187,43 @@ const WorkflowControlPanel = (props) => {
     items: workflows,
     loading,
     error,
-  } = useSelector((state) => state.workflow.workflows);
+    loaded,
+  } = useAppSelector((state) => state.workflow.workflows);
+
+  // Add selector for workflow creation state - matching your actual reducer structure
+  const { loading: operationLoading, error: operationError } = useAppSelector(
+    (state) => state.workflow.operation,
+  );
+
+  const lastCreatedWorkflowId = useAppSelector(
+    (state) => state.workflow.lastCreatedWorkflowId,
+  );
+
   const [modalOpen, setModalOpen] = useState(false);
+  const [isProcessingCreation, setIsProcessingCreation] = useState(false);
 
   useEffect(() => {
-    dispatch(getWorkflows());
-  }, [dispatch]);
-
-  const handleCreateWorkflow = async (cloneFromWorkflow, workflowName) => {
-    const result = dispatch(addWorkflow(cloneFromWorkflow, workflowName));
-    if (result?.workflow_id) {
+    if (!loaded) {
       dispatch(getWorkflows());
-      history.push(
-        `/controlpanel/workflowmanager?workflow=${result.workflow_id}`,
-      );
     }
+  }, [dispatch, loaded]);
+
+  // Handle successful workflow creation
+  useEffect(() => {
+    if (lastCreatedWorkflowId && isProcessingCreation) {
+      // Navigate to the new workflow
+      history.push(
+        `/controlpanel/workflowmanager?workflow=${lastCreatedWorkflowId}`,
+      );
+
+      // Reset the processing flag
+      setIsProcessingCreation(false);
+    }
+  }, [lastCreatedWorkflowId, isProcessingCreation, history]);
+
+  const handleCreateWorkflow = (cloneFromWorkflow, workflowName) => {
+    setIsProcessingCreation(true);
+    dispatch(addWorkflow(cloneFromWorkflow, workflowName));
     setModalOpen(false);
   };
 
@@ -212,6 +234,13 @@ const WorkflowControlPanel = (props) => {
   if (selectedWorkflow) {
     return <WorkflowView workflowId={selectedWorkflow} />;
   }
+
+  // Show loading if we're creating a workflow or loading initial workflows
+  const showLoading = (operationLoading && isProcessingCreation) || loading;
+  const loadingText =
+    operationLoading && isProcessingCreation
+      ? 'Creating Workflow...'
+      : 'Loading Workflows...';
 
   return (
     <div id="page-controlpanel" className="ui container">

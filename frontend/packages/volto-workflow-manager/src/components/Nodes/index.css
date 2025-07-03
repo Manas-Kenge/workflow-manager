@@ -54,30 +54,6 @@
   font-weight: normal;
 }
 
-/* Node badges for initial/final states */
-.node-badge {
-  font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-top: 4px;
-  display: inline-block;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.node-badge.initial {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.node-badge.final {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-}
-
 /* Handle styles */
 .react-flow__handle {
   width: 8px;

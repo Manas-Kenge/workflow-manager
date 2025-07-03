@@ -29,7 +29,6 @@ export function addWorkflow(cloneFromWorkflow: string, workflowName: string) {
       data: {
         'clone-from-workflow': cloneFromWorkflow,
         'workflow-name': workflowName,
-        'form.actions.add': true,
       },
     },
   };
@@ -39,25 +38,12 @@ export function deleteWorkflow(workflowId: string) {
   return {
     type: DELETE_WORKFLOW,
     request: {
-      op: 'del',
-      path: '/@workflow-delete',
-      data: {
-        'selected-workflow': workflowId,
-      },
+      op: 'delete',
+      path: `/@workflows/${workflowId}`,
     },
-  };
-}
-
-export function updateWorkflowState(workflowId: string, state: WorkflowState) {
-  return {
-    type: UPDATE_WORKFLOW_STATE,
-    request: {
-      op: 'put',
-      path: `/api/@workflow/${workflowId}/states/${state.id}`,
-      data: state,
+    meta: {
+      workflowId, // Add metadata to help the reducer identify which workflow was deleted
     },
-    workflowId,
-    state,
   };
 }
 
@@ -66,11 +52,8 @@ export function updateWorkflowSecurity(workflowId: string) {
     type: UPDATE_WORKFLOW_SECURITY,
     request: {
       op: 'post',
-      path: '/@workflow-security-update',
-      data: {
-        'selected-workflow': workflowId,
-        'form.actions.confirm': true,
-      },
+      path: `/@workflows/${workflowId}/@update-security`, // Fixed path
+      data: {},
     },
   };
 }
@@ -80,9 +63,8 @@ export function assignWorkflow(workflowId: string, contentType: string) {
     type: ASSIGN_WORKFLOW,
     request: {
       op: 'post',
-      path: '/@workflow-assign',
+      path: `/@workflows/${workflowId}/@assign`, // Fixed path
       data: {
-        'selected-workflow': workflowId,
         type_id: contentType,
       },
     },
@@ -94,10 +76,7 @@ export function validateWorkflow(workflowId: string) {
     type: VALIDATE_WORKFLOW,
     request: {
       op: 'get',
-      path: '/@workflow-validate',
-      params: {
-        'selected-workflow': workflowId,
-      },
+      path: `/@workflows/${workflowId}/@sanity-check`, // Fixed path
     },
   };
 }
@@ -114,5 +93,18 @@ export function renameWorkflow(workflowId: string, newTitle: string) {
         'form.actions.rename': true,
       },
     },
+  };
+}
+
+export function updateWorkflowState(workflowId: string, state: WorkflowState) {
+  return {
+    type: UPDATE_WORKFLOW_STATE,
+    request: {
+      op: 'put',
+      path: `/api/@workflow/${workflowId}/states/${state.id}`,
+      data: state,
+    },
+    workflowId,
+    state,
   };
 }

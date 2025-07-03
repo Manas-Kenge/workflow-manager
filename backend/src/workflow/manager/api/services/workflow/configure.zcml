@@ -58,43 +58,42 @@
       permission="cmf.ManagePortal"
       />
 
- <!-- GET /@workflows/{wid}/@states/{sid} -> Gets details for one state -->
-  <plone:service
-      method="GET"
-      name="@states"
-      for="plone.restapi.bbb.IPloneSiteRoot"
-      factory=".state.EditState"
-      permission="cmf.ManagePortal"
-      />
+  <!-- GET /@states/{workflow_id} -> Lists all states in workflow -->
+    <plone:service
+        method="GET"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.ListStates"
+        permission="cmf.ManagePortal"
+    />
 
-  <!-- POST /@workflows/{wid}/@states -> Creates a new state -->
-  <plone:service
-      method="POST"
-      name="@states"
-      accept="application/json"
-      for="plone.restapi.bbb.IPloneSiteRoot"
-      factory=".state.AddState"
-      permission="cmf.ManagePortal"
-      />
+    <!-- POST /@states/{workflow_id} -> Add a new state to workflow -->
+    <plone:service
+        method="POST"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.AddState"
+        permission="cmf.ManagePortal"
+    />
 
-  <!-- PATCH /@workflows/{wid}/@states/{sid} -> Updates an existing state -->
-  <plone:service
-      method="PATCH"
-      name="@states"
-      for="plone.restapi.bbb.IPloneSiteRoot"
-      factory=".state.SaveState"
-      permission="cmf.ManagePortal"
-      />
+    <!-- PATCH /@states/{workflow_id}/{state_id} -> Update/Edit a state -->
+    <plone:service
+        method="PATCH"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.EditState"
+        permission="cmf.ManagePortal"
+    />
 
-  <!-- DELETE /@workflows/{wid}/@states/{sid} -> Deletes a state -->
-  <plone:service
-      method="DELETE"
-      name="@states"
-      for="plone.restapi.bbb.IPloneSiteRoot"
-      factory=".state.DeleteState"
-      permission="cmf.ManagePortal"
-      />
-
+    <!-- DELETE /@states/{workflow_id}/{state_id} -> Delete a state -->
+    <plone:service
+        method="DELETE"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.DeleteState"
+        permission="cmf.ManagePortal"
+    />
+    
   <!-- GET /@workflows/{wid}/@transitions/{tid} -> Gets details for one transition -->
   <plone:service
       method="GET"
