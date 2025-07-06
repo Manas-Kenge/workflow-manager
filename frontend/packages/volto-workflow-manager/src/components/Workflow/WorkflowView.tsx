@@ -13,7 +13,6 @@ import {
 } from '@adobe/react-spectrum';
 import TopBar from './WorkflowHeader';
 import WorkflowGraph from '../Graph/WorkflowGraph';
-import Toolbox from './Toolbox';
 import '@xyflow/react/dist/style.css';
 import { useHistory, Link } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../types';
@@ -22,6 +21,7 @@ import Icon from '@plone/volto/components/theme/Icon/Icon';
 import editing from '@plone/volto/icons/editing.svg';
 import back from '@plone/volto/icons/back.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
+import Sidebar from '@plone/volto/components/manage/Sidebar/Sidebar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 
@@ -171,7 +171,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           />,
           document.getElementById('toolbar'),
         )}
-      {createPortal(<Toolbox />, document.getElementById('sidebar'))}
+      {createPortal(<Sidebar />, document.getElementById('sidebar'))}
     </View>
   );
 };

@@ -1,45 +1,33 @@
-import React, { useState } from 'react';
 import {
-  Picker,
-  Item,
-  View,
-  Button,
-  DialogTrigger,
-  Flex,
+  Accordion,
+  Disclosure,
+  DisclosureTitle,
+  DisclosurePanel,
 } from '@adobe/react-spectrum';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import editing from '@plone/volto/icons/editing.svg';
+import React from 'react';
 
-const TransitionTab = ({ transitions, onSaveTransition }) => {
-  const [selectedTransitionId, setSelectedTransitionId] = useState(null);
-
-  const selectedTransition = transitions.find(
-    (t) => t.id === selectedTransitionId,
-  );
-
+const TransitionTab = () => {
   return (
-    <View>
-      <Picker
-        label="Select a transition"
-        selectedKey={selectedTransitionId}
-        onSelectionChange={setSelectedTransitionId}
-        width="100%"
-        marginBottom="size-200"
-      >
-        {transitions.map((trans) => (
-          <Item key={trans.id}>{trans.title}</Item>
-        ))}
-      </Picker>
-
-      <Flex>
-        <DialogTrigger>
-          <Button variant="secondary" isDisabled={!selectedTransition}>
-            <Icon name={editing} size="16px" />
-            Edit
-          </Button>
-        </DialogTrigger>
-      </Flex>
-    </View>
+    <Accordion defaultExpandedKeys={['properties']}>
+      <Disclosure id="properties">
+        <DisclosureTitle>Properties</DisclosureTitle>
+        <DisclosurePanel>Properties this transition can use.</DisclosurePanel>
+      </Disclosure>
+      <Disclosure id="guards">
+        <DisclosureTitle>Guards</DisclosureTitle>
+        <DisclosurePanel>Guards this transition can use.</DisclosurePanel>
+      </Disclosure>
+      <Disclosure id="source-states">
+        <DisclosureTitle>Source States</DisclosureTitle>
+        <DisclosurePanel>
+          Source states this transition can use.
+        </DisclosurePanel>
+      </Disclosure>
+      <Disclosure id="actions">
+        <DisclosureTitle>Actions</DisclosureTitle>
+        <DisclosurePanel>Actions this transition can use.</DisclosurePanel>
+      </Disclosure>
+    </Accordion>
   );
 };
 

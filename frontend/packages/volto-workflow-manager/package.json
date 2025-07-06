@@ -29,8 +29,8 @@
   "addons": [],
   "dependencies": {
     "@adobe/react-spectrum": "^3.42.0",
+    "@plone/components": "^3.0.2",
     "@reduxjs/toolkit": "^2.8.2",
-    "@spectrum-icons/workflow": "^4.2.22",
     "@types/redux": "^3.6.0",
     "@xyflow/react": "^12.6.4",
     "lucide-react": "^0.511.0",
