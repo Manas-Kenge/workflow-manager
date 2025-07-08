@@ -95,7 +95,6 @@ class DeleteWorkflow(Service):
         self.params = []
 
     def publishTraverse(self, request, name):
-        # Capture the workflow_id from the URL
         self.params.append(name)
         return self
 
@@ -120,7 +119,6 @@ class DeleteWorkflow(Service):
             self.request.response.setStatus(400)
             return {"error": f"Cannot delete workflow. It is still assigned to: {', '.join(assigned_types)}"}
 
-        # Note: CSRF protection disabled above, no need for base.authorize()
         for transition in base.available_transitions:
             base.actions.delete_rule_for(transition)
 

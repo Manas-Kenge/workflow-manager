@@ -94,16 +94,25 @@
         permission="cmf.ManagePortal"
     />
     
-  <!-- GET /@workflows/{wid}/@transitions/{tid} -> Gets details for one transition -->
+ <!-- GET /@transitions/{workflow_id} -> Lists all transitions in a workflow -->
   <plone:service
       method="GET"
       name="@transitions"
       for="Products.CMFCore.interfaces.IWorkflowAware"
-      factory=".transition.EditTransition"
+      factory=".transition.ListTransitions"
       permission="cmf.ManagePortal"
       />
 
-  <!-- POST /@workflows/{wid}/@transitions -> Creates a new transition -->
+  <!-- GET /@transitions/{workflow_id}/{transition_id} -> Gets details for one transition -->
+  <plone:service
+      method="GET"
+      name="@transition"
+      for="Products.CMFCore.interfaces.IWorkflowAware"
+      factory=".transition.GetTransition"
+      permission="cmf.ManagePortal"
+      />
+
+  <!-- POST /@transitions/{workflow_id}/{transition_id} -> Creates a new transition -->
   <plone:service
       method="POST"
       name="@transitions"
@@ -112,22 +121,22 @@
       permission="cmf.ManagePortal"
       />
 
-  <!-- PATCH /@workflows/{wid}/@transitions/{tid} -> Updates an existing transition -->
+  <!-- PATCH /@transitions/{workflow_id}/{transition_id} -> Updates an existing transition -->
   <plone:service
       method="PATCH"
       name="@transitions"
       for="Products.CMFCore.interfaces.IWorkflowAware"
-      factory=".transition.SaveTransition"
+      factory=".transition.UpdateTransition"
       permission="cmf.ManagePortal"
       />
 
-  <!-- DELETE /@workflows/{wid}/@transitions/{tid} -> Deletes a transition -->
+  <!-- DELETE /@transitions/{workflow_id}/{transition_id} -> Deletes a transition -->
   <plone:service
       method="DELETE"
       name="@transitions"
       for="Products.CMFCore.interfaces.IWorkflowAware"
       factory=".transition.DeleteTransition"
       permission="cmf.ManagePortal"
-      />    
+      />
 
 </configure>

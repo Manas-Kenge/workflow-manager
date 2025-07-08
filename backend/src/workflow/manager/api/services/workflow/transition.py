@@ -1,14 +1,17 @@
 import json
 from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC, TRIGGER_USER_ACTION
+from plone.protect.interfaces import IDisableCSRFProtection
 from plone.restapi.deserializer import json_body
 from plone.restapi.services import Service
 from workflow.manager import _
 from workflow.manager.api.services.workflow.base import Base
 from workflow.manager.utils import clone_transition
+from zope.interface import alsoProvides
 from zope.interface import implementer
 from zope.publisher.interfaces import IPublishTraverse
+import re
 
-# Helper function to serialize a transition object to a dictionary.
+
 def serialize_transition(transition):
     """Serializes a workflow transition object to a dictionary."""
     if not transition:
@@ -16,24 +19,24 @@ def serialize_transition(transition):
     guard = transition.getGuard()
     return {
         'id': transition.id,
-        'title': transition.title,
-        'description': transition.description,
-        'new_state_id': transition.new_state_id,
-        'trigger_type': transition.trigger_type,
-        'actbox_name': transition.actbox_name,
+        'title': getattr(transition, 'title', ''),
+        'description': getattr(transition, 'description', ''),
+        'new_state_id': getattr(transition, 'new_state_id', ''),
+        'trigger_type': getattr(transition, 'trigger_type', TRIGGER_USER_ACTION),
         'guard': {
-            'permissions': guard.permissions,
-            'roles': guard.roles,
-            'groups': guard.groups,
+            'permissions': getattr(guard, 'permissions', ()),
+            'roles': getattr(guard, 'roles', ()),
+            'groups': getattr(guard, 'groups', ()),
+            'expr': getattr(guard, 'expr', ''),
         }
     }
 
 
 @implementer(IPublishTraverse)
-class EditTransition(Service):
+class ListTransitions(Service):
     """
-    Provides all data needed to build the transition editing UI.
-    Endpoint: GET /@workflows/{workflow_id}/@transitions/{transition_id}
+    Lists all transitions in a workflow.
+    Endpoint: GET /@transitions/{workflow_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -44,26 +47,71 @@ class EditTransition(Service):
         return self
 
     def reply(self):
-        workflow_id, transition_id = self.params[0], self.params[2]
+        if len(self.params) < 1:
+            self.request.response.setStatus(400)
+            return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}"}
+            
+        workflow_id = self.params[0]
+        base = Base(self.context, self.request, workflow_id=workflow_id)
+
+        if not base.selected_workflow:
+            self.request.response.setStatus(404)
+            return {"error": f"Workflow '{workflow_id}' not found."}
+
+        transitions = [serialize_transition(t) for t in base.available_transitions]
+        return {
+            "workflow_id": workflow_id,
+            "workflow_title": getattr(base.selected_workflow, 'title', workflow_id),
+            "transitions": transitions
+        }
+
+
+@implementer(IPublishTraverse)
+class GetTransition(Service):
+    """
+    Gets details for a specific transition.
+    Endpoint: GET /@transitions/{workflow_id}/{transition_id}
+    """
+    def __init__(self, context, request):
+        super().__init__(context, request)
+        self.params = []
+
+    def publishTraverse(self, request, name):
+        self.params.append(name)
+        return self
+
+    def reply(self):
+        if len(self.params) < 2:
+            self.request.response.setStatus(400)
+            return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
+            
+        workflow_id = self.params[0]
+        transition_id = self.params[1]
+        
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
 
-        if not base.selected_workflow or not base.selected_transition:
+        if not base.selected_workflow:
             self.request.response.setStatus(404)
-            return {"error": "Workflow or Transition not found."}
+            return {"error": f"Workflow '{workflow_id}' not found."}
+            
+        if not base.selected_transition:
+            self.request.response.setStatus(404)
+            return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
 
         transition = base.selected_transition
         workflow = base.selected_workflow
 
         return {
+            "workflow_id": workflow_id,
             "transition": serialize_transition(transition),
             "states_with_this_transition": [
-                s.id for s in base.available_states if transition.id in s.transitions
+                s.id for s in base.available_states if transition.id in getattr(s, 'transitions', ())
             ],
             "available_states": [{'id': s.id, 'title': s.title} for s in base.available_states],
             "available_transitions": [{'id': t.id, 'title': t.title} for t in base.available_transitions],
             "guard_options": {
                 "permissions": base.allowed_guard_permissions,
-                "roles": workflow.getAvailableRoles(),
+                "roles": list(workflow.getAvailableRoles()),
                 "groups": base.getGroups()
             }
         }
@@ -73,7 +121,7 @@ class EditTransition(Service):
 class AddTransition(Service):
     """
     Creates a new transition within a workflow.
-    Endpoint: POST /@workflows/{workflow_id}/@transitions
+    Endpoint: POST /@transitions/{workflow_id}/{transition_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -84,9 +132,22 @@ class AddTransition(Service):
         return self
 
     def reply(self):
+        alsoProvides(self.request, IDisableCSRFProtection)
+        
+        if len(self.params) < 2:
+            self.request.response.setStatus(400)
+            return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
+            
         workflow_id = self.params[0]
+        transition_id = self.params[1]
+        
         base = Base(self.context, self.request, workflow_id=workflow_id)
-        body = json_body(self.request)
+        
+        try:
+            body = json_body(self.request)
+        except Exception as e:
+            self.request.response.setStatus(400)
+            return {"error": f"Invalid JSON payload: {str(e)}"}
 
         if not base.selected_workflow:
             self.request.response.setStatus(404)
@@ -95,37 +156,76 @@ class AddTransition(Service):
         title = body.get('title')
         if not title:
             self.request.response.setStatus(400)
-            return {"error": "A 'title' for the new transition is required."}
+            return {"error": "A 'title' for the new transition is required in the request body."}
 
-        base.authorize()
-        transition_id = title.strip().replace(" ", "_").lower()
-        if transition_id in base.selected_workflow.transitions:
+        # Validate transition_id format
+        if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', transition_id):
+            self.request.response.setStatus(400)
+            return {"error": "Invalid transition ID format. Use only letters, numbers, and underscores."}
+
+        # Check if transition already exists
+        if transition_id in base.selected_workflow.transitions.objectIds():
             self.request.response.setStatus(409)
             return {"error": f"Transition with id '{transition_id}' already exists."}
 
-        workflow = base.selected_workflow
-        workflow.transitions.addTransition(transition_id)
-        new_transition = workflow.transitions[transition_id]
-        new_transition.title = title
+        try:
+            workflow = base.selected_workflow
+            
+            # Create the transition
+            workflow.transitions.addTransition(transition_id)
+            new_transition = workflow.transitions[transition_id]
+            new_transition.title = title
+            
+            # Set description if provided
+            if 'description' in body:
+                new_transition.description = body['description']
+            
+            # Set new_state_id if provided
+            if 'new_state_id' in body:
+                new_state_id = body['new_state_id']
+                if new_state_id in workflow.states.objectIds():
+                    new_transition.new_state_id = new_state_id
+                else:
+                    self.request.response.setStatus(400)
+                    return {"error": f"State '{new_state_id}' does not exist in workflow."}
 
-        clone_from_id = body.get('clone_from_id')
-        if clone_from_id and clone_from_id in workflow.transitions:
-            clone_transition(new_transition, workflow.transitions[clone_from_id])
-        else:
-            # This logic is directly from the old AddTransition class
-            new_transition.actbox_name = title
-            new_transition.actbox_url = f"%(content_url)s/content_status_modify?workflow_action={transition_id}"
-            new_transition.actbox_category = 'workflow'
+            # Clone from existing transition if requested
+            clone_from_id = body.get('clone_from_id')
+            if clone_from_id and clone_from_id in workflow.transitions.objectIds():
+                clone_transition(new_transition, workflow.transitions[clone_from_id])
+            else:
+                # Set default values for core functionality only
+                new_transition.trigger_type = TRIGGER_USER_ACTION
 
-        self.request.response.setStatus(201)
-        return serialize_transition(new_transition)
+            # Add transition to specified states
+            initial_states = body.get('initial_states', [])
+            if initial_states:
+                for state in base.available_states:
+                    if state.id in initial_states:
+                        current_transitions = list(getattr(state, 'transitions', ()))
+                        if transition_id not in current_transitions:
+                            current_transitions.append(transition_id)
+                            state.transitions = tuple(current_transitions)
+
+            # Mark the workflow as modified
+            workflow._p_changed = True
+
+            self.request.response.setStatus(201)
+            return {
+                "status": "success",
+                "transition": serialize_transition(new_transition),
+                "message": _("Transition created successfully")
+            }
+        except Exception as e:
+            self.request.response.setStatus(500)
+            return {"error": f"Failed to create transition: {str(e)}"}
 
 
 @implementer(IPublishTraverse)
-class SaveTransition(Service):
+class UpdateTransition(Service):
     """
     Updates an existing transition from a JSON payload.
-    Endpoint: PATCH /@workflows/{workflow_id}/@transitions/{transition_id}
+    Endpoint: PATCH /@transitions/{workflow_id}/{transition_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -136,60 +236,102 @@ class SaveTransition(Service):
         return self
 
     def reply(self):
-        workflow_id, transition_id = self.params[0], self.params[2]
+        alsoProvides(self.request, IDisableCSRFProtection)
+        
+        if len(self.params) < 2:
+            self.request.response.setStatus(400)
+            return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
+            
+        workflow_id = self.params[0]
+        transition_id = self.params[1]
+        
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
-        body = json_body(self.request)
+        
+        try:
+            body = json_body(self.request)
+        except Exception as e:
+            self.request.response.setStatus(400)
+            return {"error": f"Invalid JSON payload: {str(e)}"}
 
-        if not base.selected_workflow or not base.selected_transition:
+        if not base.selected_workflow:
             self.request.response.setStatus(404)
-            return {"error": "Workflow or Transition not found."}
+            return {"error": f"Workflow '{workflow_id}' not found."}
+            
+        if not base.selected_transition:
+            self.request.response.setStatus(404)
+            return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
 
-        base.authorize()
-        transition = base.selected_transition
+        try:
+            transition = base.selected_transition
+            workflow = base.selected_workflow
 
-        # Update basic properties
-        if 'title' in body:
-            transition.title = body['title']
-        if 'description' in body:
-            transition.description = body['description']
-        if 'new_state_id' in body:
-            transition.new_state_id = body['new_state_id']
-        if 'actbox_name' in body:
-            transition.actbox_name = body['actbox_name']
-        if 'trigger_type' in body:
-            transition.trigger_type = body['trigger_type']
+            # Update basic properties
+            if 'title' in body:
+                transition.title = body['title']
+            if 'description' in body:
+                transition.description = body['description']
+            if 'new_state_id' in body:
+                new_state_id = body['new_state_id']
+                if new_state_id in workflow.states.objectIds():
+                    transition.new_state_id = new_state_id
+                else:
+                    self.request.response.setStatus(400)
+                    return {"error": f"State '{new_state_id}' does not exist in workflow."}
+            if 'trigger_type' in body:
+                trigger_type = body['trigger_type']
+                if trigger_type in [TRIGGER_AUTOMATIC, TRIGGER_USER_ACTION]:
+                    transition.trigger_type = trigger_type
+                else:
+                    self.request.response.setStatus(400)
+                    return {"error": f"Invalid trigger_type. Must be {TRIGGER_AUTOMATIC} or {TRIGGER_USER_ACTION}."}
 
-        # Update guard
-        if 'guard' in body:
-            guard = transition.getGuard()
-            guard_data = body['guard']
-            if 'permissions' in guard_data:
-                guard.permissions = tuple(guard_data['permissions'])
-            if 'roles' in guard_data:
-                guard.roles = tuple(guard_data['roles'])
-            if 'groups' in guard_data:
-                guard.groups = tuple(guard_data['groups'])
-            transition.guard = guard
+            # Update guard settings
+            if 'guard' in body:
+                guard = transition.getGuard()
+                guard_data = body['guard']
+                if 'permissions' in guard_data:
+                    guard.permissions = tuple(guard_data['permissions'])
+                if 'roles' in guard_data:
+                    guard.roles = tuple(guard_data['roles'])
+                if 'groups' in guard_data:
+                    guard.groups = tuple(guard_data['groups'])
+                if 'expr' in guard_data:
+                    guard.expr = guard_data['expr']
+                transition.guard = guard
 
-        # Update which states have this transition
-        if 'states_with_this_transition' in body:
-            new_state_ids = set(body['states_with_this_transition'])
-            for state in base.available_states:
-                has_transition = transition.id in state.transitions
-                should_have_transition = state.id in new_state_ids
-                if should_have_transition and not has_transition:
-                    state.transitions += (transition.id,)
-                elif not should_have_transition and has_transition:
-                    state.transitions = tuple(t for t in state.transitions if t != transition.id)
+            # Update states that have this transition
+            if 'states_with_this_transition' in body:
+                new_state_ids = set(body['states_with_this_transition'])
+                for state in base.available_states:
+                    current_transitions = list(getattr(state, 'transitions', ()))
+                    has_transition = transition_id in current_transitions
+                    should_have_transition = state.id in new_state_ids
+                    
+                    if should_have_transition and not has_transition:
+                        current_transitions.append(transition_id)
+                        state.transitions = tuple(current_transitions)
+                    elif not should_have_transition and has_transition:
+                        current_transitions.remove(transition_id)
+                        state.transitions = tuple(current_transitions)
 
-        return self.reply_no_content()
+            # Mark the workflow as modified
+            workflow._p_changed = True
+
+            return {
+                "status": "success",
+                "transition": serialize_transition(transition),
+                "message": _("Transition updated successfully")
+            }
+        except Exception as e:
+            self.request.response.setStatus(500)
+            return {"error": f"Failed to update transition: {str(e)}"}
 
 
 @implementer(IPublishTraverse)
 class DeleteTransition(Service):
     """
     Deletes a transition and cleans up references.
-    Endpoint: DELETE /@workflows/{workflow_id}/@transitions/{transition_id}
+    Endpoint: DELETE /@transitions/{workflow_id}/{transition_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -200,23 +342,48 @@ class DeleteTransition(Service):
         return self
 
     def reply(self):
-        workflow_id, transition_id = self.params[0], self.params[2]
+        alsoProvides(self.request, IDisableCSRFProtection)
+        
+        if len(self.params) < 2:
+            self.request.response.setStatus(400)
+            return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
+            
+        workflow_id = self.params[0]
+        transition_id = self.params[1]
+        
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
 
-        if not base.selected_workflow or not base.selected_transition:
+        if not base.selected_workflow:
             self.request.response.setStatus(404)
-            return {"error": "Workflow or Transition not found."}
+            return {"error": f"Workflow '{workflow_id}' not found."}
+            
+        if not base.selected_transition:
+            self.request.response.setStatus(404)
+            return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
 
-        base.authorize()
-        # Delete any associated rules (from old DeleteTransition)
-        base.actions.delete_rule_for(base.selected_transition)
+        try:
+            workflow = base.selected_workflow
+            
+            # Delete any action rules associated with this transition
+            base.actions.delete_rule_for(base.selected_transition)
+            
+            # Remove the transition from all states
+            for state in base.available_states:
+                current_transitions = list(getattr(state, 'transitions', ()))
+                if transition_id in current_transitions:
+                    current_transitions.remove(transition_id)
+                    state.transitions = tuple(current_transitions)
+            
+            # Delete the transition
+            workflow.transitions.deleteTransitions([transition_id])
+            
+            # Mark the workflow as modified
+            workflow._p_changed = True
 
-        # Delete the transition itself
-        base.selected_workflow.transitions.deleteTransitions([transition_id])
-
-        # Clean up dangling references in states (from old DeleteTransition)
-        for state in base.available_states:
-            if transition_id in state.transitions:
-                state.transitions = tuple(t for t in state.transitions if t != transition_id)
-
-        return self.reply_no_content()
+            return {
+                "status": "success",
+                "message": _("Transition deleted successfully")
+            }
+        except Exception as e:
+            self.request.response.setStatus(500)
+            return {"error": f"Failed to delete transition: {str(e)}"}
