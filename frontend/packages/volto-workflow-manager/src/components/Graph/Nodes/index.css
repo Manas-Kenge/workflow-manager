@@ -81,3 +81,7 @@
     display: none; /* Hide descriptions on small screens */
   }
 }
+
+.react-flow__attribution {
+  display: none;
+}

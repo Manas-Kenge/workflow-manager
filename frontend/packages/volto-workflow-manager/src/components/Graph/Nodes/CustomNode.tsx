@@ -24,11 +24,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
       data-node-id={id}
       title={data.description || data.label}
     >
-      {/* Target handle - where edges connect TO this node */}
       <Handle
         type="target"
         position={Position.Left}
-        id={`${id}-target`}
         style={{ background: '#555' }}
         isConnectable={true}
       />
@@ -40,11 +38,9 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
         )}
       </div>
 
-      {/* Source handle - where edges connect FROM this node */}
       <Handle
         type="source"
         position={Position.Right}
-        id={`${id}-source`}
         style={{ background: '#555' }}
         isConnectable={true}
       />

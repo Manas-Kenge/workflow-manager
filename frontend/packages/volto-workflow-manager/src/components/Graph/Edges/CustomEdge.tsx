@@ -1,5 +1,5 @@
 import React from 'react';
-import { BezierEdge, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
+import { BaseEdge, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 
 interface WorkflowTransitionEdgeData {
@@ -19,6 +19,7 @@ interface CustomEdgeProps extends EdgeProps {
 
 const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
   const {
+    id,
     sourceX,
     sourceY,
     targetX,
@@ -26,8 +27,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
     sourcePosition,
     targetPosition,
     data,
-    id,
     selected,
+    markerEnd,
+    style,
   } = props;
 
   const [edgePath, labelX, labelY] = getBezierPath({
@@ -42,17 +44,18 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
 
   return (
     <>
-      <BezierEdge
+      <BaseEdge
+        id={id}
         path={edgePath}
-        {...props}
+        markerEnd={markerEnd}
         style={{
+          ...style,
           stroke: data?.highlighted
             ? '#ff6b6b'
             : selected
               ? '#0078d4'
               : '#b1b1b7',
           strokeWidth: data?.highlighted ? 3 : selected ? 2 : 1,
-          ...props.style,
         }}
       />
       {data?.label && (
