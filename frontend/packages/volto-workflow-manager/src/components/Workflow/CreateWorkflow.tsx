@@ -37,7 +37,6 @@ const CreateWorkflow = ({ workflows, onCreate, close }) => {
           marginBottom="size-200"
           UNSAFE_style={{ height: '1px', backgroundColor: '#gray-300' }}
         />
-        {/* Clone From */}
         <View marginBottom="size-300">
           <Heading level={3} marginBottom="size-100">
             Clone from
@@ -57,7 +56,6 @@ const CreateWorkflow = ({ workflows, onCreate, close }) => {
           </Picker>
         </View>
 
-        {/* Workflow Name */}
         <View marginBottom="size-300">
           <Heading level={3} marginBottom="size-100">
             Workflow Name
@@ -75,7 +73,6 @@ const CreateWorkflow = ({ workflows, onCreate, close }) => {
           />
         </View>
 
-        {/* Buttons */}
         <ButtonGroup>
           <Button variant="secondary" onPress={close}>
             Cancel

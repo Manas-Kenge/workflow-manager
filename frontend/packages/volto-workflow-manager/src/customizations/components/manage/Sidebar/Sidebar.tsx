@@ -14,6 +14,7 @@ import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
 import { useLocation } from 'react-router-dom';
+import WorkflowTab from 'volto-workflow-manager/components/Workflow/WorkflowTab';
 import StateTab from 'volto-workflow-manager/components/States/StateTab';
 import TransitionTab from 'volto-workflow-manager/components/Transitions/TransitionTab';
 
@@ -183,11 +184,7 @@ const Sidebar = (props) => {
                         className="tab-wrapper"
                         id="sidebar-workflow"
                       >
-                        <Icon
-                          className="tab-forbidden"
-                          name={forbiddenSVG}
-                          size="48px"
-                        />
+                        <WorkflowTab />
                       </Tab.Pane>
                     ),
                   },

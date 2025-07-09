@@ -3,7 +3,6 @@ import { useAppSelector, useAppDispatch } from '../../types';
 import { useLocation, useHistory, Link } from 'react-router-dom';
 import {
   Button,
-  ButtonGroup,
   Heading,
   Text,
   ProgressCircle,
@@ -12,33 +11,16 @@ import {
   Flex,
   Form,
   Well,
-  Item,
   View,
-  Column,
-  TableHeader,
-  Cell,
-  Row,
-  TableBody,
-  TableView,
-  MenuTrigger,
-  Menu,
-  Dialog,
-  TextField,
-  Content,
 } from '@adobe/react-spectrum';
-import {
-  getWorkflows,
-  addWorkflow,
-  deleteWorkflow,
-  renameWorkflow,
-} from '../../actions';
+import { getWorkflows, addWorkflow } from '../../actions';
 import CreateWorkflow from '../Workflow/CreateWorkflow';
 import WorkflowView from '../Workflow/WorkflowView';
+import WorkflowTable from './WorkflowTable';
 import ThemeProvider from '../../Provider';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import add from '@plone/volto/icons/add.svg';
 import back from '@plone/volto/icons/back.svg';
-import more from '@plone/volto/icons/more.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { createPortal } from 'react-dom';
@@ -54,123 +36,6 @@ const plone_shipped_workflows = [
   'comment_review_workflow',
   'comment_one_state_workflow',
 ];
-
-interface WorkflowItem {
-  id: string;
-  title: string;
-  description: string;
-  assignedTypes: string | null;
-}
-
-const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
-  const dispatch = useAppDispatch();
-  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [workflowToRename, setWorkflowToRename] = useState(null);
-  const [newTitle, setNewTitle] = useState('');
-
-  const workflowItems: WorkflowItem[] = workflows.map((workflow) => ({
-    id: workflow.id,
-    title: workflow.title || workflow.id,
-    description: workflow.description || 'No description available',
-    assignedTypes:
-      workflow.assigned_types?.length > 0
-        ? `Assigned to: ${workflow.assigned_types.join(', ')}`
-        : null,
-  }));
-
-  const handleAction = (key, item) => {
-    if (key === 'edit') {
-      handleWorkflowClick(item.id);
-    } else if (key === 'delete') {
-      dispatch(deleteWorkflow(item.id));
-    } else if (key === 'rename') {
-      setWorkflowToRename(item);
-      setNewTitle(item.title);
-      setRenameDialogOpen(true);
-    }
-  };
-
-  const handleRename = () => {
-    if (workflowToRename) {
-      dispatch(renameWorkflow(workflowToRename.id, newTitle));
-    }
-  };
-
-  return (
-    <>
-      <TableView
-        flex
-        aria-label="Workflow table"
-        onAction={(key) => isClickable && handleWorkflowClick(key)}
-      >
-        <TableHeader>
-          <Column isRowHeader>Title</Column>
-          <Column isRowHeader>Description</Column>
-          <Column align="end">Actions</Column>
-        </TableHeader>
-        <TableBody items={workflowItems}>
-          {(item) => (
-            <Row key={item.id}>
-              <Cell>{item.title}</Cell>
-              <Cell>{item.description}</Cell>
-              <Cell>
-                <MenuTrigger>
-                  <ActionButton aria-label="Workflow actions" isQuiet>
-                    <Icon name={more} size="20px" />
-                  </ActionButton>
-                  <Menu onAction={(key) => handleAction(key, item)}>
-                    <Item key="edit">Edit</Item>
-                    <Item key="rename">Rename</Item>
-                    <Item key="delete">Delete</Item>
-                  </Menu>
-                </MenuTrigger>
-              </Cell>
-            </Row>
-          )}
-        </TableBody>
-      </TableView>
-
-      <DialogTrigger
-        isOpen={renameDialogOpen}
-        onOpenChange={setRenameDialogOpen}
-        isDismissable
-      >
-        <ActionButton isHidden>Hidden Trigger</ActionButton>
-        {(close) => (
-          <Dialog>
-            <Heading>Rename Workflow</Heading>
-            <Content>
-              <Flex direction="column" gap="size-150">
-                <Text>
-                  Enter a new name for workflow "{workflowToRename?.title}"
-                </Text>
-                <TextField
-                  label="New workflow name"
-                  value={newTitle}
-                  onChange={setNewTitle}
-                />
-              </Flex>
-            </Content>
-            <ButtonGroup>
-              <Button variant="secondary" onPress={close}>
-                Cancel
-              </Button>
-              <Button
-                variant="accent"
-                onPress={() => {
-                  handleRename();
-                  close();
-                }}
-              >
-                Rename
-              </Button>
-            </ButtonGroup>
-          </Dialog>
-        )}
-      </DialogTrigger>
-    </>
-  );
-};
 
 const WorkflowControlPanel = (props) => {
   const dispatch = useAppDispatch();

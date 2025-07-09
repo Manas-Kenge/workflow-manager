@@ -36,7 +36,7 @@ class GetWorkflows(Service):
                     for s in workflow.states.objectValues()
                 ],
                 "transitions": [
-                    {"id": t.id, "title": t.title, "new_state": t.new_state_id}
+                    {"id": t.id, "title": t.title, "new_state_id": t.new_state_id}
                     for t in workflow.transitions.objectValues()
                 ],
                 "assigned_types": base.get_assigned_types_for(workflow_id)

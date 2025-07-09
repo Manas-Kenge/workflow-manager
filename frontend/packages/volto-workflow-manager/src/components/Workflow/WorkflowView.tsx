@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import {
   Button,
   ProgressCircle,
@@ -14,8 +13,8 @@ import {
 import TopBar from './WorkflowHeader';
 import WorkflowGraph from '../Graph/WorkflowGraph';
 import '@xyflow/react/dist/style.css';
-import { useHistory, Link } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../../types';
+import { Link } from 'react-router-dom';
+import { useAppSelector } from '../../types';
 import ActionsToolbar from './ActionsToolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import editing from '@plone/volto/icons/editing.svg';
@@ -154,16 +153,15 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
                   />
                 </Link>
                 <Button
-                  id="toolbar-editing-state"
-                  className="editing-state"
-                  aria-label="Add State"
-                  onPress={() => setCreateStateOpen(true)}
+                  id="toolbar-editing-workflow"
+                  className="editing-workflow"
+                  aria-label="Edit workflow"
                 >
                   <Icon
                     name={editing}
                     className="circled"
                     size="30px"
-                    title="editing-state"
+                    title="Edit workflow"
                   />
                 </Button>
               </>

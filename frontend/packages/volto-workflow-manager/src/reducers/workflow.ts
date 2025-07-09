@@ -48,7 +48,6 @@ export interface ValidationErrors {
   initial_state_error: boolean;
 }
 
-// Define the shape of your Redux state
 interface WorkflowReduxState {
   workflows: {
     error: string | null;
