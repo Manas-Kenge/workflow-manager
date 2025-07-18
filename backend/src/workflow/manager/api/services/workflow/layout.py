@@ -1,49 +1,74 @@
-from Products.Five.browser import BrowserView
 import json
 from plone import api
+from plone.restapi.deserializer import json_body
+from plone.restapi.services import Service
+from zope.interface import Interface
+from zope.interface import implementer
+from zope.component import adapter
+from zope.publisher.interfaces import IPublishTraverse
+from Products.CMFPlone.interfaces import IPloneSiteRoot
 
 
-class GraphLayout(BrowserView):
-    """Class to handle the Workflow Manager graph layouts."""
-
+@implementer(IPublishTraverse)
+@adapter(IPloneSiteRoot, Interface)
+class WorkflowLayout(Service):
+    """
+    Accessed via the /@workflow-layout/{workflow_id} endpoint.
+    """
+    
     REGISTRY_KEY = "workflow.manager.layouts"
 
-    def __init__(self, context, request, workflow=None):
+    def __init__(self, context, request):
         super().__init__(context, request)
-        self.workflow = (
-            workflow or self.request.form.get("workflow") or None
-        )
+        self.params = []
 
-        self.layout = {}
-        layouts = self.getLayouts() or {}
+    def publishTraverse(self, request, name):
+        """Captures the workflow_id from the URL path."""
+        self.params.append(name)
+        return self
 
-        if self.workflow not in layouts:
-            layouts[self.workflow] = "{}"
-        else:
-            try:
-                self.layout = json.loads(layouts[self.workflow])
-            except json.JSONDecodeError:
-                self.layout = {}
+    def get(self):
+        if not self.params:
+            self.request.response.setStatus(400)
+            return {"error": "Workflow ID must be provided in the URL."}
 
-    def __call__(self):
-        layout_json = self.request.form.get("layout")
-        if layout_json:
-            try:
-                self.layout = json.loads(layout_json)
-                self.saveLayout()
-            except json.JSONDecodeError:
-                pass  # Optionally log error here
+        workflow_id = self.params[0]
+        all_layouts = self._get_all_layouts_from_registry()
+        layout_json_string = all_layouts.get(workflow_id, '{}')
 
-    def getLayouts(self):
         try:
-            return api.portal.get_registry_record(self.REGISTRY_KEY)
+            layout_data = json.loads(layout_json_string)
+        except json.JSONDecodeError:
+            layout_data = {}
+
+        return {
+            "workflow_id": workflow_id,
+            "layout": layout_data
+        }
+
+    def post(self):
+        if not self.params:
+            self.request.response.setStatus(400)
+            return {"error": "Workflow ID must be provided in the URL."}
+
+        workflow_id = self.params[0]
+        all_layouts = self._get_all_layouts_from_registry()
+        new_layout_data = json_body(self.request)
+
+        all_layouts[workflow_id] = json.dumps(new_layout_data)
+        
+        api.portal.set_registry_record(self.REGISTRY_KEY, all_layouts)
+
+        self.request.response.setStatus(200)
+        return {
+            "status": "success",
+            "message": f"Layout for workflow '{workflow_id}' saved."
+        }
+
+    def _get_all_layouts_from_registry(self):
+        """Helper to safely retrieve the main layouts dictionary."""
+        try:
+            layouts = api.portal.get_registry_record(self.REGISTRY_KEY)
+            return layouts if isinstance(layouts, dict) else {}
         except Exception:
             return {}
-
-    def saveLayout(self):
-        layouts = self.getLayouts() or {}
-        layouts[self.workflow] = json.dumps(self.layout)
-        api.portal.set_registry_record(self.REGISTRY_KEY, layouts)
-
-    def getLayout(self):
-        return json.dumps(self.layout) if self.workflow else False

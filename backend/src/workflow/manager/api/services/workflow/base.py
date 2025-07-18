@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-A stateless helper base class for workflow API services.
-
-This class provides shared business logic and utility methods for accessing
-workflow data. It is initialized by the API service with the relevant IDs
-(workflow, state, etc.) which are extracted from the URL path. This makes
-it a clean, reusable, and testable utility.
-"""
 from AccessControl import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from plone.memoize.view import memoize
