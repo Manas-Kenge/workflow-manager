@@ -11,39 +11,68 @@ from zope.interface import implementer
 from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
 
+def _serialize_workflow(workflow, base):
+    """Serializes a single workflow object into a dictionary."""
+    workflow_base = Base(base.context, base.request, workflow_id=workflow.id)
+    
+    return {
+        "id": workflow.id,
+        "title": workflow.title or workflow.id,
+        "description": getattr(workflow, "description", ""),
+        "initial_state": workflow.initial_state,
+        "states": [
+            {"id": s.id, "title": s.title, "transitions": s.transitions}
+            for s in workflow.states.objectValues()
+        ],
+        "transitions": [
+            {"id": t.id, "title": t.title, "new_state_id": t.new_state_id}
+            for t in workflow.transitions.objectValues()
+        ],
+        "assigned_types": workflow_base.get_assigned_types_for(workflow.id),
+        "context_data": {
+            "managed_permissions": workflow_base.managed_permissions,
+            "available_roles": list(workflow.getAvailableRoles()),
+            "groups": workflow_base.getGroups()
+        }
+    }
 
-@implementer(IExpandableElement)
+@implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class GetWorkflows(Service):
     """
     Lists all available workflows with their detailed configuration.
     Endpoint: GET /@workflows
     """
+    def __init__(self, context, request):
+        super().__init__(context, request)
+        self.params = []
+
+    def publishTraverse(self, request, name):
+        self.params.append(name)
+        return self
+    
     def reply(self):
-        base = Base(self.context, self.request)
-        portal_workflow = base.portal_workflow
-        workflows = []
+        if self.params:
+            workflow_id = self.params[0]
+            base = Base(self.context, self.request, workflow_id=workflow_id)
+            workflow = base.selected_workflow
 
-        for workflow_id in portal_workflow.listWorkflows():
-            workflow = portal_workflow[workflow_id]
-            workflow_info = {
-                "id": workflow_id,
-                "title": workflow.title or workflow_id,
-                "description": getattr(workflow, "description", ""),
-                "initial_state": workflow.initial_state,
-                "states": [
-                    {"id": s.id, "title": s.title, "transitions": s.transitions}
-                    for s in workflow.states.objectValues()
-                ],
-                "transitions": [
-                    {"id": t.id, "title": t.title, "new_state_id": t.new_state_id}
-                    for t in workflow.transitions.objectValues()
-                ],
-                "assigned_types": base.get_assigned_types_for(workflow_id)
-            }
-            workflows.append(workflow_info)
+            if not workflow:
+                self.request.response.setStatus(404)
+                return {"error": f"Workflow '{workflow_id}' not found."}
+            
+            return _serialize_workflow(workflow, base)
 
-        return {"workflows": workflows}
+        else:
+            base = Base(self.context, self.request)
+            portal_workflow = base.portal_workflow
+            workflows = []
+
+            for workflow_id in portal_workflow.listWorkflows():
+                workflow = portal_workflow.get(workflow_id)
+                workflows.append(_serialize_workflow(workflow, base))
+
+            return {"workflows": workflows}
 
 
 @implementer(IExpandableElement)
@@ -51,7 +80,6 @@ class GetWorkflows(Service):
 class AddWorkflow(Service):
     """
     Adds a new workflow by cloning an existing one.
-    Endpoint: POST /@workflows (using @workflow-add service name)
     """
     def reply(self):
         # Disable CSRF protection for REST API service
@@ -88,7 +116,6 @@ class AddWorkflow(Service):
 class DeleteWorkflow(Service):
     """
     Deletes a workflow and its associated transition rules.
-    Endpoint: DELETE /@workflows/{workflow_id} (using @workflow-delete service name)
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -128,10 +155,54 @@ class DeleteWorkflow(Service):
 
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
+class UpdateWorkflow(Service):
+    """
+    Updates properties of a workflow.
+    Endpoint: PATCH /@workflows/{workflow_id}
+    """
+    def __init__(self, context, request):
+        super().__init__(context, request)
+        self.params = []
+
+    def publishTraverse(self, request, name):
+        self.params.append(name)
+        return self
+
+    def reply(self):
+        if not self.params:
+            self.request.response.setStatus(400)
+            return {"error": "No workflow ID provided."}
+
+        workflow_id = self.params[0]
+        base = Base(self.context, self.request, workflow_id=workflow_id)
+        workflow = base.selected_workflow
+
+        if not workflow:
+            self.request.response.setStatus(404)
+            return {"error": f"Workflow '{workflow_id}' not found."}
+
+        data = json_body(self.request)
+        changed = False
+        if 'title' in data:
+            workflow.title = data['title']
+            changed = True
+        if 'description' in data:
+            workflow.description = data['description']
+            changed = True
+
+        if changed:
+            workflow._p_changed = True
+        
+        # Return the full, updated workflow object to the frontend
+        return _serialize_workflow(workflow, base)
+
+
+@implementer(IPublishTraverse)
+@adapter(IWorkflowAware, Interface)
 class UpdateSecuritySettings(Service):
     """
     Triggers a recursive update of role mappings on content objects.
-    Endpoint: POST /@workflows/{workflow_id}/@update-security (using @workflow-update-security service name)
+    Endpoint: POST /@workflows/{workflow_id}/@update-security
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -173,7 +244,7 @@ class UpdateSecuritySettings(Service):
 class AssignWorkflow(Service):
     """
     Assigns a workflow to a specific content type.
-    Endpoint: POST /@workflows/{workflow_id}/@assign (using @workflow-assign service name)
+    Endpoint: POST /@workflows/{workflow_id}/@assign
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -221,7 +292,7 @@ class AssignWorkflow(Service):
 class SanityCheck(Service):
     """
     Performs a sanity check on a workflow.
-    Endpoint: GET /@workflows/{workflow_id}/@sanity-check (using @workflow-sanity-check service name)
+    Endpoint: GET /@workflows/{workflow_id}/@sanity-check
     """
     def __init__(self, context, request):
         super().__init__(context, request)

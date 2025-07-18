@@ -4,6 +4,7 @@ import {
   GET_WORKFLOWS,
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
+  UPDATE_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
@@ -62,7 +63,7 @@ interface WorkflowReduxState {
   operation: {
     error: string | null;
     loading: boolean;
-    result: any; // Simplified - can be different shapes based on operation
+    result: any;
   };
   lastCreatedWorkflowId: string | null;
 }
@@ -207,7 +208,29 @@ export default function workflow(
           result: null,
         },
       };
-
+    // Update Workflow
+    case `${UPDATE_WORKFLOW}_PENDING`:
+      return {
+        ...state,
+        operation: { ...state.operation, loading: true, error: null },
+      };
+    case `${UPDATE_WORKFLOW}_SUCCESS`:
+      const updatedWorkflow = action.result;
+      return {
+        ...state,
+        operation: { ...state.operation, loading: false },
+        workflows: {
+          ...state.workflows,
+          items: state.workflows.items.map((wf) =>
+            wf.id === updatedWorkflow.id ? updatedWorkflow : wf,
+          ),
+        },
+      };
+    case `${UPDATE_WORKFLOW}_FAIL`:
+      return {
+        ...state,
+        operation: { ...state.operation, loading: false, error: action.error },
+      };
     // Update Workflow Security
     case `${UPDATE_WORKFLOW_SECURITY}_PENDING`:
       return {

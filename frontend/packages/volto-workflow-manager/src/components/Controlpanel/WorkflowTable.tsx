@@ -20,7 +20,7 @@ import {
   Text,
 } from '@adobe/react-spectrum';
 import { useState } from 'react';
-import { deleteWorkflow, renameWorkflow } from 'volto-workflow-manager/actions';
+import { deleteWorkflow, updateWorkflow } from 'volto-workflow-manager/actions';
 import { useAppDispatch } from 'volto-workflow-manager/types';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import more from '@plone/volto/icons/more.svg';
@@ -77,7 +77,7 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
 
   const handleConfirmRename = () => {
     if (workflowToRename) {
-      dispatch(renameWorkflow(workflowToRename.id, newTitle));
+      dispatch(updateWorkflow(workflowToRename.id, { title: newTitle }));
     }
   };
 

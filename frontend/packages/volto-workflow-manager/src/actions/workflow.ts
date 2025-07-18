@@ -2,10 +2,10 @@ import {
   GET_WORKFLOWS,
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
+  UPDATE_WORKFLOW,
   ASSIGN_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
   VALIDATE_WORKFLOW,
-  RENAME_WORKFLOW,
 } from '../constants';
 
 export function getWorkflows() {
@@ -45,6 +45,20 @@ export function deleteWorkflow(workflowId: string) {
   };
 }
 
+export function updateWorkflow(
+  workflowId: string,
+  data: { title?: string; description?: string },
+) {
+  return {
+    type: UPDATE_WORKFLOW,
+    request: {
+      op: 'patch',
+      path: `/@workflows/${workflowId}`,
+      data,
+    },
+  };
+}
+
 export function updateWorkflowSecurity(workflowId: string) {
   return {
     type: UPDATE_WORKFLOW_SECURITY,
@@ -75,21 +89,6 @@ export function validateWorkflow(workflowId: string) {
     request: {
       op: 'get',
       path: `/@workflows/${workflowId}/@sanity-check`,
-    },
-  };
-}
-
-export function renameWorkflow(workflowId: string, newTitle: string) {
-  return {
-    type: RENAME_WORKFLOW,
-    request: {
-      op: 'post',
-      path: '/@workflow-rename',
-      data: {
-        'selected-workflow': workflowId,
-        'new-title': newTitle,
-        'form.actions.rename': true,
-      },
     },
   };
 }
