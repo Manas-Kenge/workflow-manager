@@ -14,7 +14,6 @@ export interface AddTransitionPayload {
   clone_from_id?: string | null;
 }
 
-// For PATCH requests, all fields are optional.
 export interface UpdateTransitionPayload {
   title?: string;
   description?: string;
@@ -104,8 +103,6 @@ export function updateTransition(
   return {
     type: UPDATE_TRANSITION,
     request: {
-      // Assuming your middleware maps 'patch' to the PATCH HTTP method.
-      // If not, you may need to use 'post' and a special header depending on the middleware.
       op: 'patch',
       path: `/@transitions/${workflowId}/${transitionId}`,
       data: payload,
@@ -126,7 +123,7 @@ export function deleteTransition(workflowId: string, transitionId: string) {
   return {
     type: DELETE_TRANSITION,
     request: {
-      op: 'del', // Using 'del' to match your workflow example
+      op: 'del',
       path: `/@transitions/${workflowId}/${transitionId}`,
     },
     meta: {

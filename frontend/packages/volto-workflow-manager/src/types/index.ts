@@ -4,24 +4,23 @@ import {
   useSelector,
 } from 'react-redux';
 import type { WorkflowReduxState } from '../reducers/workflow';
-import type { StateReduxState } from '../reducers/state';
 import type { WorkflowState } from '../reducers/workflow';
+import type { StateReduxState } from '../reducers/state';
+import type { TransitionReduxState } from '../reducers/transition';
 
 export type UpdateStatePayload = Partial<Omit<WorkflowState, 'id'>> & {
   is_initial_state?: boolean;
-  // The frontend will send the complete list of states that should have this transition
   states_with_this_transition?: string[];
 };
 
-// Define your root state interface to include both slices
 export interface RootState {
   workflow: WorkflowReduxState;
   state: StateReduxState;
+  transition: TransitionReduxState;
 }
 
-export type AppDispatch = any; // Replace with your actual dispatch type
+export type AppDispatch = any;
 
-// Create typed versions of useSelector and useDispatch hooks
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
