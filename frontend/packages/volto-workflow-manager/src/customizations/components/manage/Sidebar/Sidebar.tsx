@@ -14,9 +14,9 @@ import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
 import { useLocation } from 'react-router-dom';
-import WorkflowTab from 'volto-workflow-manager/components/Workflow/WorkflowTab';
 import StateTab from 'volto-workflow-manager/components/States/StateTab';
 import TransitionTab from 'volto-workflow-manager/components/Transitions/TransitionTab';
+import WorkflowTabWrapper from 'volto-workflow-manager/components/Workflow/WorkflowTabWrapper';
 
 const messages = defineMessages({
   document: {
@@ -184,7 +184,7 @@ const Sidebar = (props) => {
                         className="tab-wrapper"
                         id="sidebar-workflow"
                       >
-                        <WorkflowTab />
+                        <WorkflowTabWrapper />
                       </Tab.Pane>
                     ),
                   },
