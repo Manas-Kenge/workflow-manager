@@ -66,7 +66,7 @@ const WorkflowTabWrapper: React.FC = (workflowId: { workflowId: string }) => {
     }
   }, [currentWorkflow]);
 
-
+  //can use useCallback
   const handleChangeField = (fieldId: string, value: any) => {
     console.log('Field changed:', fieldId, value);
     setFormData((prevData) => ({
@@ -79,9 +79,8 @@ const WorkflowTabWrapper: React.FC = (workflowId: { workflowId: string }) => {
     if (workflowId.workflowId && formData?.title) {
       try {
         await dispatch(updateWorkflow(workflowId.workflowId, formData));
-        console.log('Workflow updated successfully');
       } catch (error) {
-        console.error('Failed to update workflow:', error);
+        return error;
       }
     }
   }, [dispatch, workflowId.workflowId, formData]);
