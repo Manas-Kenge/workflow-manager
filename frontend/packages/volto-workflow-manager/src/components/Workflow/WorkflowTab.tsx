@@ -11,14 +11,14 @@ import BlockDataForm from '@plone/volto/components/manage/Form/BlockDataForm';
 interface WorkflowTabProps {
   schema: any;
   formData: { [key: string]: any };
-  onChangeBlock: (id: string, data: any) => void;
+  onChangeField: (id: string, data: any) => void;
   workflowId: string;
 }
 
 const WorkflowTab: React.FC<WorkflowTabProps> = ({
   schema,
   formData,
-  onChangeBlock,
+  onChangeField,
   workflowId,
 }) => {
   return (
@@ -31,7 +31,7 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
               key={workflowId}
               schema={schema}
               formData={formData}
-              onChangeBlock={onChangeBlock}
+              onChangeField={onChangeField}
               block={workflowId}
             />
           </DisclosurePanel>

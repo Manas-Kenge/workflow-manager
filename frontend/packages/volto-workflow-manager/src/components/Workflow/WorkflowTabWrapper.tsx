@@ -2,11 +2,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Button, Flex, ProgressCircle, View } from '@adobe/react-spectrum';
-import { getWorkflows, updateWorkflow } from '../../actions/workflow';
+import {
+  getWorkflow,
+  getWorkflows,
+  updateWorkflow,
+} from '../../actions/workflow';
 import WorkflowTab from './WorkflowTab';
 import type { WorkflowReduxState } from '../../reducers/workflow';
 import type { StateReduxState } from '../../reducers/state';
 import type { TransitionReduxState } from '../../reducers/transition';
+import workflow from '../../reducers/workflow';
+import { useAppSelector, useAppDispatch } from '../../types';
 
 interface GlobalRootState {
   workflow: WorkflowReduxState;
@@ -37,70 +43,66 @@ const workflowSchema = {
   required: ['title'],
 };
 
-const WorkflowTabWrapper: React.FC = () => {
+const WorkflowTabWrapper: React.FC = (workflowId: { workflowId: string }) => {
   const dispatch = useDispatch();
-  const { workflowId } = useParams<{ workflowId: string }>();
-
-  const { workflow, isLoading, isSaving } = useSelector(
-    (state: GlobalRootState) => {
-      return {
-        workflow: state.workflow.workflows.items.find(
-          (w) => w.id === workflowId,
-        ),
-        isLoading: state.workflow.workflows.loading,
-        isSaving: state.workflow.operation.loading,
-      };
-    },
+  const currentWorkflow = useAppSelector(
+    (state) => state.workflow?.workflow?.currentWorkflow,
   );
-
-  const [formData, setFormData] = useState({ title: '', description: '' });
+  console.log(currentWorkflow);
+  const [formData, setFormData] = useState({
+    title: currentWorkflow?.title || '',
+    description: currentWorkflow?.description || '',
+  });
+  useEffect(() => {
+    if (workflowId.workflowId) dispatch(getWorkflow(workflowId.workflowId));
+  }, [workflowId.workflowId, dispatch]);
 
   useEffect(() => {
-    dispatch(getWorkflows());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (workflow) {
+    if (currentWorkflow) {
       setFormData({
-        title: workflow.title,
-        description: workflow.description,
+        title: currentWorkflow?.title || '',
+        description: currentWorkflow?.description || '',
       });
     }
-  }, [workflow]);
+  }, [currentWorkflow]);
 
-  const handleBlockChange = useCallback((blockId, newData) => {
-    setFormData(newData);
-  }, []);
 
-  const handleSave = () => {
-    if (workflowId) {
-      dispatch(updateWorkflow(workflowId, formData));
-    }
+  const handleChangeField = (fieldId: string, value: any) => {
+    console.log('Field changed:', fieldId, value);
+    setFormData((prevData) => ({
+      ...prevData,
+      [fieldId]: value,
+    }));
   };
 
-  if (isLoading && !workflow) {
-    return (
-      <Flex alignItems="center" justifyContent="center" height="size-2000">
-        <ProgressCircle isIndeterminate aria-label="Loading workflow..." />
-      </Flex>
-    );
-  }
+  const handleSave = useCallback(async () => {
+    if (workflowId.workflowId && formData?.title) {
+      try {
+        await dispatch(updateWorkflow(workflowId.workflowId, formData));
+        console.log('Workflow updated successfully');
+      } catch (error) {
+        console.error('Failed to update workflow:', error);
+      }
+    }
+  }, [dispatch, workflowId.workflowId, formData]);
 
   return (
     <View>
       <WorkflowTab
         schema={workflowSchema}
         formData={formData}
-        onChangeBlock={handleBlockChange}
-        workflowId={workflowId}
+        workflowId={workflowId.workflowId}
+        onChangeField={handleChangeField}
       />
+
       <Flex
         direction="row"
         justifyContent="end"
         marginTop="size-200"
         paddingX="size-200"
       >
-        <Button variant="cta" onPress={handleSave} isPending={isSaving}>
+        {/* Add isPending */}
+        <Button variant="cta" onPress={handleSave}>
           Save
         </Button>
       </Flex>

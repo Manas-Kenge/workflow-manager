@@ -5,6 +5,7 @@ import {
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
   UPDATE_WORKFLOW,
+  GET_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
@@ -50,6 +51,12 @@ export interface ValidationErrors {
 }
 
 interface WorkflowReduxState {
+  workflow: {
+    currentWorkflow: Workflow,
+    error: string | null,
+    loaded: boolean,
+    loading: boolean,
+  };
   workflows: {
     error: string | null;
     items: Workflow[];
@@ -69,6 +76,13 @@ interface WorkflowReduxState {
 }
 
 const initialState: WorkflowReduxState = {
+  workflow:
+  {
+    currentWorkflow: null,
+    error: null,
+    loaded: false,
+    loading: false
+  },
   workflows: {
     error: null,
     items: [],
@@ -208,6 +222,43 @@ export default function workflow(
           result: null,
         },
       };
+
+
+    // Get Workflow
+    case `${GET_WORKFLOW}_PENDING`:
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          error: null,
+          loading: true,
+          loaded: false,
+        }
+      };
+    case `${GET_WORKFLOW}_SUCCESS`:
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          currentWorkflow: action.result,
+          error: null,
+          loaded: true,
+          loading: false,
+        },
+      };
+    case `${GET_WORKFLOW}_FAIL`:
+      return {
+        ...state,
+        workflow: {
+          ...state.workflow,
+          error: action.error || 'Failed to load workflows',
+          currentWorkflow: null,
+          loading: false,
+          loaded: false,
+        },
+      };
+
+
     // Update Workflow
     case `${UPDATE_WORKFLOW}_PENDING`:
       return {
