@@ -1,6 +1,7 @@
 import React, { useState, Fragment, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Tab } from 'semantic-ui-react';
+import { Tab } from 'semantic-ui-react';
+import { Button } from '@plone/components';
 import { useDispatch, useSelector } from 'react-redux';
 import { compose } from 'redux';
 import { withCookies } from 'react-cookie';
@@ -14,9 +15,9 @@ import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
 import { useLocation } from 'react-router-dom';
-import WorkflowTab from 'volto-workflow-manager/components/Workflow/WorkflowTab';
 import StateTab from 'volto-workflow-manager/components/States/StateTab';
 import TransitionTab from 'volto-workflow-manager/components/Transitions/TransitionTab';
+import WorkflowTabWrapper from 'volto-workflow-manager/components/Workflow/WorkflowTabWrapper';
 
 const messages = defineMessages({
   document: {
@@ -66,6 +67,7 @@ const Sidebar = (props) => {
     content,
     documentTab,
     blockTab,
+    id,
     settingsTab,
     orderTab = true,
     workflowTab = true,
@@ -184,7 +186,7 @@ const Sidebar = (props) => {
                         className="tab-wrapper"
                         id="sidebar-workflow"
                       >
-                        <WorkflowTab />
+                        <WorkflowTabWrapper workflowId={id} />
                       </Tab.Pane>
                     ),
                   },

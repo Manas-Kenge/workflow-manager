@@ -1,5 +1,6 @@
 import {
   GET_WORKFLOWS,
+  GET_WORKFLOW,
   ADD_WORKFLOW,
   DELETE_WORKFLOW,
   UPDATE_WORKFLOW,
@@ -28,6 +29,18 @@ export function addWorkflow(cloneFromWorkflow: string, workflowName: string) {
         'clone-from-workflow': cloneFromWorkflow,
         'workflow-name': workflowName,
       },
+    },
+  };
+}
+export function getWorkflow(workflowId: string) {
+  return {
+    type: GET_WORKFLOW,
+    request: {
+      op: 'get',
+      path: `/@workflows/${workflowId}`,
+    },
+    meta: {
+      workflowId,
     },
   };
 }
