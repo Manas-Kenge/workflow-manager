@@ -17,10 +17,10 @@ import { Link } from 'react-router-dom';
 import { useAppSelector } from '../../types';
 import ActionsToolbar from './ActionsToolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
-import editing from '@plone/volto/icons/editing.svg';
+import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
-import Sidebar from '@plone/volto/components/manage/Sidebar/Sidebar';
+import WorkflowSidebar from './WorkflowSidebar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 
@@ -59,11 +59,9 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
       >
         <TopBar workflows={workflows} selectedWorkflowId={workflow.id} />
       </View>
-
       <View padding="size-300" marginBottom="size-300">
         <ActionsToolbar workflowId={workflow.id} />
       </View>
-
       {validation.loading && (
         <View borderRadius="medium" padding="size-300" marginBottom="size-300">
           <Flex alignItems="center" gap="size-200">
@@ -75,7 +73,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           </Flex>
         </View>
       )}
-
       {validation.errors && (
         <DialogTrigger>
           <ActionButton
@@ -112,7 +109,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           )}
         </DialogTrigger>
       )}
-
       <View borderRadius="medium">
         <Grid
           areas={['content']}
@@ -153,15 +149,15 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
                   />
                 </Link>
                 <Button
-                  id="toolbar-editing-workflow"
-                  className="editing-workflow"
-                  aria-label="Edit workflow"
+                  id="toolbar-saving-workflow"
+                  className="saving-workflow"
+                  aria-label="Save workflow"
                 >
                   <Icon
-                    name={editing}
+                    name={save}
                     className="circled"
                     size="30px"
-                    title="Edit workflow"
+                    title="Save workflow"
                   />
                 </Button>
               </>
@@ -169,7 +165,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           />,
           document.getElementById('toolbar'),
         )}
-      {createPortal(<Sidebar />, document.getElementById('sidebar'))}
+      <WorkflowSidebar id={workflow.id} />
     </View>
   );
 };
