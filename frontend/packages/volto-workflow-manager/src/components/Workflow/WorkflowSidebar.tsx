@@ -15,7 +15,7 @@ import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
 import { useLocation } from 'react-router-dom';
-import StateTab from 'volto-workflow-manager/components/States/StateTab';
+import StateTabWrapper from 'volto-workflow-manager/components/States/StateTabWrapper';
 import TransitionTab from 'volto-workflow-manager/components/Transitions/TransitionTab';
 import WorkflowTabWrapper from 'volto-workflow-manager/components/Workflow/WorkflowTabWrapper';
 
@@ -64,6 +64,7 @@ const Sidebar = (props) => {
   const intl = useIntl();
   const {
     cookies,
+    workflowId,
     content,
     documentTab,
     blockTab,
@@ -186,7 +187,7 @@ const Sidebar = (props) => {
                         className="tab-wrapper"
                         id="sidebar-workflow"
                       >
-                        <WorkflowTabWrapper workflowId={id} />
+                        <WorkflowTabWrapper workflowId={workflowId} />
                       </Tab.Pane>
                     ),
                   },
@@ -198,7 +199,7 @@ const Sidebar = (props) => {
                         className="tab-wrapper"
                         id="sidebar-states"
                       >
-                        <StateTab />
+                        <StateTabWrapper workflowId={workflowId} />
                       </Tab.Pane>
                     ),
                   },

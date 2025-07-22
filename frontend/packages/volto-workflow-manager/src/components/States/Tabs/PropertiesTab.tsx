@@ -1,59 +1,59 @@
 import React from 'react';
-import {
-  Checkbox,
-  TextField,
-  TextArea,
-  Heading,
-  View,
-  Content,
-  Text,
-  Flex,
-} from '@adobe/react-spectrum';
+import { Checkbox, Flex, View } from '@adobe/react-spectrum';
+import BlockDataForm from '@plone/volto/components/manage/Form/BlockDataForm';
 
-interface PropertiesTabProps {
+export interface PropertiesData {
   isInitialState: boolean;
   title: string;
   description: string;
-  onToggleInitial: () => void;
-  onChangeTitle: (value: string) => void;
-  onChangeDescription: (value: string) => void;
+}
+
+interface PropertiesTabProps {
+  data: PropertiesData;
+  schema: any;
+  onChange: (newData: PropertiesData) => void;
+  isDisabled: boolean;
+  stateId: string;
 }
 
 const PropertiesTab: React.FC<PropertiesTabProps> = ({
-  isInitialState,
-  title,
-  description,
-  onToggleInitial,
-  onChangeTitle,
-  onChangeDescription,
+  data,
+  schema,
+  onChange,
+  isDisabled,
+  stateId,
 }) => {
-  return (
-    <View
-      borderWidth="thin"
-      borderColor="dark"
-      borderRadius="medium"
-      padding="size-200"
-    >
-      <Heading level={3}>Properties</Heading>
+  const handleFormChange = (fieldId: string, value: any) => {
+    onChange({
+      ...data,
+      [fieldId]: value,
+    });
+  };
 
-      <Flex direction="column" gap="size-200" marginTop="size-200">
-        <Checkbox isSelected={isInitialState} onChange={onToggleInitial}>
+  const handleToggleInitial = () => {
+    onChange({
+      ...data,
+      isInitialState: !data.isInitialState,
+    });
+  };
+
+  return (
+    <View>
+      <Flex direction="column" gap="size-200">
+        <Checkbox
+          isSelected={data.isInitialState}
+          onChange={handleToggleInitial}
+          isDisabled={isDisabled}
+        >
           Initial State
         </Checkbox>
-        <Text UNSAFE_className="discreet" color="gray-500">
-          Should this state be the initial state of the workflow?
-        </Text>
-
-        <TextField
-          label="The title of this State"
-          value={title}
-          onChange={onChangeTitle}
-        />
-
-        <TextArea
-          label="The description of this State"
-          value={description}
-          onChange={onChangeDescription}
+        <BlockDataForm
+          key={stateId}
+          schema={schema}
+          formData={data}
+          onChangeField={handleFormChange}
+          block={stateId}
+          isDisabled={isDisabled}
         />
       </Flex>
     </View>

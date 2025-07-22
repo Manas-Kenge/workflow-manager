@@ -1,68 +1,61 @@
 import React from 'react';
-import { Checkbox } from '@adobe/react-spectrum';
-import {
-  ActionButton,
-  Heading,
-  Content,
-  Text,
-  View,
-  Flex,
-} from '@adobe/react-spectrum';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import add from '@plone/volto/icons/add.svg';
+import { Checkbox, Flex, View, Text } from '@adobe/react-spectrum';
 
-type Transition = {
+export interface TransitionsData {
+  selected: string[];
+}
+
+interface AvailableTransition {
   id: string;
   title: string;
-};
+}
 
 interface TransitionsTabProps {
-  availableTransitions: Transition[];
-  selectedTransitions: string[];
-  onToggleTransition: (transitionId: string) => void;
-  onAddTransitionClick: () => void;
+  data: TransitionsData;
+  availableTransitions: AvailableTransition[];
+  onChange: (newData: TransitionsData) => void;
+  isDisabled: boolean;
 }
 
 const TransitionsTab: React.FC<TransitionsTabProps> = ({
+  data,
   availableTransitions,
-  selectedTransitions,
-  onToggleTransition,
-  onAddTransitionClick,
+  onChange,
+  isDisabled,
 }) => {
-  return (
-    <View
-      borderWidth="thin"
-      borderColor="dark"
-      borderRadius="medium"
-      padding="size-200"
-    >
-      <Heading level={3}>Transitions</Heading>
-      <Content>
-        <Text>Transitions this state can use.</Text>
-      </Content>
+  const handleToggleTransition = (toggledId: string) => {
+    const currentlySelected = data.selected || [];
+    const isSelected = currentlySelected.includes(toggledId);
 
-      <Flex
-        direction="column"
-        gap="size-150"
-        marginTop="size-200"
-        marginBottom="size-200"
-      >
+    let newSelected: string[];
+    if (isSelected) {
+      newSelected = currentlySelected.filter((id) => id !== toggledId);
+    } else {
+      newSelected = [...currentlySelected, toggledId];
+    }
+
+    onChange({ selected: newSelected });
+  };
+
+  if (isDisabled) {
+    return <Text>Select a state to configure its transitions.</Text>;
+  }
+
+  return (
+    <View>
+      <Text>Select the transitions that can be triggered from this state.</Text>
+      <Flex direction="column" gap="size-150" marginTop="size-200">
         {availableTransitions.map((transition) => (
           <Checkbox
             key={transition.id}
-            isSelected={selectedTransitions.includes(transition.id)}
-            onChange={() => onToggleTransition(transition.id)}
-            UNSAFE_className="transition-checkbox"
+            isSelected={data.selected?.includes(transition.id) || false}
+            onChange={() => handleToggleTransition(transition.id)}
+            isDisabled={isDisabled}
           >
             {transition.title}
           </Checkbox>
         ))}
       </Flex>
-
-      <ActionButton onPress={onAddTransitionClick} aria-label="Add transition">
-        <Icon name={add} size="20px" />
-        Add transition
-      </ActionButton>
     </View>
   );
 };

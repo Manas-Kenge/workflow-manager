@@ -165,7 +165,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           />,
           document.getElementById('toolbar'),
         )}
-      <WorkflowSidebar id={workflow.id} />
+      <WorkflowSidebar workflowId={workflow.id} />
     </View>
   );
 };

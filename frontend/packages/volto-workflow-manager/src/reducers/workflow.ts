@@ -52,10 +52,10 @@ export interface ValidationErrors {
 
 interface WorkflowReduxState {
   workflow: {
-    currentWorkflow: Workflow,
-    error: string | null,
-    loaded: boolean,
-    loading: boolean,
+    currentWorkflow: Workflow;
+    error: string | null;
+    loaded: boolean;
+    loading: boolean;
   };
   workflows: {
     error: string | null;
@@ -76,12 +76,11 @@ interface WorkflowReduxState {
 }
 
 const initialState: WorkflowReduxState = {
-  workflow:
-  {
+  workflow: {
     currentWorkflow: null,
     error: null,
     loaded: false,
-    loading: false
+    loading: false,
   },
   workflows: {
     error: null,
@@ -223,7 +222,6 @@ export default function workflow(
         },
       };
 
-
     // Get Workflow
     case `${GET_WORKFLOW}_PENDING`:
       return {
@@ -233,7 +231,7 @@ export default function workflow(
           error: null,
           loading: true,
           loaded: false,
-        }
+        },
       };
     case `${GET_WORKFLOW}_SUCCESS`:
       return {
@@ -257,7 +255,6 @@ export default function workflow(
           loaded: false,
         },
       };
-
 
     // Update Workflow
     case `${UPDATE_WORKFLOW}_PENDING`:
