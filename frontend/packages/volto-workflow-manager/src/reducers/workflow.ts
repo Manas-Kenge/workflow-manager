@@ -64,6 +64,7 @@ interface WorkflowReduxState {
     loading: boolean;
   };
   validation: {
+    error: string | null;
     errors: ValidationErrors | null;
     loading: boolean;
   };
@@ -89,6 +90,7 @@ const initialState: WorkflowReduxState = {
     loading: false,
   },
   validation: {
+    error: null,
     errors: null,
     loading: false,
   },
@@ -368,20 +370,17 @@ export default function workflow(
       return {
         ...state,
         validation: {
-          ...state.validation,
+          ...initialState.validation,
           loading: true,
-          errors: null,
-          error: null,
         },
       };
     case `${VALIDATE_WORKFLOW}_SUCCESS`:
-      // Backend returns { status, workflow, errors, message }
       return {
         ...state,
         validation: {
           ...state.validation,
           loading: false,
-          errors: action.result?.errors || null,
+          errors: action.result.errors,
           error: null,
         },
       };
