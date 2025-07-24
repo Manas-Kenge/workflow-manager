@@ -1,4 +1,5 @@
 import WorkflowControlPanel from './components/Controlpanel/WorkflowPanel';
+import State from './components/States/State';
 import { workflow, state, transition } from './reducers';
 
 const applyConfig = (config) => {
@@ -18,6 +19,11 @@ const applyConfig = (config) => {
     {
       path: '/controlpanel/workflowmanager',
       component: WorkflowControlPanel,
+    },
+    {
+      path: '/**/controlpanel/workflowmanager/example',
+      exact: true,
+      component: State,
     },
   ];
   config.addonReducers = {

@@ -10,8 +10,12 @@ import {
   Row,
   Cell,
   Checkbox,
-  Flex,
 } from '@adobe/react-spectrum';
+import { cloneDeep } from 'lodash';
+
+export interface PermissionRolesData {
+  [permissionName: string]: string[];
+}
 
 interface PermissionInfo {
   name: string;
@@ -19,77 +23,95 @@ interface PermissionInfo {
   description: string;
 }
 
-interface StatePermissionMatrix {
-  [permName: string]: {
-    acquired: boolean;
-    roles: string[];
-  };
-}
-
 interface PermissionRolesTabProps {
+  data: PermissionRolesData;
   managedPermissions: PermissionInfo[];
   availableRoles: string[];
-  permissions: StatePermissionMatrix;
-  onTogglePermissionAcquire: (permName: string) => void;
-  onToggleRolePermission: (permName: string, role: string) => void;
+  onChange: (newData: PermissionRolesData) => void;
+  isDisabled: boolean;
 }
 
 const PermissionRolesTab: React.FC<PermissionRolesTabProps> = ({
+  data,
   managedPermissions,
   availableRoles,
-  permissions,
-  onTogglePermissionAcquire,
-  onToggleRolePermission,
+  onChange,
+  isDisabled,
 }) => {
+  if (isDisabled) {
+    return <Text>Select a state to configure permission roles.</Text>;
+  }
+
+  const tableRows = availableRoles.map((roleName) => ({
+    id: roleName,
+    name: roleName,
+  }));
+
+  const tableColumns = [
+    { key: 'role', name: 'Role' },
+    ...managedPermissions.map((p) => ({ key: p.perm, name: p.name })),
+  ];
+
+  const handleToggleRolePermission = (permissionName: string, role: string) => {
+    const newData = cloneDeep(data);
+    if (!newData[permissionName]) {
+      newData[permissionName] = [];
+    }
+    const roles = newData[permissionName];
+    const roleIndex = roles.indexOf(role);
+
+    if (roleIndex > -1) {
+      roles.splice(roleIndex, 1);
+    } else {
+      roles.push(role);
+    }
+    onChange(newData);
+  };
+
   return (
     <View>
       <Heading level={3}>Permission Roles</Heading>
-      <Text color="gray-500" marginBottom="size-200">
-        Permissions these roles have in this state.
-      </Text>
+      <Text>Select the permissions that each role has in this state.</Text>
 
-      <TableView aria-label="Permission Role Matrix" density="compact">
-        <TableHeader>
-          <Column key="role" allowsResizing>
-            Role
-          </Column>
-          {managedPermissions.map((perm) => (
-            <Column key={perm.name} allowsResizing>
-              {perm.name}
-            </Column>
-          ))}
+      <TableView
+        aria-label="Permission Roles Matrix"
+        density="compact"
+        marginTop="size-200"
+        flex
+      >
+        <TableHeader columns={tableColumns}>
+          {(column) => <Column key={column.key}>{column.name}</Column>}
         </TableHeader>
 
-        <TableBody>
-          {/* Acquired row */}
-          <Row key="acquired">
-            <Cell>Acquired</Cell>
-            {managedPermissions.map((perm) => (
-              <Cell key={perm.name}>
-                <Checkbox
-                  isSelected={permissions[perm.name]?.acquired || false}
-                  onChange={() => onTogglePermissionAcquire(perm.name)}
-                  aria-label={`Acquire ${perm.name}`}
-                />
-              </Cell>
-            ))}
-          </Row>
-
-          {/* Role rows */}
-          {availableRoles.map((role) => (
-            <Row key={role}>
-              <Cell>{role}</Cell>
-              {managedPermissions.map((perm) => (
-                <Cell key={`${role}-${perm.name}`}>
-                  <Checkbox
-                    isSelected={permissions[perm.name]?.roles.includes(role)}
-                    onChange={() => onToggleRolePermission(perm.name, role)}
-                    aria-label={`${role} can ${perm.name}`}
-                  />
-                </Cell>
-              ))}
+        <TableBody items={tableRows}>
+          {(
+            item, // `item` is now an object: { id: 'Manager', name: 'Manager' }
+          ) => (
+            <Row key={item.id}>
+              {(columnKey) => {
+                if (columnKey === 'role') {
+                  // Display the name from the row item object
+                  return <Cell>{item.name}</Cell>;
+                }
+                const permissionName = columnKey as string;
+                return (
+                  <Cell>
+                    <Checkbox
+                      // Use item.id (the role name) for the logic check
+                      isSelected={
+                        data[permissionName]?.includes(item.id) || false
+                      }
+                      onChange={() =>
+                        handleToggleRolePermission(permissionName, item.id)
+                      }
+                      aria-label={`${item.name} has permission ${permissionName}`}
+                      isDisabled={isDisabled}
+                    />
+                  </Cell>
+                );
+              }}
             </Row>
-          ))}
+          )}
         </TableBody>
       </TableView>
     </View>

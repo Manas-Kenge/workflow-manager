@@ -1565,6 +1565,9 @@ importers:
       '@xyflow/react':
         specifier: ^12.6.4
         version: 12.6.4(@types/react@18.3.22)(immer@10.1.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
       lucide-react:
         specifier: ^0.511.0
         version: 0.511.0(react@18.2.0)
