@@ -20,6 +20,7 @@ import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
+import clear from '@plone/volto/icons/clear.svg';
 import ThemeProvider from '../../Provider';
 import { listStates, updateState } from '../../actions/state';
 import { getWorkflows } from '../../actions/workflow';
@@ -263,15 +264,12 @@ const State: React.FC = (props) => {
             hideDefaultViewButtons
             inner={
               <>
-                <Link
-                  to={`/controlpanel/workflowmanager/${workflowId}`}
-                  className="item"
-                >
+                <Link to="/controlpanel/workflowmanager" className="cancel">
                   <Icon
-                    name={back}
+                    name={clear}
                     className="circled"
                     size="30px"
-                    title="Back to Workflow"
+                    title="Cancel"
                   />
                 </Link>
                 <Button

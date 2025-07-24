@@ -150,7 +150,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
                   />
                 </Link>
                 <Link
-                  to="/controlpanel/workflowmanager/example"
+                  to={`/controlpanel/workflowmanager/${workflowId}/settings`}
                   className="settings"
                 >
                   <Icon

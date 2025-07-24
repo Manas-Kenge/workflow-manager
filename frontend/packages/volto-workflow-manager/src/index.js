@@ -14,16 +14,18 @@ const applyConfig = (config) => {
       title: 'Workflow Manager',
     },
   ];
+
   config.addonRoutes = [
     ...config.addonRoutes,
     {
-      path: '/controlpanel/workflowmanager',
-      component: WorkflowControlPanel,
-    },
-    {
-      path: '/**/controlpanel/workflowmanager/example',
+      path: '/controlpanel/workflowmanager/:workflowId/settings',
       exact: true,
       component: State,
+    },
+    {
+      path: '/controlpanel/workflowmanager',
+      exact: true,
+      component: WorkflowControlPanel,
     },
   ];
   config.addonReducers = {
@@ -38,5 +40,6 @@ const applyConfig = (config) => {
   };
   return config;
 };
+``;
 
 export default applyConfig;
