@@ -1,11 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import {
-  ProgressCircle,
-  Button,
   View,
-  Content,
   Heading,
   Flex,
   Picker,
@@ -14,174 +9,75 @@ import {
   TabList,
   TabPanels,
 } from '@adobe/react-spectrum';
-import { createPortal } from 'react-dom';
-import { useClient } from '@plone/volto/hooks/client/useClient';
-import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import save from '@plone/volto/icons/save.svg';
-import back from '@plone/volto/icons/back.svg';
-import clear from '@plone/volto/icons/clear.svg';
-import ThemeProvider from '../../Provider';
-import { listStates, updateState } from '../../actions/state';
-import { getWorkflows } from '../../actions/workflow';
-import { listTransitions } from '../../actions/transition';
-import PropertiesTab, {
-  type PropertiesData,
-} from '../States/Tabs/PropertiesTab';
-import TransitionsTab, {
-  type TransitionsData,
-} from '../States/Tabs/TransitionsTab';
-import PermissionRolesTab, {
-  type PermissionRolesData,
-} from '../States/Tabs/PermissionRolesTab';
-import GroupRolesTab, {
-  type GroupRolesData,
-} from '../States/Tabs/GroupRolesTab';
-import type { WorkflowReduxState } from '../../reducers/workflow';
-import type { StateReduxState } from '../../reducers/state';
-import type { TransitionReduxState } from '../../reducers/transition';
-
-interface GlobalRootState {
-  workflow: WorkflowReduxState;
-  state: StateReduxState;
-  transition: TransitionReduxState;
-}
-
-export interface StateData {
-  properties: PropertiesData;
-  transitions: TransitionsData;
-  permissions: PermissionRolesData;
-  groupRoles: GroupRolesData;
-}
+import PropertiesTab from '../States/Tabs/PropertiesTab';
+import TransitionsTab from '../States/Tabs/TransitionsTab';
+import PermissionRolesTab from '../States/Tabs/PermissionRolesTab';
+import GroupRolesTab from '../States/Tabs/GroupRolesTab';
+import type { StateData } from '../Workflow/WorkflowSettings';
 
 const propertiesSchema = {
   title: 'State Properties',
   fieldsets: [
-    { id: 'default', title: 'Default', fields: ['title', 'description'] },
+    {
+      id: 'default',
+      title: 'Default',
+      fields: ['title', 'description', 'isInitialState'],
+    },
   ],
   properties: {
-    title: { title: 'Title', type: 'string' },
-    description: { title: 'Description', type: 'string', widget: 'textarea' },
+    title: {
+      title: 'Title',
+      type: 'string',
+    },
+    description: {
+      title: 'Description',
+      type: 'string',
+      widget: 'textarea',
+    },
+    isInitialState: {
+      title: 'Initial State',
+      description: 'Should this state be the initial state of the workflow?',
+      type: 'boolean',
+    },
   },
   required: ['title'],
 };
 
-const State: React.FC = (props) => {
-  const { workflowId } = useParams<{ workflowId: string }>();
-  //   const workflowId = 'intra';
-  const dispatch = useDispatch();
-  const isClient = useClient();
+interface StateProps {
+  states: any[];
+  selectedStateId: string | null;
+  onStateSelect: (key: string) => void;
+  localStateData: StateData | null;
+  onStateChange: (newState: Partial<StateData>) => void;
+  availableTransitions: any[];
+  currentWorkflow: any;
+}
 
-  const [selectedStateId, setSelectedStateId] = useState<string | null>(null);
-  const [localStateData, setLocalStateData] = useState<StateData | null>(null);
-
-  const {
-    statesInfo,
-    isLoadingStates,
-    currentWorkflow,
-    isLoadingWorkflows,
-    transitionsInfo,
-    isLoadingTransitions,
-    isSaving,
-    saveError,
-  } = useSelector((state: GlobalRootState) => ({
-    statesInfo: state.state.list,
-    isLoadingStates: state.state.list.loading,
-    currentWorkflow: state.workflow.workflows.items.find(
-      (w) => w.id === workflowId,
-    ),
-    isLoadingWorkflows: state.workflow.workflows.loading,
-    transitionsInfo: state.transition.list,
-    isLoadingTransitions: state.transition.list.loading,
-    isSaving: state.state.update.loading,
-    saveError: state.state.update.error,
-  }));
-
-  useEffect(() => {
-    if (workflowId) {
-      dispatch(listStates(workflowId));
-      dispatch(getWorkflows());
-      dispatch(listTransitions(workflowId));
-    }
-  }, [dispatch, workflowId]);
-
-  useEffect(() => {
-    const currentState = statesInfo.data?.states.find(
-      (s) => s.id === selectedStateId,
-    );
-    if (currentState && currentWorkflow) {
-      setLocalStateData({
-        properties: {
-          title: currentState.title || '',
-          description: currentState.description || '',
-          isInitialState: currentWorkflow.initial_state === currentState.id,
-        },
-        transitions: {
-          selected: currentState.transitions || [],
-        },
-        permissions: currentState.permission_roles || {},
-        groupRoles: currentState.group_roles || {},
-      });
-    } else {
-      setLocalStateData(null);
-    }
-  }, [selectedStateId, statesInfo.data, currentWorkflow]);
-
-  const handleStateChange = useCallback((newState: Partial<StateData>) => {
-    setLocalStateData((prevState) => {
-      if (!prevState) return null;
-      return { ...prevState, ...newState };
-    });
-  }, []);
-
-  const handleSave = () => {
-    if (!localStateData || !workflowId || !selectedStateId) return;
-    const { properties, transitions } = localStateData;
-    const payload = {
-      title: properties.title,
-      description: properties.description,
-      is_initial_state: properties.isInitialState,
-      transitions: transitions.selected,
-      permission_roles: permissions,
-      group_roles: groupRoles,
-    };
-    dispatch(updateState(workflowId, selectedStateId, payload));
-  };
-
+const State: React.FC<StateProps> = ({
+  states,
+  selectedStateId,
+  onStateSelect,
+  localStateData,
+  onStateChange,
+  availableTransitions,
+  currentWorkflow,
+}) => {
   const isDisabled = !localStateData;
-  const isLoading = isLoadingWorkflows || isLoadingStates;
-
-  if (isLoading && !statesInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
-  }
 
   return (
-    <View width="100%" padding="size-400">
-      <Heading level={1}>Editing States for "{currentWorkflow?.title}"</Heading>
-
+    <View>
       <Flex direction="column" gap="size-200" marginY="size-300">
         <Heading level={3}>Configure a State</Heading>
         <Picker
           label="Select a state to edit"
           placeholder="Choose a state..."
-          items={statesInfo.data?.states || []}
+          items={states || []}
           selectedKey={selectedStateId}
-          onSelectionChange={(key) => setSelectedStateId(key as string)}
+          onSelectionChange={(key) => onStateSelect(key as string)}
         >
           {(item) => <Item key={item.id}>{item.title}</Item>}
         </Picker>
       </Flex>
-
-      {saveError && (
-        <View
-          backgroundColor="negative"
-          padding="size-100"
-          borderRadius="medium"
-        >
-          <Heading level={4}>Save Failed</Heading>
-          <Content>{saveError}</Content>
-        </View>
-      )}
 
       <Tabs aria-label="State Configuration" marginTop="size-300">
         <TabList>
@@ -202,9 +98,7 @@ const State: React.FC = (props) => {
                   }
                 }
                 schema={propertiesSchema}
-                onChange={(newData) =>
-                  handleStateChange({ properties: newData })
-                }
+                onChange={(newData) => onStateChange({ properties: newData })}
                 isDisabled={isDisabled}
                 stateId={selectedStateId || 'no-state-selected'}
               />
@@ -214,10 +108,8 @@ const State: React.FC = (props) => {
             <View padding="size-200">
               <TransitionsTab
                 data={localStateData?.transitions || { selected: [] }}
-                availableTransitions={transitionsInfo.data?.transitions || []}
-                onChange={(newData) =>
-                  handleStateChange({ transitions: newData })
-                }
+                availableTransitions={availableTransitions || []}
+                onChange={(newData) => onStateChange({ transitions: newData })}
                 isDisabled={isDisabled}
               />
             </View>
@@ -232,9 +124,7 @@ const State: React.FC = (props) => {
                 availableRoles={
                   currentWorkflow?.context_data?.available_roles || []
                 }
-                onChange={(newData) =>
-                  handleStateChange({ permissions: newData })
-                }
+                onChange={(newData) => onStateChange({ permissions: newData })}
                 isDisabled={isDisabled}
               />
             </View>
@@ -247,51 +137,15 @@ const State: React.FC = (props) => {
                 availableRoles={
                   currentWorkflow?.context_data?.available_roles || []
                 }
-                onChange={(newData) =>
-                  handleStateChange({ groupRoles: newData })
-                }
+                onChange={(newData) => onStateChange({ groupRoles: newData })}
                 isDisabled={isDisabled}
               />
             </View>
           </Item>
         </TabPanels>
       </Tabs>
-
-      {isClient &&
-        createPortal(
-          <Toolbar
-            pathname={props.pathname}
-            hideDefaultViewButtons
-            inner={
-              <>
-                <Link to="/controlpanel/workflowmanager" className="cancel">
-                  <Icon
-                    name={clear}
-                    className="circled"
-                    size="30px"
-                    title="Cancel"
-                  />
-                </Link>
-                <Button
-                  variant="cta"
-                  onPress={handleSave}
-                  isPending={isSaving}
-                  isDisabled={isDisabled || isSaving}
-                >
-                  <Icon
-                    name={save}
-                    className="circled"
-                    size="30px"
-                    title="Save State"
-                  />
-                </Button>
-              </>
-            }
-          />,
-          document.getElementById('toolbar'),
-        )}
     </View>
   );
 };
 
-export default ThemeProvider(State);
+export default State;
