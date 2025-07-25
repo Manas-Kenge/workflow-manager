@@ -19,6 +19,7 @@ import ActionsToolbar from './ActionsToolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
+import settings from '@plone/volto/icons/settings.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import WorkflowSidebar from './WorkflowSidebar';
 import { createPortal } from 'react-dom';
@@ -146,6 +147,18 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
                     className="circled"
                     size="30px"
                     title="back"
+                  />
+                </Link>
+                <Link
+                  to={`/controlpanel/workflowmanager/${workflowId}/settings`}
+                  className="settings"
+                >
+                  <Icon
+                    name={settings}
+                    className="circled"
+                    aria-label="Workflow Settings"
+                    size="30px"
+                    title="Workflow Settings"
                   />
                 </Link>
                 <Button

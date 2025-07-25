@@ -11,64 +11,101 @@ import {
   Cell,
   Checkbox,
 } from '@adobe/react-spectrum';
+import { cloneDeep } from 'lodash';
+
+export interface GroupRolesData {
+  [groupId: string]: string[];
+}
 
 interface GroupInfo {
   id: string;
-}
-
-interface GroupRolesMatrix {
-  [groupId: string]: {
-    [role: string]: boolean;
-  };
+  title: string;
 }
 
 interface GroupRolesTabProps {
-  availableRoles: string[];
+  data: GroupRolesData;
   groups: GroupInfo[];
-  groupRoles: GroupRolesMatrix;
-  onToggleGroupRole: (groupId: string, role: string) => void;
+  availableRoles: string[];
+  onChange: (newData: GroupRolesData) => void;
+  isDisabled: boolean;
 }
 
 const GroupRolesTab: React.FC<GroupRolesTabProps> = ({
-  availableRoles,
+  data,
   groups,
-  groupRoles,
-  onToggleGroupRole,
+  availableRoles,
+  onChange,
+  isDisabled,
 }) => {
+  if (isDisabled) {
+    return <Text>Select a state to configure group roles.</Text>;
+  }
+
+  const tableRows = availableRoles.map((roleName) => ({
+    id: roleName,
+    name: roleName,
+  }));
+
+  const tableColumns = [
+    { key: 'role', name: 'Role' },
+    ...groups.map((g) => ({ key: g.id, name: g.title })),
+  ];
+
+  const handleToggleGroupRole = (groupId: string, role: string) => {
+    const newData = cloneDeep(data);
+    if (!newData[groupId]) {
+      newData[groupId] = [];
+    }
+
+    const roles = newData[groupId];
+    const roleIndex = roles.indexOf(role);
+
+    if (roleIndex > -1) {
+      roles.splice(roleIndex, 1);
+    } else {
+      roles.push(role);
+    }
+    onChange(newData);
+  };
+
   return (
     <View>
       <Heading level={3}>Group Roles</Heading>
-      <Text color="gray-500" marginBottom="size-200">
-        The local roles that are assigned to these groups in this state.
+      <Text>
+        Select the local roles that are assigned to each group in this state.
       </Text>
 
-      <TableView aria-label="Group Roles Matrix" density="compact">
-        <TableHeader>
-          <Column key="role" allowsResizing>
-            Role
-          </Column>
-          {groups.map((group) => (
-            <Column key={group.id} allowsResizing>
-              {group.id}
-            </Column>
-          ))}
+      <TableView
+        aria-label="Group Roles Matrix"
+        density="compact"
+        marginTop="size-200"
+        flex
+      >
+        <TableHeader columns={tableColumns}>
+          {(column) => <Column key={column.key}>{column.name}</Column>}
         </TableHeader>
 
-        <TableBody>
-          {availableRoles.map((role) => (
-            <Row key={role}>
-              <Cell>{role}</Cell>
-              {groups.map((group) => (
-                <Cell key={`${group.id}-${role}`}>
-                  <Checkbox
-                    isSelected={groupRoles[group.id]?.[role] || false}
-                    onChange={() => onToggleGroupRole(group.id, role)}
-                    aria-label={`${group.id} has role ${role}`}
-                  />
-                </Cell>
-              ))}
+        <TableBody items={tableRows}>
+          {(item) => (
+            <Row key={item.id}>
+              {(columnKey) => {
+                if (columnKey === 'role') {
+                  return <Cell>{item.name}</Cell>;
+                }
+                const groupId = columnKey as string;
+                return (
+                  <Cell>
+                    <Checkbox
+                      isSelected={data[groupId]?.includes(item.id) || false}
+                      onChange={() => handleToggleGroupRole(groupId, item.id)}
+                      aria-label={`${groupId} has role ${item.name}`}
+                      isDisabled={isDisabled}
+                    />
+                  </Cell>
+                );
+              }}
             </Row>
-          ))}
+          )}
         </TableBody>
       </TableView>
     </View>
