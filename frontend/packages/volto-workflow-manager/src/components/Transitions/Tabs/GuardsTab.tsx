@@ -6,7 +6,6 @@ import {
   Flex,
   ListView,
   Item,
-  TextField,
 } from '@adobe/react-spectrum';
 
 export interface GuardsData {
@@ -16,10 +15,7 @@ export interface GuardsData {
   expr: string;
 }
 
-interface RoleInfo {
-  id: string;
-  title: string;
-}
+// Contextual data shapes, passed in as props
 interface GroupInfo {
   id: string;
   title: string;
@@ -55,6 +51,10 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
     const selectedIds = keys === 'all' ? [] : Array.from(keys).map(String);
     onChange({ ...data, [property]: selectedIds });
   };
+
+  if (isDisabled) {
+    return <Text>Select a transition to configure its guards.</Text>;
+  }
 
   return (
     <View>
@@ -112,17 +112,6 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
           </ListView>
         </View>
       </Flex>
-
-      <View marginTop="size-300">
-        <TextField
-          label="TAL Expression"
-          description="An advanced condition written in TAL. Leave blank if not needed."
-          value={data.expr}
-          onChange={(value) => onChange({ ...data, expr: value })}
-          isDisabled={isDisabled}
-          width="100%"
-        />
-      </View>
     </View>
   );
 };
