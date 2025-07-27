@@ -11,7 +11,6 @@ import {
   Heading,
   ProgressCircle,
   Flex,
-  Content,
   Picker,
 } from '@adobe/react-spectrum';
 import { createPortal } from 'react-dom';
@@ -106,7 +105,11 @@ const WorkflowSettings: React.FC = (props) => {
     const currentTransition = transitionsInfo.data?.transitions.find(
       (t) => t.id === selectedTransitionId,
     );
-    if (currentTransition) {
+    const allStates = statesInfo.data?.states;
+    if (currentTransition && allStates) {
+      const sourceStateIds = allStates
+        .filter((state) => state.transitions.includes(currentTransition.id))
+        .map((state) => state.id);
       setLocalTransitionData({
         properties: {
           title: currentTransition.title || '',
@@ -114,11 +117,20 @@ const WorkflowSettings: React.FC = (props) => {
           new_state_id: currentTransition.new_state_id || null,
           trigger_type: currentTransition.trigger_type === 0,
         },
+        guards: {
+          roles: currentTransition.guard?.roles || [],
+          groups: currentTransition.guard?.groups || [],
+          permissions: currentTransition.guard?.permissions || [],
+          expr: currentTransition.guard?.expr || '',
+        },
+        sourceStates: {
+          selected: sourceStateIds,
+        },
       });
     } else {
       setLocalTransitionData(null);
     }
-  }, [selectedTransitionId, transitionsInfo.data]);
+  }, [selectedTransitionId, transitionsInfo.data, statesInfo.data]);
 
   const handleStateChange = useCallback((newState: Partial<StateData>) => {
     setLocalStateData((prevState) => ({ ...prevState, ...newState }));
@@ -131,37 +143,37 @@ const WorkflowSettings: React.FC = (props) => {
     [],
   );
 
-  const handleSaveState = () => {
-    if (!localStateData || !workflowId || !selectedStateId) return;
-    const { properties, transitions, permissions, groupRoles } = localStateData;
-    const payload = {
-      title: properties.title,
-      description: properties.description,
-      is_initial_state: properties.isInitialState,
-      transitions: transitions.selected,
-      permission_roles: permissions,
-      group_roles: groupRoles,
-    };
-    dispatch(updateState(workflowId, selectedStateId, payload));
-  };
-
-  const handleSaveTransition = () => {
-    if (!localTransitionData || !workflowId || !selectedTransitionId) return;
-    const { properties } = localTransitionData;
-    const payload = {
-      title: properties.title,
-      description: properties.description,
-      new_state_id: properties.new_state_id,
-      trigger_type: properties.trigger_type,
-    };
-    dispatch(updateTransition(workflowId, selectedTransitionId, payload));
-  };
-
   const handleSave = () => {
     if (activeTab === 'states') {
-      handleSaveState();
+      if (!localStateData || !workflowId || !selectedStateId) return;
+      const { properties, transitions, permissions, groupRoles } =
+        localStateData;
+      const payload = {
+        title: properties.title,
+        description: properties.description,
+        is_initial_state: properties.isInitialState,
+        transitions: transitions.selected,
+        permission_roles: permissions,
+        group_roles: groupRoles,
+      };
+      dispatch(updateState(workflowId, selectedStateId, payload));
     } else if (activeTab === 'transitions') {
-      handleSaveTransition();
+      if (!localTransitionData || !workflowId || !selectedTransitionId) return;
+      const { properties, guards, sourceStates } = localTransitionData;
+      const payload = {
+        title: properties.title,
+        description: properties.description,
+        new_state_id: properties.new_state_id,
+        trigger_type: properties.trigger_type ? 0 : 1,
+        guard: {
+          roles: guards.roles,
+          groups: guards.groups,
+          permissions: guards.permissions,
+          expr: guards.expr,
+        },
+        states_with_this_transition: sourceStates.selected,
+      };
+      dispatch(updateTransition(workflowId, selectedTransitionId, payload));
     }
   };
 
@@ -219,6 +231,13 @@ const WorkflowSettings: React.FC = (props) => {
                 onTransitionChange={handleTransitionChange}
                 isDisabled={!selectedTransitionId}
                 availableStates={statesInfo.data?.states || []}
+                availableRoles={
+                  currentWorkflow?.context_data?.available_roles || []
+                }
+                availableGroups={currentWorkflow?.context_data?.groups || []}
+                availablePermissions={
+                  currentWorkflow?.context_data?.managed_permissions || []
+                }
               />
             </View>
           </Item>

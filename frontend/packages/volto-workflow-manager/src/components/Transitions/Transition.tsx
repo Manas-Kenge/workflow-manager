@@ -9,9 +9,14 @@ import {
   Content,
 } from '@adobe/react-spectrum';
 import PropertiesTab, { type PropertiesData } from './Tabs/PropertiesTab';
+import GuardsTab, { type GuardsData } from './Tabs/GuardsTab';
+import SourceStatesTab, { type SourceStatesData } from './Tabs/SourceStatesTab';
+import ActionsTab from './Tabs/ActionsTab';
 
 export interface TransitionData {
   properties: PropertiesData;
+  guards: GuardsData;
+  sourceStates: SourceStatesData;
 }
 
 interface TransitionProps {
@@ -70,6 +75,14 @@ const Transition: React.FC<TransitionProps> = ({
     onTransitionChange({ properties: newPropertiesData });
   };
 
+  const handleGuardsChange = (newGuardsData: GuardsData) => {
+    onTransitionChange({ guards: newGuardsData });
+  };
+
+  const handleSourceStatesChange = (newSourceStatesData: SourceStatesData) => {
+    onTransitionChange({ sourceStates: newSourceStatesData });
+  };
+
   if (isDisabled) {
     return (
       <View padding="size-200">
@@ -85,6 +98,9 @@ const Transition: React.FC<TransitionProps> = ({
     <Tabs aria-label="Transition Configuration" marginTop="size-300">
       <TabList>
         <Item key="properties">Properties</Item>
+        <Item key="guards">Guards</Item>
+        <Item key="source-states">Source States</Item>
+        <Item key="actions">Actions</Item>
       </TabList>
       <TabPanels>
         <Item key="properties">
@@ -102,6 +118,40 @@ const Transition: React.FC<TransitionProps> = ({
               onChange={handlePropertiesChange}
               isDisabled={isDisabled}
             />
+          </View>
+        </Item>
+        <Item key="guards">
+          <View padding="size-200">
+            <GuardsTab
+              data={
+                transitionData?.guards || {
+                  roles: [],
+                  groups: [],
+                  permissions: [],
+                  expr: '',
+                }
+              }
+              availableRoles={availableRoles}
+              availableGroups={availableGroups}
+              availablePermissions={availablePermissions}
+              onChange={handleGuardsChange}
+              isDisabled={isDisabled}
+            />
+          </View>
+        </Item>
+        <Item key="source-states">
+          <View padding="size-200">
+            <SourceStatesTab
+              data={transitionData?.sourceStates || { selected: [] }}
+              availableStates={availableStates}
+              onChange={handleSourceStatesChange}
+              isDisabled={isDisabled}
+            />
+          </View>
+        </Item>
+        <Item key="actions">
+          <View padding="size-200">
+            <ActionsTab />
           </View>
         </Item>
       </TabPanels>
