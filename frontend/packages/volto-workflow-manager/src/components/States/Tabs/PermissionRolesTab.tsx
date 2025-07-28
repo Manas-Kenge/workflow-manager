@@ -84,20 +84,16 @@ const PermissionRolesTab: React.FC<PermissionRolesTabProps> = ({
         </TableHeader>
 
         <TableBody items={tableRows}>
-          {(
-            item, // `item` is now an object: { id: 'Manager', name: 'Manager' }
-          ) => (
+          {(item) => (
             <Row key={item.id}>
               {(columnKey) => {
                 if (columnKey === 'role') {
-                  // Display the name from the row item object
                   return <Cell>{item.name}</Cell>;
                 }
                 const permissionName = columnKey as string;
                 return (
                   <Cell>
                     <Checkbox
-                      // Use item.id (the role name) for the logic check
                       isSelected={
                         data[permissionName]?.includes(item.id) || false
                       }

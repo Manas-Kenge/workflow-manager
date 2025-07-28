@@ -8,10 +8,7 @@ import {
   TabList,
   TabPanels,
   View,
-  Heading,
   ProgressCircle,
-  Flex,
-  Picker,
 } from '@adobe/react-spectrum';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
@@ -19,16 +16,17 @@ import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import clear from '@plone/volto/icons/clear.svg';
-import { updateState, listStates } from '../../actions/state';
-import { getWorkflows } from '../../actions/workflow';
-import { listTransitions, updateTransition } from '../../actions/transition';
+import { updateState } from '../../actions/state';
+import { getWorkflows, updateWorkflow } from '../../actions/workflow';
+import { updateTransition } from '../../actions/transition';
 import State from '../States/State';
-import Transition, { type TransitionData } from '../Transitions/Transition';
+import Transition from '../Transitions/Transition';
 import ThemeProvider from '../../Provider';
 import type { WorkflowReduxState } from '../../reducers/workflow';
 import type { StateReduxState } from '../../reducers/state';
 import type { TransitionReduxState } from '../../reducers/transition';
-import type { StateData } from '../States/State';
+import WorkflowTab from './WorkflowTab';
+import WorkflowHeader from './WorkflowHeader';
 
 interface GlobalRootState {
   workflow: WorkflowReduxState;
@@ -41,205 +39,95 @@ const WorkflowSettings: React.FC = (props) => {
   const dispatch = useDispatch();
   const isClient = useClient();
 
-  const [activeTab, setActiveTab] = useState<React.Key>('states');
-  const [selectedStateId, setSelectedStateId] = useState<string | null>(null);
-  const [localStateData, setLocalStateData] = useState<StateData | null>(null);
-  const [selectedTransitionId, setSelectedTransitionId] = useState<
-    string | null
-  >(null);
-  const [localTransitionData, setLocalTransitionData] =
-    useState<TransitionData | null>(null);
+  const [activeTab, setActiveTab] = useState<React.Key>('workflow');
+  const [payloadToSave, setPayloadToSave] = useState<any | null>(null);
 
   const {
-    statesInfo,
-    isLoadingData,
     currentWorkflow,
-    transitionsInfo,
+    isLoadingWorkflow,
     isSavingState,
     isSavingTransition,
-    saveError,
   } = useSelector((state: GlobalRootState) => ({
-    statesInfo: state.state.list,
     currentWorkflow: state.workflow.workflows.items.find(
       (w) => w.id === workflowId,
     ),
-    transitionsInfo: state.transition.list,
-    isLoadingData:
-      state.state.list.loading ||
-      state.workflow.workflows.loading ||
-      state.transition.list.loading,
+    isLoadingWorkflow: state.workflow.workflows.loading,
     isSavingState: state.state.update.loading,
     isSavingTransition: state.transition.update.loading,
-    saveError: state.state.update.error || state.transition.update.error,
   }));
 
   useEffect(() => {
     if (workflowId) {
-      dispatch(listStates(workflowId));
       dispatch(getWorkflows());
-      dispatch(listTransitions(workflowId));
     }
   }, [dispatch, workflowId]);
 
-  useEffect(() => {
-    const currentState = statesInfo.data?.states.find(
-      (s) => s.id === selectedStateId,
-    );
-    if (currentState && currentWorkflow) {
-      setLocalStateData({
-        properties: {
-          title: currentState.title || '',
-          description: currentState.description || '',
-          isInitialState: currentWorkflow.initial_state === currentState.id,
-        },
-        transitions: { selected: currentState.transitions || [] },
-        permissions: currentState.permission_roles || {},
-        groupRoles: currentState.group_roles || {},
-      });
-    } else {
-      setLocalStateData(null);
-    }
-  }, [selectedStateId, statesInfo.data, currentWorkflow]);
-
-  useEffect(() => {
-    const currentTransition = transitionsInfo.data?.transitions.find(
-      (t) => t.id === selectedTransitionId,
-    );
-    const allStates = statesInfo.data?.states;
-    if (currentTransition && allStates) {
-      const sourceStateIds = allStates
-        .filter((state) => state.transitions.includes(currentTransition.id))
-        .map((state) => state.id);
-      setLocalTransitionData({
-        properties: {
-          title: currentTransition.title || '',
-          description: currentTransition.description || '',
-          new_state_id: currentTransition.new_state_id || null,
-          trigger_type: currentTransition.trigger_type === 0,
-        },
-        guards: {
-          roles: currentTransition.guard?.roles || [],
-          groups: currentTransition.guard?.groups || [],
-          permissions: currentTransition.guard?.permissions || [],
-          expr: currentTransition.guard?.expr || '',
-        },
-        sourceStates: {
-          selected: sourceStateIds,
-        },
-      });
-    } else {
-      setLocalTransitionData(null);
-    }
-  }, [selectedTransitionId, transitionsInfo.data, statesInfo.data]);
-
-  const handleStateChange = useCallback((newState: Partial<StateData>) => {
-    setLocalStateData((prevState) => ({ ...prevState, ...newState }));
+  const handleDataChange = useCallback((payload: any | null) => {
+    setPayloadToSave(payload);
   }, []);
 
-  const handleTransitionChange = useCallback(
-    (newState: Partial<TransitionData>) => {
-      setLocalTransitionData((prevState) => ({ ...prevState, ...newState }));
-    },
-    [],
-  );
+  const handleTabChange = (key: React.Key) => {
+    setActiveTab(key);
+    setPayloadToSave(null);
+  };
 
   const handleSave = () => {
-    if (activeTab === 'states') {
-      if (!localStateData || !workflowId || !selectedStateId) return;
-      const { properties, transitions, permissions, groupRoles } =
-        localStateData;
-      const payload = {
-        title: properties.title,
-        description: properties.description,
-        is_initial_state: properties.isInitialState,
-        transitions: transitions.selected,
-        permission_roles: permissions,
-        group_roles: groupRoles,
-      };
-      dispatch(updateState(workflowId, selectedStateId, payload));
+    if (!payloadToSave || !workflowId) return;
+
+    if (activeTab === 'workflow') {
+      dispatch(updateWorkflow(workflowId, payloadToSave));
+    } else if (activeTab === 'states') {
+      dispatch(updateState(workflowId, payloadToSave.id, payloadToSave));
     } else if (activeTab === 'transitions') {
-      if (!localTransitionData || !workflowId || !selectedTransitionId) return;
-      const { properties, guards, sourceStates } = localTransitionData;
-      const payload = {
-        title: properties.title,
-        description: properties.description,
-        new_state_id: properties.new_state_id,
-        trigger_type: properties.trigger_type ? 0 : 1,
-        guard: {
-          roles: guards.roles,
-          groups: guards.groups,
-          permissions: guards.permissions,
-          expr: guards.expr,
-        },
-        states_with_this_transition: sourceStates.selected,
-      };
-      dispatch(updateTransition(workflowId, selectedTransitionId, payload));
+      dispatch(updateTransition(workflowId, payloadToSave.id, payloadToSave));
     }
   };
 
   const isSaving = isSavingState || isSavingTransition;
-  const isDisabled =
-    activeTab === 'states' ? !localStateData : !localTransitionData;
+  const isSaveDisabled = !payloadToSave || isSaving;
 
-  if (isLoadingData && !statesInfo.loaded) {
+  if (isLoadingWorkflow && !currentWorkflow) {
     return <ProgressCircle isIndeterminate />;
   }
 
   return (
     <View padding="size-400">
-      <Heading level={1}>Editing Workflow: "{currentWorkflow?.title}"</Heading>
+      <WorkflowHeader
+        workflows={currentWorkflow ? [currentWorkflow] : []}
+        selectedWorkflowId={workflowId}
+      />
       <Tabs
         aria-label="Workflow Settings"
         marginTop="size-300"
         selectedKey={activeTab}
-        onSelectionChange={setActiveTab}
+        onSelectionChange={handleTabChange}
       >
         <TabList>
+          <Item key="workflow">Workflow</Item>
           <Item key="states">States</Item>
           <Item key="transitions">Transitions</Item>
         </TabList>
         <TabPanels>
+          <Item key="workflow">
+            <WorkflowTab
+              workflowId={workflowId}
+              onDataChange={handleDataChange}
+              isDisabled={isSaving}
+            />
+          </Item>
           <Item key="states">
             <State
-              states={statesInfo.data?.states || []}
-              selectedStateId={selectedStateId}
-              onStateSelect={setSelectedStateId}
-              localStateData={localStateData}
-              onStateChange={handleStateChange}
-              availableTransitions={transitionsInfo.data?.transitions || []}
-              currentWorkflow={currentWorkflow}
+              workflowId={workflowId}
+              onDataChange={handleDataChange}
+              isDisabled={isSaving}
             />
           </Item>
           <Item key="transitions">
-            <View padding="size-200">
-              <Flex direction="column" gap="size-200" marginY="size-300">
-                <Heading level={3}>Configure a Transition</Heading>
-                <Picker
-                  label="Select a transition to edit"
-                  placeholder="Choose a transition..."
-                  items={transitionsInfo.data?.transitions || []}
-                  selectedKey={selectedTransitionId}
-                  onSelectionChange={(key) =>
-                    setSelectedTransitionId(key as string)
-                  }
-                >
-                  {(item) => <Item key={item.id}>{item.title}</Item>}
-                </Picker>
-              </Flex>
-              <Transition
-                transitionData={localTransitionData}
-                onTransitionChange={handleTransitionChange}
-                isDisabled={!selectedTransitionId}
-                availableStates={statesInfo.data?.states || []}
-                availableRoles={
-                  currentWorkflow?.context_data?.available_roles || []
-                }
-                availableGroups={currentWorkflow?.context_data?.groups || []}
-                availablePermissions={
-                  currentWorkflow?.context_data?.managed_permissions || []
-                }
-              />
-            </View>
+            <Transition
+              workflowId={workflowId}
+              onDataChange={handleDataChange}
+              isDisabled={isSaving}
+            />
           </Item>
         </TabPanels>
       </Tabs>
@@ -252,7 +140,7 @@ const WorkflowSettings: React.FC = (props) => {
             inner={
               <>
                 <Link
-                  to={`/controlpanel/workflowmanager/${workflowId}`}
+                  to={`/controlpanel/workflowmanager?workflow=${workflowId}`}
                   className="item"
                 >
                   <Icon
@@ -266,7 +154,7 @@ const WorkflowSettings: React.FC = (props) => {
                   variant="cta"
                   onPress={handleSave}
                   isPending={isSaving}
-                  isDisabled={isDisabled || isSaving}
+                  isDisabled={isSaveDisabled}
                 >
                   <Icon
                     name={save}

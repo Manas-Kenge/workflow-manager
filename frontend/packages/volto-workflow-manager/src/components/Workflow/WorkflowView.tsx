@@ -10,7 +10,7 @@ import {
   Flex,
   Grid,
 } from '@adobe/react-spectrum';
-import TopBar from './WorkflowHeader';
+import WorkflowHeader from './WorkflowHeader';
 import WorkflowGraph from '../Graph/WorkflowGraph';
 import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
@@ -21,7 +21,6 @@ import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
 import settings from '@plone/volto/icons/settings.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
-import WorkflowSidebar from './WorkflowSidebar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 
@@ -58,7 +57,10 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
         borderWidth="thin"
         borderRadius="medium"
       >
-        <TopBar workflows={workflows} selectedWorkflowId={workflow.id} />
+        <WorkflowHeader
+          workflows={workflows}
+          selectedWorkflowId={workflow.id}
+        />
       </View>
       <View padding="size-300" marginBottom="size-300">
         <ActionsToolbar workflowId={workflow.id} />
@@ -178,7 +180,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
           />,
           document.getElementById('toolbar'),
         )}
-      <WorkflowSidebar workflowId={workflow.id} />
     </View>
   );
 };

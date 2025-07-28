@@ -15,7 +15,6 @@ export interface GuardsData {
   expr: string;
 }
 
-// Contextual data shapes, passed in as props
 interface GroupInfo {
   id: string;
   title: string;

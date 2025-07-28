@@ -12,6 +12,23 @@ import {
   CLEAR_LAST_CREATED_WORKFLOW,
 } from '../constants';
 
+export interface PermissionInfo {
+  perm: string;
+  name: string;
+  description: string;
+}
+
+export interface GroupInfo {
+  id: string;
+  title: string;
+}
+
+export interface ContextData {
+  available_roles: string[];
+  groups: GroupInfo[];
+  managed_permissions: PermissionInfo[];
+}
+
 export interface Workflow {
   id: string;
   title: string;
@@ -20,6 +37,7 @@ export interface Workflow {
   initial_state: string;
   states: WorkflowState[];
   transitions: WorkflowTransition[];
+  context_data?: ContextData;
 }
 
 export interface WorkflowState {

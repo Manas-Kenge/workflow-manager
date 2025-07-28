@@ -1,6 +1,6 @@
 import { Flex, Heading, Text, View } from '@adobe/react-spectrum';
 
-const TopBar = ({ workflows, selectedWorkflowId }) => {
+const WorkflowHeader = ({ workflows, selectedWorkflowId }) => {
   const currentWorkflow = workflows.find((w) => w.id === selectedWorkflowId);
 
   return (
@@ -21,4 +21,4 @@ const TopBar = ({ workflows, selectedWorkflowId }) => {
   );
 };
 
-export default TopBar;
+export default WorkflowHeader;
