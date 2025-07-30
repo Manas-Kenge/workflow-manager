@@ -48,54 +48,53 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
   const dispatch = useDispatch();
 
   const currentWorkflow = useSelector(
-    (state: GlobalRootState) => state.workflow.workflow.data,
+    (state: GlobalRootState) => state.workflow.workflow.currentWorkflow,
   );
+
   const loading = useSelector(
     (state: GlobalRootState) => state.workflow.workflow.loading,
   );
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-  });
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+  } | null>(null);
 
   useEffect(() => {
-    if (workflowId) {
+    if (!currentWorkflow || currentWorkflow.id !== workflowId) {
       dispatch(getWorkflow(workflowId));
+      setFormData(null);
+      return;
     }
-  }, [workflowId, dispatch]);
+    setFormData({
+      title: currentWorkflow.title || '',
+      description: currentWorkflow.description || '',
+    });
+  }, [workflowId, currentWorkflow, dispatch]);
 
   useEffect(() => {
-    if (currentWorkflow) {
-      const initialData = {
-        title: currentWorkflow.title || '',
-        description: currentWorkflow.description || '',
-      };
-      setFormData(initialData);
+    if (
+      !formData ||
+      !currentWorkflow ||
+      currentWorkflow.id !== workflowId ||
+      (formData.title === currentWorkflow.title &&
+        formData.description === currentWorkflow.description)
+    ) {
+      onDataChange(null);
+    } else {
+      onDataChange(formData);
     }
-  }, [currentWorkflow]);
+  }, [formData, currentWorkflow, workflowId, onDataChange]);
 
   const handleChangeField = useCallback((id: string, value: any) => {
     setFormData((prevData) => ({
-      ...prevData,
+      ...(prevData ?? { title: '', description: '' }),
       [id]: value,
     }));
   }, []);
 
-  useEffect(() => {
-    if (
-      currentWorkflow &&
-      (formData.title !== currentWorkflow.title ||
-        formData.description !== currentWorkflow.description)
-    ) {
-      onDataChange(formData);
-    } else {
-      onDataChange(null);
-    }
-  }, [formData, currentWorkflow, onDataChange]);
-
-  if (loading && !currentWorkflow) {
-    return <ProgressCircle isIndeterminate />;
+  if (!formData) {
+    return <ProgressCircle isIndeterminate aria-label="Loading workflow..." />;
   }
 
   return (
@@ -105,6 +104,7 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
         schema={workflowSchema}
         formData={formData}
         onChangeField={handleChangeField}
+        editable={!isDisabled}
         hideActions
       />
     </View>

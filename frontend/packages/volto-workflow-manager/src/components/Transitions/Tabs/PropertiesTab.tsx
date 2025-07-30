@@ -42,6 +42,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
         schema={schema}
         formData={data}
         onChangeField={handleChangeField}
+        editable={!isDisabled}
         hideActions
       />
     </View>

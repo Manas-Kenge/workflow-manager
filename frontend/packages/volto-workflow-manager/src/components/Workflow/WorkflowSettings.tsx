@@ -45,6 +45,7 @@ const WorkflowSettings: React.FC = (props) => {
   const {
     currentWorkflow,
     isLoadingWorkflow,
+    isSavingWorkflow,
     isSavingState,
     isSavingTransition,
   } = useSelector((state: GlobalRootState) => ({
@@ -52,6 +53,7 @@ const WorkflowSettings: React.FC = (props) => {
       (w) => w.id === workflowId,
     ),
     isLoadingWorkflow: state.workflow.workflows.loading,
+    isSavingWorkflow: state.workflow.operation.loading,
     isSavingState: state.state.update.loading,
     isSavingTransition: state.transition.update.loading,
   }));
@@ -83,11 +85,11 @@ const WorkflowSettings: React.FC = (props) => {
     }
   };
 
-  const isSaving = isSavingState || isSavingTransition;
+  const isSaving = isSavingWorkflow || isSavingState || isSavingTransition;
   const isSaveDisabled = !payloadToSave || isSaving;
 
   if (isLoadingWorkflow && !currentWorkflow) {
-    return <ProgressCircle isIndeterminate />;
+    return <ProgressCircle isIndeterminate aria-label="Loading workflow..." />;
   }
 
   return (

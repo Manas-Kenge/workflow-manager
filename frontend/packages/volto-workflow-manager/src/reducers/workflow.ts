@@ -284,7 +284,14 @@ export default function workflow(
       const updatedWorkflow = action.result;
       return {
         ...state,
-        operation: { ...state.operation, loading: false },
+        operation: { ...state.operation, loading: false, error: null },
+        workflow: {
+          ...state.workflow,
+          currentWorkflow:
+            state.workflow.currentWorkflow?.id === updatedWorkflow.id
+              ? updatedWorkflow
+              : state.workflow.currentWorkflow,
+        },
         workflows: {
           ...state.workflows,
           items: state.workflows.items.map((wf) =>
