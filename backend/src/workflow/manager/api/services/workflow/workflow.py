@@ -299,7 +299,6 @@ class SanityCheck(Service):
         self.params = []
 
     def publishTraverse(self, request, name):
-        # Capture the workflow_id from the URL
         self.params.append(name)
         return self
 
@@ -318,34 +317,47 @@ class SanityCheck(Service):
 
         states = workflow.states
         transitions = workflow.transitions
+        state_ids = states.objectIds()
+        
         errors = {
             "state_errors": [],
             "transition_errors": [],
             "initial_state_error": False,
         }
 
-        # Check for unreachable states
+        # Check for a valid initial state
+        if not workflow.initial_state or workflow.initial_state not in state_ids:
+            errors["initial_state_error"] = True
+            errors["initial_state_error_message"] = "The workflow must have a valid initial state."
+
+        # Check each state for reachability
         for state in states.values():
-            is_reachable = any(t.new_state_id == state.id for t in transitions.values())
-            is_initial_with_exit = (workflow.initial_state == state.id and len(state.transitions) > 0)
-            if not is_reachable and not is_initial_with_exit:
+            is_destination = any(t.new_state_id == state.id for t in transitions.values())
+            is_initial = (workflow.initial_state == state.id)
+            if not is_destination and not is_initial:
                 errors["state_errors"].append({
                     "id": state.id, 
                     "title": state.title, 
-                    "error": "State is not reachable"
+                    "error": "State is not reachable. No transition points to it and it is not the initial state."
                 })
         
-        # Check if initial state exists
-        if workflow.initial_state not in states:
-            errors["initial_state_error"] = True
-
-        # Check for transitions that reference non-existent states
+        # Check each transition
         for transition in transitions.values():
-            if transition.new_state_id not in states:
+            # Check for invalid destination
+            if transition.new_state_id and transition.new_state_id not in state_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,
                     "title": transition.title,
-                    "error": f"References non-existent state: {transition.new_state_id}"
+                    "error": f"Transition points to a non-existent state: '{transition.new_state_id}'."
+                })
+            
+            # Check for unused transitions
+            is_used_by_a_state = any(transition.id in s.transitions for s in states.values())
+            if not is_used_by_a_state:
+                errors["transition_errors"].append({
+                    "id": transition.id,
+                    "title": transition.title,
+                    "error": "Transition is not available from any state."
                 })
 
         has_errors = any([
@@ -358,5 +370,5 @@ class SanityCheck(Service):
             "status": "success" if not has_errors else "error",
             "workflow": workflow.id,
             "errors": errors,
-            "message": _("Workflow validation complete"),
+            "message": "Workflow validation complete.",
         }

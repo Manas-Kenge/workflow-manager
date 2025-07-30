@@ -1,9 +1,6 @@
 import {
   Button,
   ProgressCircle,
-  AlertDialog,
-  DialogTrigger,
-  ActionButton,
   Text,
   Form,
   View,
@@ -34,7 +31,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
   const workflow = useAppSelector((state) =>
     state.workflow.workflows.items.find((w) => w.id === workflowId),
   );
-  const validation = useAppSelector((state) => state.workflow.validation);
 
   if (!workflow) {
     return (
@@ -65,53 +61,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
       <View padding="size-300" marginBottom="size-300">
         <ActionsToolbar workflowId={workflow.id} />
       </View>
-      {validation.loading && (
-        <View borderRadius="medium" padding="size-300" marginBottom="size-300">
-          <Flex alignItems="center" gap="size-200">
-            <ProgressCircle
-              aria-label="Validating workflow..."
-              isIndeterminate
-            />
-            <Text>Validating workflow...</Text>
-          </Flex>
-        </View>
-      )}
-      {validation.errors && (
-        <DialogTrigger>
-          <ActionButton
-            variant={
-              validation.errors.state_errors.length > 0
-                ? 'negative'
-                : 'secondary'
-            }
-            marginBottom="size-300"
-          >
-            View Validation Results
-          </ActionButton>
-          {(close) => (
-            <AlertDialog
-              title="Validation Results"
-              variant={
-                validation.errors.state_errors.length > 0
-                  ? 'warning'
-                  : 'information'
-              }
-              primaryActionLabel="Close"
-              onPrimaryAction={close}
-            >
-              {validation.errors.state_errors.length > 0 ? (
-                <View>
-                  {validation.errors.state_errors.map((err, index) => (
-                    <Text key={index}>{err.error}</Text>
-                  ))}
-                </View>
-              ) : (
-                <Text>No validation errors found.</Text>
-              )}
-            </AlertDialog>
-          )}
-        </DialogTrigger>
-      )}
+
       <View borderRadius="medium">
         <Grid
           areas={['content']}
