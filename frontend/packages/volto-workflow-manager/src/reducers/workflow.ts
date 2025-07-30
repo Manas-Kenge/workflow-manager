@@ -12,6 +12,23 @@ import {
   CLEAR_LAST_CREATED_WORKFLOW,
 } from '../constants';
 
+export interface PermissionInfo {
+  perm: string;
+  name: string;
+  description: string;
+}
+
+export interface GroupInfo {
+  id: string;
+  title: string;
+}
+
+export interface ContextData {
+  available_roles: string[];
+  groups: GroupInfo[];
+  managed_permissions: PermissionInfo[];
+}
+
 export interface Workflow {
   id: string;
   title: string;
@@ -20,6 +37,7 @@ export interface Workflow {
   initial_state: string;
   states: WorkflowState[];
   transitions: WorkflowTransition[];
+  context_data?: ContextData;
 }
 
 export interface WorkflowState {
@@ -266,7 +284,14 @@ export default function workflow(
       const updatedWorkflow = action.result;
       return {
         ...state,
-        operation: { ...state.operation, loading: false },
+        operation: { ...state.operation, loading: false, error: null },
+        workflow: {
+          ...state.workflow,
+          currentWorkflow:
+            state.workflow.currentWorkflow?.id === updatedWorkflow.id
+              ? updatedWorkflow
+              : state.workflow.currentWorkflow,
+        },
         workflows: {
           ...state.workflows,
           items: state.workflows.items.map((wf) =>

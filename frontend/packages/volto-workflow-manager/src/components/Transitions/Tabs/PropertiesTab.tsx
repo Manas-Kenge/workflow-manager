@@ -3,9 +3,10 @@ import { View, Text } from '@adobe/react-spectrum';
 import Form from '@plone/volto/components/manage/Form/Form';
 
 export interface PropertiesData {
-  isInitialState: boolean;
   title: string;
   description: string;
+  new_state_id: string | null;
+  trigger_type: boolean;
 }
 
 interface PropertiesTabProps {
@@ -32,7 +33,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
   );
 
   if (isDisabled) {
-    return <Text>Select a state to edit its properties.</Text>;
+    return <Text>Select a transition to edit its properties.</Text>;
   }
 
   return (
@@ -41,6 +42,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
         schema={schema}
         formData={data}
         onChangeField={handleChangeField}
+        editable={!isDisabled}
         hideActions
       />
     </View>

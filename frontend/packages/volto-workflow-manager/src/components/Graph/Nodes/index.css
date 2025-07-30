@@ -66,6 +66,11 @@
   left: -4px;
 }
 
+.react-flow__node.draggable {
+  top: 0px;
+  left: 0px;
+}
+
 .react-flow__handle-right {
   right: -4px;
 }
@@ -76,7 +81,7 @@
     padding: 8px 12px;
     min-width: 80px;
   }
-  
+
   .node-description {
     display: none; /* Hide descriptions on small screens */
   }
