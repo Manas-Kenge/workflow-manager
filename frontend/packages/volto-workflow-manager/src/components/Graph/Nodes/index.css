@@ -20,27 +20,6 @@
   box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
 }
 
-/* Pulse animation for highlighted nodes */
-.custom-node.pulse-border {
-  animation: pulse-border 2s ease-in-out infinite;
-  border-color: #ff6b6b;
-}
-
-@keyframes pulse-border {
-  0% {
-    border-color: #ff6b6b;
-    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
-  }
-  50% {
-    border-color: #ff8e8e;
-    box-shadow: 0 0 0 8px rgba(255, 107, 107, 0);
-  }
-  100% {
-    border-color: #ff6b6b;
-    box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
-  }
-}
-
 /* Node content layout */
 .node-content {
   text-align: center;

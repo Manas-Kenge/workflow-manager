@@ -20,7 +20,7 @@ interface CustomNodeProps extends NodeProps {
 const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
   return (
     <div
-      className={`custom-node ${data.highlighted ? 'pulse-border' : ''} ${selected ? 'selected' : ''}`}
+      className={`custom-node ${selected ? 'selected' : ''}`}
       data-node-id={id}
       title={data.description || data.label}
     >

@@ -1,5 +1,5 @@
-import React from 'react';
-import { BaseEdge, getBezierPath, EdgeLabelRenderer } from '@xyflow/react';
+import React, { useMemo } from 'react';
+import { BaseEdge, getSmoothStepPath, EdgeLabelRenderer } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 
 interface WorkflowTransitionEdgeData {
@@ -15,6 +15,9 @@ interface WorkflowTransitionEdgeData {
 
 interface CustomEdgeProps extends EdgeProps {
   data?: WorkflowTransitionEdgeData;
+  pathOptions?: {
+    borderRadius?: number;
+  };
 }
 
 const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
@@ -30,17 +33,31 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
     selected,
     markerEnd,
     style,
+    pathOptions,
   } = props;
 
-  const [edgePath, labelX, labelY] = getBezierPath({
+  // Use getSmoothStepPath to match the playground example
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
     targetX,
     targetY,
     sourcePosition,
     targetPosition,
-    curvature: 0.25,
+    borderRadius: pathOptions?.borderRadius ?? 10, // Use borderRadius from props
   });
+
+  const truncatedLabel = useMemo(() => {
+    if (!data?.label) return '';
+    const words = data.label.split(' ');
+    if (words.length > 2) {
+      return `${words.slice(0, 2).join(' ')}...`;
+    }
+    return data.label;
+  }, [data?.label]);
+
+  const edgeColor = selected ? '#0078d4' : '#b1b1b7';
+  const edgeWidth = selected ? 2 : 1.5;
 
   return (
     <>
@@ -50,12 +67,9 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
         markerEnd={markerEnd}
         style={{
           ...style,
-          stroke: data?.highlighted
-            ? '#ff6b6b'
-            : selected
-              ? '#0078d4'
-              : '#b1b1b7',
-          strokeWidth: data?.highlighted ? 3 : selected ? 2 : 1,
+          stroke: edgeColor,
+          strokeWidth: edgeWidth,
+          strokeDasharray: '5,5',
         }}
       />
       {data?.label && (
@@ -64,19 +78,22 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
             style={{
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-              fontSize: 12,
-              fontWeight: 700,
-              background: 'white',
-              padding: '2px 6px',
-              borderRadius: 3,
-              border: '1px solid #ccc',
-              color: data.highlighted ? '#ff6b6b' : '#333',
-              pointerEvents: 'none',
+              fontSize: 10,
+              fontWeight: 600,
+              background: 'rgba(255, 255, 255, 0.95)',
+              padding: '4px 8px',
+              borderRadius: 10,
+              border: `1px solid ${edgeColor}`,
+              color: '#333',
+              pointerEvents: 'all',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+              maxWidth: '100px',
+              textAlign: 'center',
             }}
             className="nodrag nopan"
             title={data.description || data.label}
           >
-            {data.label}
+            {truncatedLabel}
           </div>
         </EdgeLabelRenderer>
       )}

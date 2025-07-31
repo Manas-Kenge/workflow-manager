@@ -51,15 +51,9 @@ interface Workflow {
 
 interface WorkflowGraphProps {
   workflow: Workflow;
-  highlightedState?: string | null;
-  highlightedTransition?: string | null;
 }
 
-const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
-  workflow,
-  highlightedState,
-  highlightedTransition,
-}) => {
+const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
   const initialNodes = useMemo<Node[]>(() => {
     if (!workflow?.states) return [];
 
@@ -73,7 +67,6 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
         type: 'custom',
         data: {
           label: state.title,
-          highlighted: state.id === highlightedState,
           stateId: state.id,
           isInitial: state.id === workflow.initial_state,
           isFinal: !state.transitions?.length,
@@ -84,7 +77,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
         },
       };
     });
-  }, [workflow, highlightedState]);
+  }, [workflow]);
 
   const initialEdges = useMemo<Edge<WorkflowTransitionEdgeData>[]>(() => {
     if (!workflow?.states || !workflow?.transitions) return [];
@@ -108,7 +101,6 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
           data: {
             label: transition.title,
             transitionId: transition.id,
-            highlighted: transition.id === highlightedTransition,
           },
           markerEnd: {
             type: 'arrowclosed',
@@ -119,7 +111,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
     });
 
     return edges;
-  }, [workflow, highlightedTransition]);
+  }, [workflow]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -156,15 +148,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({
       >
         <Background />
         <Controls />
-        <MiniMap
-          nodeColor={(node) =>
-            node.data.highlighted
-              ? '#ff6b6b'
-              : node.selected
-                ? '#0078d4'
-                : '#ddd'
-          }
-        />
+        <MiniMap nodeColor={(node) => (node.selected ? '#0078d4' : '#ddd')} />
       </ReactFlow>
     </div>
   );
