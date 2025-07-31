@@ -17,13 +17,8 @@ import {
 } from '@adobe/react-spectrum';
 import { addState, getWorkflows } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
-import type { RootState } from '../../types';
-
-interface CreateStateProps {
-  workflowId: string;
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { GlobalRootState } from '../../types';
+import type { CreateStateProps } from '../../types/state';
 
 const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   const dispatch = useAppDispatch();
@@ -34,12 +29,13 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const currentWorkflow = useAppSelector((state: RootState) =>
+  const currentWorkflow = useAppSelector((state: GlobalRootState) =>
     state.workflow.workflows.items.find((wf) => wf.id === workflowId),
   );
 
-  // Get add state status from Redux store
-  const addStateStatus = useAppSelector((state: RootState) => state.state?.add);
+  const addStateStatus = useAppSelector(
+    (state: GlobalRootState) => state.state?.add,
+  );
 
   // Reset form when dialog opens/closes
   useEffect(() => {

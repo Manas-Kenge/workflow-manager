@@ -17,38 +17,8 @@ import PropertiesTab from './Tabs/PropertiesTab';
 import TransitionsTab from './Tabs/TransitionsTab';
 import PermissionRolesTab from './Tabs/PermissionRolesTab';
 import GroupRolesTab from './Tabs/GroupRolesTab';
-import type { WorkflowReduxState } from '../../reducers/workflow';
-import type { StateReduxState } from '../../reducers/state';
-import type { TransitionReduxState } from '../../reducers/transition';
-
-export interface StateData {
-  properties: {
-    title: string;
-    description: string;
-    isInitialState: boolean;
-  };
-  transitions: {
-    selected: string[];
-  };
-  permissions: {
-    [permissionName: string]: string[];
-  };
-  groupRoles: {
-    [groupId: string]: string[];
-  };
-}
-
-interface GlobalRootState {
-  workflow: WorkflowReduxState;
-  state: StateReduxState;
-  transition: TransitionReduxState;
-}
-
-interface StateProps {
-  workflowId: string;
-  onDataChange: (payload: any | null) => void;
-  isDisabled: boolean;
-}
+import type { GlobalRootState } from '../../types';
+import type { StateData, StateProps } from '../../types/state';
 
 const propertiesSchema = {
   title: 'State Properties',

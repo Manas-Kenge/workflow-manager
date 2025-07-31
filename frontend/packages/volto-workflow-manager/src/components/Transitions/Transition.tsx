@@ -13,31 +13,12 @@ import {
 } from '@adobe/react-spectrum';
 import { listTransitions } from '../../actions/transition';
 import { listStates } from '../../actions/state';
-import PropertiesTab, { type PropertiesData } from './Tabs/PropertiesTab';
-import GuardsTab, { type GuardsData } from './Tabs/GuardsTab';
-import SourceStatesTab, { type SourceStatesData } from './Tabs/SourceStatesTab';
+import PropertiesTab from './Tabs/PropertiesTab';
+import GuardsTab from './Tabs/GuardsTab';
+import SourceStatesTab from './Tabs/SourceStatesTab';
 import ActionsTab from './Tabs/ActionsTab';
-import type { WorkflowReduxState } from '../../reducers/workflow';
-import type { StateReduxState } from '../../reducers/state';
-import type { TransitionReduxState } from '../../reducers/transition';
-
-export interface TransitionData {
-  properties: PropertiesData;
-  guards: GuardsData;
-  sourceStates: SourceStatesData;
-}
-
-interface GlobalRootState {
-  workflow: WorkflowReduxState;
-  state: StateReduxState;
-  transition: TransitionReduxState;
-}
-
-interface TransitionProps {
-  workflowId: string;
-  onDataChange: (payload: any | null) => void;
-  isDisabled: boolean;
-}
+import type { GlobalRootState } from '../../types';
+import type { TransitionData, TransitionProps } from '../../types/transition';
 
 const Transition: React.FC<TransitionProps> = ({
   workflowId,

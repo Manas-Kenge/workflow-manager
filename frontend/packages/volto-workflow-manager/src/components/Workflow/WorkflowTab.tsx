@@ -3,19 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { View, ProgressCircle } from '@adobe/react-spectrum';
 import Form from '@plone/volto/components/manage/Form/Form';
 import { getWorkflow } from '../../actions/workflow';
-import type { WorkflowReduxState } from '../../reducers/workflow';
-
-interface GlobalRootState {
-  workflow: WorkflowReduxState;
-}
-
-interface WorkflowTabProps {
-  workflowId: string;
-  onDataChange: (
-    payload: { title: string; description: string } | null,
-  ) => void;
-  isDisabled: boolean;
-}
+import type { GlobalRootState } from '../../types';
+import type { WorkflowTabProps } from '../../types/workflow';
 
 const workflowSchema = {
   title: 'Workflow Properties',

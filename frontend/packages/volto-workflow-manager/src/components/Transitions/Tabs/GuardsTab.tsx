@@ -7,31 +7,7 @@ import {
   ListView,
   Item,
 } from '@adobe/react-spectrum';
-
-export interface GuardsData {
-  roles: string[];
-  groups: string[];
-  permissions: string[];
-  expr: string;
-}
-
-interface GroupInfo {
-  id: string;
-  title: string;
-}
-interface PermissionInfo {
-  perm: string;
-  name: string;
-}
-
-interface GuardsTabProps {
-  data: GuardsData;
-  availableRoles: string[];
-  availableGroups: GroupInfo[];
-  availablePermissions: PermissionInfo[];
-  onChange: (newData: GuardsData) => void;
-  isDisabled: boolean;
-}
+import type { GuardsTabProps } from '../../../types/transition';
 
 const GuardsTab: React.FC<GuardsTabProps> = ({
   data,

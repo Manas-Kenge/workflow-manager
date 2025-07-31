@@ -1,21 +1,6 @@
 import React from 'react';
 import { Checkbox, Flex, View, Text, Heading } from '@adobe/react-spectrum';
-
-export interface SourceStatesData {
-  selected: string[];
-}
-
-interface AvailableState {
-  id: string;
-  title: string;
-}
-
-interface SourceStatesTabProps {
-  data: SourceStatesData;
-  availableStates: AvailableState[];
-  onChange: (newData: SourceStatesData) => void;
-  isDisabled: boolean;
-}
+import type { SourceStatesTabProps } from '../../../types/transition';
 
 const SourceStatesTab: React.FC<SourceStatesTabProps> = ({
   data,

@@ -11,24 +11,8 @@ import {
   Cell,
   Checkbox,
 } from '@adobe/react-spectrum';
+import type { GroupRolesTabProps } from '../../../types/state';
 import { cloneDeep } from 'lodash';
-
-export interface GroupRolesData {
-  [groupId: string]: string[];
-}
-
-interface GroupInfo {
-  id: string;
-  title: string;
-}
-
-interface GroupRolesTabProps {
-  data: GroupRolesData;
-  groups: GroupInfo[];
-  availableRoles: string[];
-  onChange: (newData: GroupRolesData) => void;
-  isDisabled: boolean;
-}
 
 const GroupRolesTab: React.FC<GroupRolesTabProps> = ({
   data,

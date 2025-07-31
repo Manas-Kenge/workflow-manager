@@ -11,25 +11,8 @@ import {
   Cell,
   Checkbox,
 } from '@adobe/react-spectrum';
+import type { PermissionRolesTabProps } from '../../../types/state';
 import { cloneDeep } from 'lodash';
-
-export interface PermissionRolesData {
-  [permissionName: string]: string[];
-}
-
-interface PermissionInfo {
-  name: string;
-  perm: string;
-  description: string;
-}
-
-interface PermissionRolesTabProps {
-  data: PermissionRolesData;
-  managedPermissions: PermissionInfo[];
-  availableRoles: string[];
-  onChange: (newData: PermissionRolesData) => void;
-  isDisabled: boolean;
-}
 
 const PermissionRolesTab: React.FC<PermissionRolesTabProps> = ({
   data,

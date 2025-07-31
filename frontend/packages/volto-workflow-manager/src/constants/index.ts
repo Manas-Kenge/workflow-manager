@@ -1,3 +1,4 @@
+export const GET_WORKFLOW = 'GET_WORKFLOW' as const;
 export const GET_WORKFLOWS = 'GET_WORKFLOWS' as const;
 export const ADD_WORKFLOW = 'ADD_WORKFLOW' as const;
 export const DELETE_WORKFLOW = 'DELETE_WORKFLOW' as const;
@@ -7,7 +8,6 @@ export const UPDATE_WORKFLOW_STATE = 'UPDATE_WORKFLOW_STATE';
 export const ASSIGN_WORKFLOW = 'ASSIGN_WORKFLOW' as const;
 export const VALIDATE_WORKFLOW = 'VALIDATE_WORKFLOW' as const;
 export const CLEAR_LAST_CREATED_WORKFLOW = 'CLEAR_LAST_CREATED_WORKFLOW';
-export const GET_WORKFLOW = 'GET_WORKFLOW' as const;
 
 export const LIST_STATES = 'LIST_STATES';
 export const ADD_STATE = 'ADD_STATE';
