@@ -6,7 +6,7 @@ export interface CreateWorkflowProps {
 
 export interface WorkflowViewProps {
   workflowId: string;
-  pathname?: string; // From router props
+  pathname?: string;
 }
 
 export interface WorkflowHeaderProps {
@@ -39,6 +39,11 @@ export interface ContextData {
   managed_permissions: PermissionInfo[];
 }
 
+export type UpdateStatePayload = Partial<Omit<WorkflowState, 'id'>> & {
+  is_initial_state?: boolean;
+  states_with_this_transition?: string[];
+};
+
 export interface Workflow {
   id: string;
   title: string;
@@ -63,7 +68,7 @@ export interface WorkflowState {
 export interface WorkflowTransition {
   id: string;
   title: string;
-  new_state: string;
+  new_state_id: string; // Fixed: was "new_state", now matches usage in WorkflowGraph
 }
 
 export interface ValidationError {

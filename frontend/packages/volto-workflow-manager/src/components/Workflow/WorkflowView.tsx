@@ -89,7 +89,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
       {isClient &&
         createPortal(
           <Toolbar
-            pathname={props.pathname}
+            pathname={pathname}
             hideDefaultViewButtons
             inner={
               <>

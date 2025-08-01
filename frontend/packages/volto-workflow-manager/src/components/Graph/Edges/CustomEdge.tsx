@@ -1,20 +1,10 @@
 import React, { useMemo } from 'react';
 import { BaseEdge, getSmoothStepPath, EdgeLabelRenderer } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
-
-interface WorkflowTransitionEdgeData {
-  [key: string]: unknown;
-  label?: string;
-  highlighted?: boolean;
-  transitionId?: string;
-  description?: string;
-  conditions?: string[];
-  permissions?: string[];
-  automatic?: boolean;
-}
+import type { EdgeData } from '../../../types/graph';
 
 interface CustomEdgeProps extends EdgeProps {
-  data?: WorkflowTransitionEdgeData;
+  data?: EdgeData;
   pathOptions?: {
     borderRadius?: number;
   };
@@ -36,7 +26,6 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
     pathOptions,
   } = props;
 
-  // Use getSmoothStepPath to match the playground example
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -44,7 +33,7 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
     targetY,
     sourcePosition,
     targetPosition,
-    borderRadius: pathOptions?.borderRadius ?? 10, // Use borderRadius from props
+    borderRadius: pathOptions?.borderRadius ?? 10,
   });
 
   const truncatedLabel = useMemo(() => {
@@ -102,4 +91,3 @@ const CustomEdge: React.FC<CustomEdgeProps> = (props) => {
 };
 
 export default CustomEdge;
-export type { WorkflowTransitionEdgeData, CustomEdgeProps };

@@ -1,20 +1,10 @@
 import React from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import './index.css';
-
-interface WorkflowStateNodeData {
-  [key: string]: unknown;
-  label: string;
-  highlighted?: boolean;
-  stateId?: string;
-  description?: string;
-  isInitial?: boolean;
-  isFinal?: boolean;
-  permissions?: string[];
-}
+import type { NodeData } from '../../../types/graph';
 
 interface CustomNodeProps extends NodeProps {
-  data: WorkflowStateNodeData;
+  data: NodeData;
 }
 
 const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
@@ -49,4 +39,3 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data, id, selected }) => {
 };
 
 export default CustomNode;
-export type { WorkflowStateNodeData, CustomNodeProps };

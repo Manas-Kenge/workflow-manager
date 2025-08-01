@@ -111,7 +111,6 @@ export interface DeleteStateResponse {
   message: string;
 }
 
-// Define the shape of the "state" slice in the Redux store
 export interface StateReduxState {
   get: {
     loading: boolean;

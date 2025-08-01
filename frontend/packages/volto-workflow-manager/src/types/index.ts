@@ -4,14 +4,8 @@ import {
   useSelector,
 } from 'react-redux';
 import type { WorkflowReduxState } from './workflow';
-import type { WorkflowState } from './workflow';
 import type { StateReduxState } from './state';
 import type { TransitionReduxState } from './transition';
-
-export type UpdateStatePayload = Partial<Omit<WorkflowState, 'id'>> & {
-  is_initial_state?: boolean;
-  states_with_this_transition?: string[];
-};
 
 export interface GlobalRootState {
   workflow: WorkflowReduxState;
