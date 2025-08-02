@@ -17,11 +17,11 @@ import {
 import { toast } from 'react-toastify';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
-import { addState, getWorkflows } from '../../actions';
+import { addTransition, getWorkflows } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
 import type { RootState } from '../../types';
 
-interface CreateStateProps {
+export interface CreateTransitionProps {
   workflowId: string;
   isOpen: boolean;
   onClose: () => void;
@@ -29,46 +29,54 @@ interface CreateStateProps {
 
 const messages = defineMessages({
   creationSuccessTitle: {
-    id: 'State Created',
-    defaultMessage: 'State Created',
+    id: 'Transition Created',
+    defaultMessage: 'Transition Created',
   },
   creationSuccessContent: {
-    id: 'The new state has been added successfully.',
-    defaultMessage: 'The new state has been added successfully.',
+    id: 'The new transition has been added successfully.',
+    defaultMessage: 'The new transition has been added successfully.',
   },
   creationErrorTitle: {
-    id: 'State Creation Failed',
-    defaultMessage: 'State Creation Failed',
+    id: 'Transition Creation Failed',
+    defaultMessage: 'Transition Creation Failed',
   },
 });
 
-const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
+const CreateTransition = ({
+  workflowId,
+  isOpen,
+  onClose,
+}: CreateTransitionProps) => {
   const dispatch = useAppDispatch();
   const intl = useIntl();
-  const [cloneFromStateId, setCloneFromStateId] = useState<string | null>(null);
-  const [newStateTitle, setNewStateTitle] = useState('');
-  const [newStateDescription, setNewStateDescription] = useState('');
+  const [cloneFromTransitionId, setCloneFromTransitionId] = useState<
+    string | null
+  >(null);
+  const [newTransitionTitle, setNewTransitionTitle] = useState('');
+  const [newTransitionDescription, setNewTransitionDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentWorkflow = useAppSelector((state: RootState) =>
     state.workflow.workflows.items.find((wf) => wf.id === workflowId),
   );
 
-  const addStateStatus = useAppSelector((state: RootState) => state.state?.add);
+  const addTransitionStatus = useAppSelector(
+    (state: RootState) => state.transition?.add,
+  );
 
   useEffect(() => {
     if (!isOpen) {
-      setCloneFromStateId(null);
-      setNewStateTitle('');
-      setNewStateDescription('');
+      setCloneFromTransitionId(null);
+      setNewTransitionTitle('');
+      setNewTransitionDescription('');
       setIsSubmitting(false);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    if (addStateStatus?.loaded && isSubmitting) {
+    if (addTransitionStatus?.loaded && isSubmitting) {
       setIsSubmitting(false);
-      setNewStateTitle('');
+      setNewTransitionTitle('');
       toast.success(
         <Toast
           success
@@ -79,9 +87,9 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
       setTimeout(() => {
         onClose();
       }, 1500);
-    } else if (addStateStatus?.error && isSubmitting) {
+    } else if (addTransitionStatus?.error && isSubmitting) {
       setIsSubmitting(false);
-      const errorMessage = addStateStatus.error;
+      const errorMessage = addTransitionStatus.error;
       toast.error(
         <Toast
           error
@@ -90,33 +98,33 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
         />,
       );
     }
-  }, [addStateStatus, isSubmitting, onClose, intl]);
+  }, [addTransitionStatus, isSubmitting, onClose, intl]);
 
-  const validateStateTitle = (title: string): string | null => {
+  const validateTransitionTitle = (title: string): string | null => {
     if (!title.trim()) {
-      return 'State title is required';
+      return 'Transition title is required';
     }
     if (title.length < 2) {
-      return 'State title must be at least 2 characters';
+      return 'Transition title must be at least 2 characters';
     }
 
-    const stateId = title.trim().replace(/\s+/g, '_').toLowerCase();
-    const existingState = currentWorkflow?.states?.find(
-      (state) =>
-        state.id === stateId ||
-        state.title.toLowerCase() === title.toLowerCase(),
+    const transitionId = title.trim().replace(/\s+/g, '_').toLowerCase();
+    const existingTransition = currentWorkflow?.transitions?.find(
+      (trans) =>
+        trans.id === transitionId ||
+        trans.title.toLowerCase() === title.toLowerCase(),
     );
-    if (existingState) {
-      return 'A state with this title already exists';
+    if (existingTransition) {
+      return 'A transition with this title already exists';
     }
 
     return null;
   };
 
   const handleCreate = async () => {
-    if (!newStateTitle || !currentWorkflow) return;
+    if (!newTransitionTitle || !currentWorkflow) return;
 
-    const titleError = validateStateTitle(newStateTitle);
+    const titleError = validateTransitionTitle(newTransitionTitle);
     if (titleError) {
       toast.error(
         <Toast
@@ -131,23 +139,30 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
     setIsSubmitting(true);
 
     try {
-      const stateData: {
+      const transitionId = newTransitionTitle
+        .trim()
+        .replace(/\s+/g, '_')
+        .toLowerCase();
+
+      const payload: {
         title: string;
         description?: string;
         clone_from_id?: string;
       } = {
-        title: newStateTitle.trim(),
+        title: newTransitionTitle.trim(),
       };
 
-      if (newStateDescription.trim()) {
-        stateData.description = newStateDescription.trim();
+      if (newTransitionDescription.trim()) {
+        payload.description = newTransitionDescription.trim();
       }
 
-      if (cloneFromStateId) {
-        stateData.clone_from_id = cloneFromStateId;
+      if (cloneFromTransitionId) {
+        payload.clone_from_id = cloneFromTransitionId;
       }
 
-      const result = await dispatch(addState(currentWorkflow.id, stateData));
+      const result = await dispatch(
+        addTransition(currentWorkflow.id, transitionId, payload),
+      );
 
       if (result && !result.error) {
         await dispatch(getWorkflows());
@@ -172,8 +187,10 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
     return null;
   }
 
-  const titleError = newStateTitle ? validateStateTitle(newStateTitle) : null;
-  const isFormValid = newStateTitle.trim() && !titleError && !isSubmitting;
+  const titleError = newTransitionTitle
+    ? validateTransitionTitle(newTransitionTitle)
+    : null;
+  const isFormValid = newTransitionTitle.trim() && !titleError && !isSubmitting;
 
   return (
     <DialogTrigger
@@ -185,10 +202,10 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
       {(close) => (
         <Dialog>
           <Content>
-            <Heading level={1}>Create new state</Heading>
+            <Heading level={1}>Create new transition</Heading>
             <Text slot="description" marginBottom="size-300">
-              This will add a new state to the workflow "{currentWorkflow.title}
-              ".
+              This will add a new transition to the workflow "
+              {currentWorkflow.title}".
             </Text>
 
             <Divider
@@ -199,39 +216,41 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
 
             <View marginBottom="size-300">
               <Heading level={3} marginBottom="size-100">
-                Clone from existing state (optional)
+                Clone from existing transition (optional)
               </Heading>
               <Picker
-                selectedKey={cloneFromStateId}
+                selectedKey={cloneFromTransitionId}
                 onSelectionChange={(selected) =>
-                  setCloneFromStateId(selected as string)
+                  setCloneFromTransitionId(selected as string)
                 }
                 width="100%"
-                items={currentWorkflow.states || []}
-                placeholder="Select a state to clone from..."
+                items={currentWorkflow.transitions || []}
+                placeholder="Select a transition to clone from..."
                 isDisabled={isSubmitting}
               >
-                {(state) => <Item key={state.id}>{state.title}</Item>}
+                {(transition) => (
+                  <Item key={transition.id}>{transition.title}</Item>
+                )}
               </Picker>
               <Text slot="description" marginTop="size-75">
-                Cloning will copy permissions, roles, and transitions from the
-                selected state.
+                Cloning will copy the destination, guards, and other properties
+                from the selected transition.
               </Text>
             </View>
 
             <View marginBottom="size-300">
               <Heading level={3} marginBottom="size-100">
-                State Name *
+                Transition Name *
               </Heading>
               <TextField
-                value={newStateTitle}
-                onChange={setNewStateTitle}
+                value={newTransitionTitle}
+                onChange={setNewTransitionTitle}
                 isRequired
                 width="100%"
                 validationState={titleError ? 'invalid' : 'valid'}
                 errorMessage={titleError}
                 isDisabled={isSubmitting}
-                description="Enter state name..."
+                description="Enter transition name..."
               />
             </View>
 
@@ -240,11 +259,11 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 Description (optional)
               </Heading>
               <TextField
-                value={newStateDescription}
-                onChange={setNewStateDescription}
+                value={newTransitionDescription}
+                onChange={setNewTransitionDescription}
                 width="100%"
                 isDisabled={isSubmitting}
-                description="Enter a brief description of this state..."
+                description="Enter a brief description of this transition..."
               />
             </View>
 
@@ -262,7 +281,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 isDisabled={!isFormValid}
               >
                 {isSubmitting && <ProgressCircle size="S" />}
-                {isSubmitting ? 'Creating...' : 'Add State'}
+                {isSubmitting ? 'Creating...' : 'Add Transition'}
               </Button>
             </ButtonGroup>
           </Content>
@@ -272,4 +291,4 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   );
 };
 
-export default CreateState;
+export default CreateTransition;

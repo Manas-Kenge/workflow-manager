@@ -23,6 +23,7 @@ import adduser from '@plone/volto/icons/add-user.svg';
 import checkboxChecked from '@plone/volto/icons/checkbox-checked.svg';
 import blank from '@plone/volto/icons/blank.svg';
 import CreateState from '../States/CreateState';
+import CreateTransition from '../Transitions/CreateTransition';
 
 const messages = defineMessages({
   validationSuccessTitle: {
@@ -54,6 +55,7 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
   const dispatch = useAppDispatch();
   const intl = useIntl();
   const [isCreateStateOpen, setCreateStateOpen] = useState(false);
+  const [isCreateTransitionOpen, setCreateTransitionOpen] = useState(false);
   const validation = useAppSelector((state) => state.workflow.validation);
   const wasLoading = usePrevious(validation.loading);
 
@@ -104,7 +106,10 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             <Icon name={add} size="20px" />
             Add State
           </Button>
-          <Button variant="secondary">
+          <Button
+            variant="secondary"
+            onPress={() => setCreateTransitionOpen(true)}
+          >
             <Icon name={blank} size="20px" />
             Add Transition
           </Button>
@@ -197,6 +202,11 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
         workflowId={workflowId}
         isOpen={isCreateStateOpen}
         onClose={() => setCreateStateOpen(false)}
+      />
+      <CreateTransition
+        workflowId={workflowId}
+        isOpen={isCreateTransitionOpen}
+        onClose={() => setCreateTransitionOpen(false)}
       />
     </>
   );
