@@ -20,12 +20,12 @@ import settings from '@plone/volto/icons/settings.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
+import type { WorkflowViewProps } from '../../types/workflow';
 
-interface WorkflowViewProps {
-  workflowId: string;
-}
-
-const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
+const WorkflowView: React.FC<WorkflowViewProps> = ({
+  workflowId,
+  pathname,
+}) => {
   const isClient = useClient();
   const workflows = useAppSelector((state) => state.workflow.workflows.items);
   const workflow = useAppSelector((state) =>
@@ -89,7 +89,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({ workflowId }, props) => {
       {isClient &&
         createPortal(
           <Toolbar
-            pathname={props.pathname}
+            pathname={pathname}
             hideDefaultViewButtons
             inner={
               <>

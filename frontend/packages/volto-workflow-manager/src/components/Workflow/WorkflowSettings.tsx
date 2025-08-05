@@ -22,17 +22,9 @@ import { updateTransition } from '../../actions/transition';
 import State from '../States/State';
 import Transition from '../Transitions/Transition';
 import ThemeProvider from '../../Provider';
-import type { WorkflowReduxState } from '../../reducers/workflow';
-import type { StateReduxState } from '../../reducers/state';
-import type { TransitionReduxState } from '../../reducers/transition';
 import WorkflowTab from './WorkflowTab';
 import WorkflowHeader from './WorkflowHeader';
-
-interface GlobalRootState {
-  workflow: WorkflowReduxState;
-  state: StateReduxState;
-  transition: TransitionReduxState;
-}
+import type { GlobalRootState } from '../../types';
 
 const WorkflowSettings: React.FC = (props) => {
   const { workflowId } = useParams<{ workflowId: string }>();

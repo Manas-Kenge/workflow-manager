@@ -19,13 +19,8 @@ import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
 import { addState, getWorkflows } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
-import type { RootState } from '../../types';
-
-interface CreateStateProps {
-  workflowId: string;
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { GlobalRootState } from '../../types';
+import type { CreateStateProps } from '../../types/state';
 
 const messages = defineMessages({
   creationSuccessTitle: {
@@ -50,7 +45,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   const [newStateDescription, setNewStateDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentWorkflow = useAppSelector((state: RootState) =>
+  const currentWorkflow = useAppSelector((state: GlobalRootState) =>
     state.workflow.workflows.items.find((wf) => wf.id === workflowId),
   );
 

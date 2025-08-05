@@ -3,17 +3,11 @@ import {
   useDispatch,
   useSelector,
 } from 'react-redux';
-import type { WorkflowReduxState } from '../reducers/workflow';
-import type { WorkflowState } from '../reducers/workflow';
-import type { StateReduxState } from '../reducers/state';
-import type { TransitionReduxState } from '../reducers/transition';
+import type { WorkflowReduxState } from './workflow';
+import type { StateReduxState } from './state';
+import type { TransitionReduxState } from './transition';
 
-export type UpdateStatePayload = Partial<Omit<WorkflowState, 'id'>> & {
-  is_initial_state?: boolean;
-  states_with_this_transition?: string[];
-};
-
-export interface RootState {
+export interface GlobalRootState {
   workflow: WorkflowReduxState;
   state: StateReduxState;
   transition: TransitionReduxState;
@@ -22,7 +16,8 @@ export interface RootState {
 export type AppDispatch = any;
 
 export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export const useAppSelector: TypedUseSelectorHook<GlobalRootState> =
+  useSelector;
 
 export enum HistoryAction {
   AddNode = 'addNode',

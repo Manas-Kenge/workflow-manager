@@ -19,7 +19,7 @@ import {
 } from '@xyflow/react';
 import CustomEdge from './Edges/CustomEdge';
 import CustomNode from './Nodes/CustomNode';
-import type { WorkflowTransitionEdgeData } from './Edges/CustomEdge';
+import type { Workflow, EdgeData } from '../../types/graph';
 import '@xyflow/react/dist/style.css';
 
 const fitViewOptions: FitViewOptions = { padding: 0.2 };
@@ -29,25 +29,6 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 };
 const edgeTypes = { custom: CustomEdge };
 const nodeTypes = { custom: CustomNode };
-
-interface WorkflowState {
-  id: string;
-  title: string;
-  transitions: string[];
-}
-interface WorkflowTransition {
-  id: string;
-  title: string;
-  new_state_id: string;
-}
-interface Workflow {
-  id: string;
-  title: string;
-  description: string;
-  initial_state: string;
-  states: WorkflowState[];
-  transitions: WorkflowTransition[];
-}
 
 interface WorkflowGraphProps {
   workflow: Workflow;
@@ -79,10 +60,10 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
     });
   }, [workflow]);
 
-  const initialEdges = useMemo<Edge<WorkflowTransitionEdgeData>[]>(() => {
+  const initialEdges = useMemo<Edge<EdgeData>[]>(() => {
     if (!workflow?.states || !workflow?.transitions) return [];
 
-    const edges: Edge<WorkflowTransitionEdgeData>[] = [];
+    const edges: Edge<EdgeData>[] = [];
     const transitionsMap = new Map(workflow.transitions.map((t) => [t.id, t]));
 
     workflow.states.forEach((state) => {

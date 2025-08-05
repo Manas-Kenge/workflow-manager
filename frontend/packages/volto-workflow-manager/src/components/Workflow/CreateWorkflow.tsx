@@ -13,8 +13,13 @@ import {
   View,
 } from '@adobe/react-spectrum';
 import ThemeProvider from '../../Provider';
+import type { CreateWorkflowProps } from '../../types/workflow';
 
-const CreateWorkflow = ({ workflows, onCreate, close }) => {
+const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
+  workflows,
+  onCreate,
+  close,
+}) => {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [workflowName, setWorkflowName] = useState('');
 

@@ -1,20 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text } from '@adobe/react-spectrum';
 import Form from '@plone/volto/components/manage/Form/Form';
-
-export interface PropertiesData {
-  title: string;
-  description: string;
-  new_state_id: string | null;
-  trigger_type: boolean;
-}
-
-interface PropertiesTabProps {
-  data: PropertiesData;
-  schema: any;
-  onChange: (newData: PropertiesData) => void;
-  isDisabled: boolean;
-}
+import type { PropertiesTabProps } from '../../../types/transition';
 
 const PropertiesTab: React.FC<PropertiesTabProps> = ({
   data,

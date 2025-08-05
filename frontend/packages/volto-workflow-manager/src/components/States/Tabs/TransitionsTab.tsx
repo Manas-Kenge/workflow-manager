@@ -1,21 +1,6 @@
 import React from 'react';
 import { Checkbox, Flex, View, Text } from '@adobe/react-spectrum';
-
-export interface TransitionsData {
-  selected: string[];
-}
-
-interface AvailableTransition {
-  id: string;
-  title: string;
-}
-
-interface TransitionsTabProps {
-  data: TransitionsData;
-  availableTransitions: AvailableTransition[];
-  onChange: (newData: TransitionsData) => void;
-  isDisabled: boolean;
-}
+import type { TransitionsTabProps } from '../../../types/state';
 
 const TransitionsTab: React.FC<TransitionsTabProps> = ({
   data,
