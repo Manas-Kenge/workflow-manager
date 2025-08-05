@@ -152,7 +152,11 @@ const State: React.FC<StateProps> = ({
         </Picker>
       </Flex>
 
-      <Tabs aria-label="State Configuration" marginTop="size-300">
+      <Tabs
+        key={selectedStateId}
+        aria-label="State Configuration"
+        marginTop="size-300"
+      >
         <TabList>
           <Item key="properties">Properties</Item>
           <Item key="transitions">Transitions</Item>

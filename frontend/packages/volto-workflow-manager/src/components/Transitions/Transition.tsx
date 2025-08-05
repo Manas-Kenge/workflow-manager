@@ -188,7 +188,11 @@ const Transition: React.FC<TransitionProps> = ({
         </Picker>
       </Flex>
 
-      <Tabs aria-label="Transition Configuration" marginTop="size-300">
+      <Tabs
+        key={selectedTransitionId}
+        aria-label="Transition Configuration"
+        marginTop="size-300"
+      >
         <TabList>
           <Item key="properties">Properties</Item>
           <Item key="guards">Guards</Item>
