@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../../types';
 import { useLocation, useHistory, Link } from 'react-router-dom';
 import {
@@ -13,7 +13,13 @@ import {
   Well,
   View,
 } from '@adobe/react-spectrum';
-import { getWorkflows, addWorkflow } from '../../actions';
+import { toast } from 'react-toastify';
+import { useIntl, defineMessages } from 'react-intl';
+import {
+  getWorkflows,
+  addWorkflow,
+  clearLastCreatedWorkflow,
+} from '../../actions';
 import CreateWorkflow from '../Workflow/CreateWorkflow';
 import WorkflowView from '../Workflow/WorkflowView';
 import WorkflowTable from './WorkflowTable';
@@ -37,26 +43,43 @@ const plone_shipped_workflows = [
   'comment_one_state_workflow',
 ];
 
+const messages = defineMessages({
+  errorLoading: {
+    id: 'Error Loading Workflows',
+    defaultMessage: 'Error Loading Workflows',
+  },
+  errorCreating: {
+    id: 'Error Creating Workflow',
+    defaultMessage: 'Error Creating Workflow',
+  },
+});
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 const WorkflowControlPanel = (props) => {
   const dispatch = useAppDispatch();
   const history = useHistory();
   const location = useLocation();
   const isClient = useClient();
+  const intl = useIntl();
   const searchParams = new URLSearchParams(location.search);
   const [isCreateWorkflowOpen, setCreateWorkflowOpen] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
   const selectedWorkflow = searchParams.get('workflow');
 
   const {
     items: workflows,
-    loading,
-    error,
+    loading: workflowsLoading,
+    error: workflowsError,
     loaded,
   } = useAppSelector((state) => state.workflow.workflows);
 
-  // Add selector for workflow creation state
   const { loading: operationLoading, error: operationError } = useAppSelector(
     (state) => state.workflow.operation,
   );
@@ -65,7 +88,8 @@ const WorkflowControlPanel = (props) => {
     (state) => state.workflow.lastCreatedWorkflowId,
   );
 
-  const [isProcessingCreation, setIsProcessingCreation] = useState(false);
+  const prevWorkflowsError = usePrevious(workflowsError);
+  const prevOperationError = usePrevious(operationError);
 
   useEffect(() => {
     if (!loaded) {
@@ -73,39 +97,45 @@ const WorkflowControlPanel = (props) => {
     }
   }, [dispatch, loaded]);
 
-  // Handle successful workflow creation
   useEffect(() => {
-    if (lastCreatedWorkflowId && isProcessingCreation) {
-      // Navigate to the new workflow
+    if (lastCreatedWorkflowId) {
       history.push(
         `/controlpanel/workflowmanager?workflow=${lastCreatedWorkflowId}`,
       );
-
-      // Reset the processing flag
-      setIsProcessingCreation(false);
+      dispatch(clearLastCreatedWorkflow());
     }
-  }, [lastCreatedWorkflowId, isProcessingCreation, history]);
+  }, [lastCreatedWorkflowId, history, dispatch]);
 
-  // Show error toast when workflow loading fails
   useEffect(() => {
-    if (error) {
-      setErrorMessage('Error loading workflows: ' + error.message);
-      setShowErrorToast(true);
+    if (workflowsError && workflowsError !== prevWorkflowsError) {
+      toast.error(
+        <Toast
+          error
+          title={intl.formatMessage(messages.errorLoading)}
+          content={workflowsError}
+        />,
+      );
     }
-  }, [error]);
-
-  // Show error toast when operation fails
-  useEffect(() => {
-    if (operationError) {
-      setErrorMessage('Error creating workflow: ' + operationError.message);
-      setShowErrorToast(true);
+    if (operationError && operationError !== prevOperationError) {
+      toast.error(
+        <Toast
+          error
+          title={intl.formatMessage(messages.errorCreating)}
+          content={operationError}
+        />,
+      );
     }
-  }, [operationError]);
+  }, [
+    workflowsError,
+    prevWorkflowsError,
+    operationError,
+    prevOperationError,
+    intl,
+  ]);
 
   const handleCreateWorkflow = (cloneFromWorkflow, workflowName) => {
-    setIsProcessingCreation(true);
     dispatch(addWorkflow(cloneFromWorkflow, workflowName));
-    setCreateWorkflowOpen(false); // Close the dialog immediately
+    setCreateWorkflowOpen(false);
   };
 
   const handleWorkflowClick = (workflowId) => {
@@ -116,12 +146,10 @@ const WorkflowControlPanel = (props) => {
     return <WorkflowView workflowId={selectedWorkflow} />;
   }
 
-  // Show loading if we're creating a workflow or loading initial workflows
-  const showLoading = (operationLoading && isProcessingCreation) || loading;
-  const loadingText =
-    operationLoading && isProcessingCreation
-      ? 'Creating Workflow...'
-      : 'Loading Workflows...';
+  const showLoading = operationLoading || workflowsLoading;
+  const loadingText = operationLoading
+    ? 'Creating Workflow...'
+    : 'Loading Workflows...';
 
   return (
     <div id="page-controlpanel" className="ui container">
@@ -132,7 +160,6 @@ const WorkflowControlPanel = (props) => {
           </Well>
 
           <Well marginTop="size-300">
-            {/* Show loading state */}
             {showLoading && (
               <Flex alignItems="center" gap="size-200" marginTop="size-300">
                 <ProgressCircle aria-label={loadingText} isIndeterminate />
@@ -167,10 +194,7 @@ const WorkflowControlPanel = (props) => {
           {(close) => (
             <CreateWorkflow
               workflows={workflows || []}
-              onCreate={(cloneFromWorkflow, workflowName) => {
-                handleCreateWorkflow(cloneFromWorkflow, workflowName);
-                // Dialog will close via state change above
-              }}
+              onCreate={handleCreateWorkflow}
               close={close}
             />
           )}
@@ -193,7 +217,7 @@ const WorkflowControlPanel = (props) => {
                   </Link>
                   <Button
                     id="toolbar-add-workflow"
-                    className="add-workflow"
+                    variant="primary"
                     aria-label="Add workflow"
                     onPress={() => setCreateWorkflowOpen(true)}
                   >
@@ -210,15 +234,6 @@ const WorkflowControlPanel = (props) => {
             document.getElementById('toolbar'),
           )}
       </View>
-
-      {showErrorToast && (
-        <Toast
-          error
-          title="Error"
-          content={errorMessage}
-          onDismiss={() => setShowErrorToast(false)}
-        />
-      )}
     </div>
   );
 };

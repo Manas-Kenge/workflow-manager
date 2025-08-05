@@ -49,7 +49,9 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
     state.workflow.workflows.items.find((wf) => wf.id === workflowId),
   );
 
-  const addStateStatus = useAppSelector((state: RootState) => state.state?.add);
+  const addStateStatus = useAppSelector(
+    (state: GlobalRootState) => state.state?.add,
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -148,7 +150,6 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
         await dispatch(getWorkflows());
       } else {
         setIsSubmitting(false);
-        // The useEffect hook will handle the toast for the API error
       }
     } catch (error: any) {
       setIsSubmitting(false);
@@ -197,6 +198,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 Clone from existing state (optional)
               </Heading>
               <Picker
+                aria-label="Clone from existing state"
                 selectedKey={cloneFromStateId}
                 onSelectionChange={(selected) =>
                   setCloneFromStateId(selected as string)
@@ -219,6 +221,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 State Name *
               </Heading>
               <TextField
+                aria-label="New state name"
                 value={newStateTitle}
                 onChange={setNewStateTitle}
                 isRequired
@@ -235,6 +238,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 Description (optional)
               </Heading>
               <TextField
+                aria-label="State description"
                 value={newStateDescription}
                 onChange={setNewStateDescription}
                 width="100%"
@@ -256,7 +260,9 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
                 onPress={handleCreate}
                 isDisabled={!isFormValid}
               >
-                {isSubmitting && <ProgressCircle size="S" />}
+                {isSubmitting && (
+                  <ProgressCircle aria-label="Creating state..." size="S" />
+                )}
                 {isSubmitting ? 'Creating...' : 'Add State'}
               </Button>
             </ButtonGroup>

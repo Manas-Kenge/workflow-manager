@@ -115,7 +115,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
                 </Link>
                 <Button
                   id="toolbar-saving-workflow"
-                  className="saving-workflow"
+                  variant="primary"
                   aria-label="Save workflow"
                 >
                   <Icon

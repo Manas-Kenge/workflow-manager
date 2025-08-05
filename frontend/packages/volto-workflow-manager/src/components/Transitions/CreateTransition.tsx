@@ -19,7 +19,7 @@ import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
 import { addTransition, getWorkflows } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
-import type { RootState } from '../../types';
+import type { GlobalRootState } from '../../types';
 
 export interface CreateTransitionProps {
   workflowId: string;
@@ -56,12 +56,12 @@ const CreateTransition = ({
   const [newTransitionDescription, setNewTransitionDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentWorkflow = useAppSelector((state: RootState) =>
+  const currentWorkflow = useAppSelector((state: GlobalRootState) =>
     state.workflow.workflows.items.find((wf) => wf.id === workflowId),
   );
 
   const addTransitionStatus = useAppSelector(
-    (state: RootState) => state.transition?.add,
+    (state: GlobalRootState) => state.transition?.add,
   );
 
   useEffect(() => {
@@ -168,7 +168,6 @@ const CreateTransition = ({
         await dispatch(getWorkflows());
       } else {
         setIsSubmitting(false);
-        // The useEffect hook will handle the toast for the API error
       }
     } catch (error: any) {
       setIsSubmitting(false);
@@ -219,6 +218,7 @@ const CreateTransition = ({
                 Clone from existing transition (optional)
               </Heading>
               <Picker
+                aria-label="Clone from existing transition"
                 selectedKey={cloneFromTransitionId}
                 onSelectionChange={(selected) =>
                   setCloneFromTransitionId(selected as string)
@@ -243,6 +243,7 @@ const CreateTransition = ({
                 Transition Name *
               </Heading>
               <TextField
+                aria-label="New transition name"
                 value={newTransitionTitle}
                 onChange={setNewTransitionTitle}
                 isRequired
@@ -259,6 +260,7 @@ const CreateTransition = ({
                 Description (optional)
               </Heading>
               <TextField
+                aria-label="Transition description"
                 value={newTransitionDescription}
                 onChange={setNewTransitionDescription}
                 width="100%"
@@ -280,7 +282,13 @@ const CreateTransition = ({
                 onPress={handleCreate}
                 isDisabled={!isFormValid}
               >
-                {isSubmitting && <ProgressCircle size="S" />}
+                {isSubmitting && (
+                  <ProgressCircle
+                    aria-label="Creating transition..."
+                    size="S"
+                    isIndeterminate
+                  />
+                )}
                 {isSubmitting ? 'Creating...' : 'Add Transition'}
               </Button>
             </ButtonGroup>

@@ -7,6 +7,7 @@ import {
   ASSIGN_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
   VALIDATE_WORKFLOW,
+  CLEAR_LAST_CREATED_WORKFLOW,
 } from '../constants';
 
 export function getWorkflows() {
@@ -103,5 +104,11 @@ export function validateWorkflow(workflowId: string) {
       op: 'get',
       path: `/@workflows/${workflowId}/@sanity-check`,
     },
+  };
+}
+
+export function clearLastCreatedWorkflow() {
+  return {
+    type: CLEAR_LAST_CREATED_WORKFLOW,
   };
 }
