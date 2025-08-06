@@ -58,7 +58,7 @@
         permission="cmf.ManagePortal"
     />
 
-    <!-- GET /@workflows/{workflow_id}/@sanity-check -> Validates a workflow -->
+    <!-- GET /@sanity-check/{workflow_id} -> Validates a workflow -->
     <plone:service
         method="GET"
         name="@sanity-check"

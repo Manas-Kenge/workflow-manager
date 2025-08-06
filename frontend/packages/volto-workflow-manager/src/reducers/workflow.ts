@@ -8,6 +8,7 @@ import {
   UPDATE_WORKFLOW_SECURITY,
   ASSIGN_WORKFLOW,
   VALIDATE_WORKFLOW,
+  CLEAR_VALIDATION,
   CLEAR_LAST_CREATED_WORKFLOW,
 } from '../constants';
 import type { WorkflowReduxState } from '../types/workflow';
@@ -337,7 +338,13 @@ export default function workflow(
           error: action.error || 'Failed to validate workflow',
         },
       };
-
+    case CLEAR_VALIDATION:
+      return {
+        ...state,
+        validation: {
+          ...initialState.validation, // Resets errors, error, and loading
+        },
+      };
     // Clear last created workflow ID
     case CLEAR_LAST_CREATED_WORKFLOW:
       return {

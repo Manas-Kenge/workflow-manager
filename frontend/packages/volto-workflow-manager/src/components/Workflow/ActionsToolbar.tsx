@@ -1,17 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { validateWorkflow } from '../../actions';
+import { validateWorkflow, clearValidation } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
 import {
   Button,
   ButtonGroup,
   Flex,
-  DialogTrigger,
-  ActionButton,
-  AlertDialog,
-  Heading,
-  Content,
-  Text,
-  Divider,
   ProgressCircle,
 } from '@adobe/react-spectrum';
 import { toast } from 'react-toastify';
@@ -24,6 +17,7 @@ import checkboxChecked from '@plone/volto/icons/checkbox-checked.svg';
 import blank from '@plone/volto/icons/blank.svg';
 import CreateState from '../States/CreateState';
 import CreateTransition from '../Transitions/CreateTransition';
+import WorkflowValidation from './WorkflowValidation';
 
 const messages = defineMessages({
   validationSuccessTitle: {
@@ -60,6 +54,10 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
   const wasLoading = usePrevious(validation.loading);
 
   useEffect(() => {
+    dispatch(clearValidation());
+  }, [dispatch, workflowId]);
+
+  useEffect(() => {
     if (wasLoading && !validation.loading) {
       const errors = validation.errors;
       const hasErrors =
@@ -88,12 +86,6 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
     }
   }, [validation, wasLoading, intl]);
 
-  const hasErrors =
-    validation.errors &&
-    (validation.errors.state_errors.length > 0 ||
-      validation.errors.transition_errors.length > 0 ||
-      validation.errors.initial_state_error);
-
   const handleSanityCheck = () => {
     dispatch(validateWorkflow(workflowId));
   };
@@ -119,7 +111,11 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             isDisabled={validation.loading}
           >
             {validation.loading ? (
-              <ProgressCircle size="S" isIndeterminate />
+              <ProgressCircle
+                aria-label="Running sanity check..."
+                size="S"
+                isIndeterminate
+              />
             ) : (
               <Icon name={checkboxChecked} size="20px" />
             )}
@@ -131,71 +127,10 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
           </Button>
         </ButtonGroup>
 
-        {validation.errors && (
-          <DialogTrigger>
-            <ActionButton
-              variant={hasErrors ? 'negative' : 'primary'}
-              UNSAFE_style={{
-                borderColor: hasErrors ? undefined : 'green',
-                color: hasErrors ? undefined : 'green',
-              }}
-            >
-              {hasErrors ? 'View Validation Errors' : 'View Validation Results'}
-            </ActionButton>
-            {(close) => (
-              <AlertDialog
-                title="Validation Results"
-                variant={hasErrors ? 'warning' : 'information'}
-                primaryActionLabel="Close"
-                onPrimaryAction={close}
-              >
-                {hasErrors ? (
-                  <Content>
-                    {validation.errors.initial_state_error && (
-                      <Text>
-                        <b>Initial State Error:</b> The workflow must have a
-                        valid initial state.
-                        <br />
-                        <br />
-                      </Text>
-                    )}
-                    {validation.errors.state_errors.length > 0 && (
-                      <>
-                        <Heading level={3}>State Errors</Heading>
-                        {validation.errors.state_errors.map((err, index) => (
-                          <Text key={`state-err-${index}`}>
-                            <b>{err.title || err.id}:</b> {err.error}
-                            <br />
-                          </Text>
-                        ))}
-                        <Divider
-                          size="S"
-                          marginTop="size-100"
-                          marginBottom="size-100"
-                        />
-                      </>
-                    )}
-                    {validation.errors.transition_errors.length > 0 && (
-                      <>
-                        <Heading level={3}>Transition Errors</Heading>
-                        {validation.errors.transition_errors.map(
-                          (err, index) => (
-                            <Text key={`trans-err-${index}`}>
-                              <b>{err.title || err.id}:</b> {err.error}
-                              <br />
-                            </Text>
-                          ),
-                        )}
-                      </>
-                    )}
-                  </Content>
-                ) : (
-                  <Text>No validation errors found.</Text>
-                )}
-              </AlertDialog>
-            )}
-          </DialogTrigger>
-        )}
+        <WorkflowValidation
+          validationErrors={validation.errors}
+          workflowId={workflowId}
+        />
       </Flex>
 
       <CreateState
