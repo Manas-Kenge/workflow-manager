@@ -292,7 +292,7 @@ class AssignWorkflow(Service):
 class SanityCheck(Service):
     """
     Performs a sanity check on a workflow.
-    Endpoint: GET /@workflows/{workflow_id}/@sanity-check
+    Endpoint: GET /@sanity-check/{workflow_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
@@ -315,9 +315,9 @@ class SanityCheck(Service):
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        states = workflow.states
-        transitions = workflow.transitions
-        state_ids = states.objectIds()
+        states = list(workflow.states.objectValues())
+        transitions = list(workflow.transitions.objectValues())
+        state_ids = [s.id for s in states]
         
         errors = {
             "state_errors": [],
@@ -328,23 +328,27 @@ class SanityCheck(Service):
         # Check for a valid initial state
         if not workflow.initial_state or workflow.initial_state not in state_ids:
             errors["initial_state_error"] = True
-            errors["initial_state_error_message"] = "The workflow must have a valid initial state."
 
         # Check each state for reachability
-        for state in states.values():
-            is_destination = any(t.new_state_id == state.id for t in transitions.values())
-            is_initial = (workflow.initial_state == state.id)
-            if not is_destination and not is_initial:
+        # A state is unreachable if it's not the initial state AND no transition points to it.
+        all_destination_ids = {t.new_state_id for t in transitions}
+        for state in states:
+            if state.id != workflow.initial_state and state.id not in all_destination_ids:
                 errors["state_errors"].append({
                     "id": state.id, 
                     "title": state.title, 
-                    "error": "State is not reachable. No transition points to it and it is not the initial state."
+                    "error": "State is not reachable by any transition."
                 })
         
-        # Check each transition
-        for transition in transitions.values():
+        # Check each transition for issues
+        all_used_transition_ids = set()
+        for state in states:
+            for transition_id in getattr(state, 'transitions', ()):
+                all_used_transition_ids.add(transition_id)
+
+        for transition in transitions:
             # Check for invalid destination
-            if transition.new_state_id and transition.new_state_id not in state_ids:
+            if not transition.new_state_id or transition.new_state_id not in state_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,
                     "title": transition.title,
@@ -352,8 +356,7 @@ class SanityCheck(Service):
                 })
             
             # Check for unused transitions
-            is_used_by_a_state = any(transition.id in s.transitions for s in states.values())
-            if not is_used_by_a_state:
+            if transition.id not in all_used_transition_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,
                     "title": transition.title,
