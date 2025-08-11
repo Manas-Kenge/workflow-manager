@@ -5,6 +5,8 @@ import {
   UPDATE_TRANSITION,
   DELETE_TRANSITION,
 } from '../constants';
+import { updateState } from './state';
+import { getWorkflows } from './workflow';
 
 export interface AddTransitionPayload {
   title: string;
@@ -132,3 +134,55 @@ export function deleteTransition(workflowId: string, transitionId: string) {
     },
   };
 }
+
+export const createAndLinkTransition = (
+  workflowId: string,
+  transitionId: string,
+  payload: any,
+  sourceStateId: string | null,
+) => {
+  return async (dispatch, getState) => {
+    try {
+      const result = await dispatch(
+        addTransition(workflowId, transitionId, payload),
+      );
+      if (result && result.error) {
+        return result;
+      }
+
+      if (sourceStateId) {
+        const { workflow } = getState();
+        const currentWorkflow = workflow.workflows.items.find(
+          (w) => w.id === workflowId,
+        );
+        const sourceState = currentWorkflow?.states.find(
+          (s) => s.id === sourceStateId,
+        );
+
+        if (sourceState) {
+          const newTransitionsForState = [
+            ...(sourceState.transitions || []),
+            transitionId,
+          ];
+          const updatePayload = {
+            id: sourceStateId,
+            transitions: newTransitionsForState,
+          };
+          const updateResult = await dispatch(
+            updateState(workflowId, sourceStateId, updatePayload),
+          );
+
+          if (updateResult && updateResult.error) {
+            return updateResult;
+          }
+        }
+      }
+
+      await dispatch(getWorkflows());
+
+      return result;
+    } catch (error) {
+      return { error: { message: 'An unexpected error occurred.' } };
+    }
+  };
+};
