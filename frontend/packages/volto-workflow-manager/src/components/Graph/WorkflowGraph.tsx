@@ -1,18 +1,15 @@
-import { useMemo, useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
   Controls,
   Background,
   MiniMap,
-  addEdge,
   reconnectEdge,
   useEdgesState,
   useNodesState,
-  type Node,
   type Edge,
   type FitViewOptions,
-  type OnConnect,
   type OnReconnect,
   type DefaultEdgeOptions,
   type Connection,
@@ -21,6 +18,7 @@ import CustomEdge from './Edges/CustomEdge';
 import CustomNode from './Nodes/CustomNode';
 import type { Workflow, EdgeData } from '../../types/graph';
 import '@xyflow/react/dist/style.css';
+import CreateTransition from '../Transitions/CreateTransition';
 
 const fitViewOptions: FitViewOptions = { padding: 0.2 };
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -35,13 +33,20 @@ interface WorkflowGraphProps {
 }
 
 const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
-  const initialNodes = useMemo<Node[]>(() => {
-    if (!workflow?.states) return [];
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [isCreateTransitionOpen, setCreateTransitionOpen] = useState(false);
+  const [newTransitionInfo, setNewTransitionInfo] = useState<{
+    source: string;
+    target: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!workflow) return;
 
     const nodeCount = workflow.states.length;
     const radius = Math.max(200, nodeCount * 40);
-
-    return workflow.states.map((state, idx) => {
+    const newNodes = workflow.states.map((state, idx) => {
       const angle = (idx * 2 * Math.PI) / nodeCount;
       return {
         id: state.id,
@@ -58,26 +63,20 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
         },
       };
     });
-  }, [workflow]);
 
-  const initialEdges = useMemo<Edge<EdgeData>[]>(() => {
-    if (!workflow?.states || !workflow?.transitions) return [];
-
-    const edges: Edge<EdgeData>[] = [];
-    const transitionsMap = new Map(workflow.transitions.map((t) => [t.id, t]));
-
+    const newEdges: Edge<EdgeData>[] = [];
+    const transitionsMap = new Map(
+      (workflow.transitions || []).map((t) => [t.id, t]),
+    );
     workflow.states.forEach((state) => {
-      state.transitions.forEach((transitionId) => {
+      (state.transitions || []).forEach((transitionId) => {
         const transition = transitionsMap.get(transitionId);
         if (!transition) return;
 
-        const sourceId = state.id;
-        const targetId = transition.new_state_id;
-
-        edges.push({
-          id: `${sourceId}-${transitionId}-${targetId}`,
-          source: sourceId,
-          target: targetId,
+        newEdges.push({
+          id: `${state.id}-${transitionId}-${transition.new_state_id}`,
+          source: state.id,
+          target: transition.new_state_id,
           type: 'custom',
           data: {
             label: transition.title,
@@ -91,18 +90,22 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
       });
     });
 
-    return edges;
-  }, [workflow]);
+    setNodes(newNodes);
+    setEdges(newEdges);
+  }, [workflow, setNodes, setEdges]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const onConnect = useCallback((connection: Connection) => {
+    setNewTransitionInfo({
+      source: connection.source,
+      target: connection.target,
+    });
+    setCreateTransitionOpen(true);
+  }, []);
 
-  const onConnect: OnConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((eds) => addEdge({ ...connection, type: 'custom' }, eds));
-    },
-    [setEdges],
-  );
+  const handleCloseCreateDialog = () => {
+    setCreateTransitionOpen(false);
+    setNewTransitionInfo(null);
+  };
 
   const onReconnect: OnReconnect = useCallback(
     (oldEdge, newConnection) => {
@@ -112,26 +115,35 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
   );
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onReconnect={onReconnect}
-        edgeTypes={edgeTypes}
-        nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={fitViewOptions}
-        defaultEdgeOptions={defaultEdgeOptions}
-        connectionMode="strict"
-      >
-        <Background />
-        <Controls />
-        <MiniMap nodeColor={(node) => (node.selected ? '#0078d4' : '#ddd')} />
-      </ReactFlow>
-    </div>
+    <>
+      <div style={{ width: '100%', height: '100%' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onReconnect={onReconnect}
+          edgeTypes={edgeTypes}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={fitViewOptions}
+          defaultEdgeOptions={defaultEdgeOptions}
+          connectionMode="strict"
+        >
+          <Background />
+          <Controls />
+          <MiniMap nodeColor={(node) => (node.selected ? '#0078d4' : '#ddd')} />
+        </ReactFlow>
+      </div>
+      <CreateTransition
+        workflowId={workflow.id}
+        isOpen={isCreateTransitionOpen}
+        onClose={handleCloseCreateDialog}
+        initialSourceStateId={newTransitionInfo?.source}
+        initialDestinationStateId={newTransitionInfo?.target}
+      />
+    </>
   );
 };
 
