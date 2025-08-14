@@ -21,18 +21,81 @@ import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 import type { WorkflowViewProps } from '../../types/workflow';
+import WorkflowSidebar from './WorkflowSidebar';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { updateState } from '../../actions/state';
+import { updateTransition } from '../../actions/transition';
+import { getWorkflow, updateWorkflow } from '../../actions/workflow';
+import { toast } from 'react-toastify';
+import Toast from '@plone/volto/components/manage/Toast/Toast';
 
 const WorkflowView: React.FC<WorkflowViewProps> = ({
   workflowId,
   pathname,
 }) => {
   const isClient = useClient();
-  const workflows = useAppSelector((state) => state.workflow.workflows.items);
-  const workflow = useAppSelector((state) =>
-    state.workflow.workflows.items.find((w) => w.id === workflowId),
+  const dispatch = useDispatch();
+  const [payloadToSave, setPayloadToSave] = useState<{
+    payload: any;
+    kind: 'workflow' | 'state' | 'transition';
+  } | null>(null);
+
+  useEffect(() => {
+    if (workflowId) {
+      dispatch(getWorkflow(workflowId));
+    }
+  }, [dispatch, workflowId]);
+
+  const workflow = useAppSelector(
+    (state) => state.workflow.workflow.currentWorkflow,
+  );
+  const isLoading = useAppSelector((state) => state.workflow.workflow.loading);
+  const isSavingState = useAppSelector((state) => state.state.update.loading);
+  const isSavingTransition = useAppSelector(
+    (state) => state.transition.update.loading,
+  );
+  const isSavingWorkflow = useAppSelector(
+    (state) => state.workflow.operation.loading,
   );
 
-  if (!workflow) {
+  const isSaving = isSavingState || isSavingTransition || isSavingWorkflow;
+
+  const prevIsSaving = useRef(isSaving);
+  useEffect(() => {
+    if (prevIsSaving.current && !isSaving) {
+      toast.success(<Toast success title="Success" content="Changes saved." />);
+      dispatch(getWorkflow(workflowId));
+    }
+    prevIsSaving.current = isSaving;
+  }, [isSaving, dispatch, workflowId]);
+
+  const handleDataChange = useCallback(
+    (payload: any | null, kind: 'workflow' | 'state' | 'transition') => {
+      if (payload) {
+        setPayloadToSave({ payload, kind });
+      } else {
+        setPayloadToSave(null);
+      }
+    },
+    [],
+  );
+
+  const handleSave = useCallback(() => {
+    if (!payloadToSave || !workflowId) return;
+
+    const { payload, kind } = payloadToSave;
+
+    if (kind === 'workflow') {
+      dispatch(updateWorkflow(workflowId, payload));
+    } else if (kind === 'state') {
+      dispatch(updateState(workflowId, payload.id, payload));
+    } else if (kind === 'transition') {
+      dispatch(updateTransition(workflowId, payload.id, payload));
+    }
+  }, [dispatch, payloadToSave, workflowId]);
+
+  if (isLoading || !workflow || workflow.id !== workflowId) {
     return (
       <Form>
         <View padding="size-400">
@@ -53,10 +116,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
         borderWidth="thin"
         borderRadius="medium"
       >
-        <WorkflowHeader
-          workflows={workflows}
-          selectedWorkflowId={workflow.id}
-        />
+        <WorkflowHeader workflow={workflow} />
       </View>
       <View padding="size-300" marginBottom="size-300">
         <ActionsToolbar workflowId={workflow.id} />
@@ -70,19 +130,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
           height="500px"
         >
           <View gridArea="content" height="100%">
-            {workflow ? (
-              <WorkflowGraph workflow={workflow} />
-            ) : (
-              <Flex alignItems="center" justifyContent="center" height="100%">
-                <Flex alignItems="center" gap="size-200">
-                  <ProgressCircle
-                    aria-label="Loading workflow graph..."
-                    isIndeterminate
-                  />
-                  <Text>Loading workflow graph...</Text>
-                </Flex>
-              </Flex>
-            )}
+            <WorkflowGraph workflow={workflow} />
           </View>
         </Grid>
       </View>
@@ -115,14 +163,16 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
                 </Link>
                 <Button
                   id="toolbar-saving-workflow"
-                  className="saving-workflow"
-                  aria-label="Save workflow"
+                  aria-label="Save changes"
+                  variant="primary"
+                  onPress={handleSave}
+                  isDisabled={!payloadToSave || isSaving}
                 >
                   <Icon
                     name={save}
                     className="circled"
                     size="30px"
-                    title="Save workflow"
+                    title="Save changes"
                   />
                 </Button>
               </>
@@ -130,6 +180,11 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
           />,
           document.getElementById('toolbar'),
         )}
+      <WorkflowSidebar
+        currentWorkflow={workflow}
+        onDataChange={handleDataChange}
+        isDisabled={isSaving}
+      />
     </View>
   );
 };

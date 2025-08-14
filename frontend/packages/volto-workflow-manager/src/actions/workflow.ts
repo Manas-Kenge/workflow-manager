@@ -7,6 +7,8 @@ import {
   ASSIGN_WORKFLOW,
   UPDATE_WORKFLOW_SECURITY,
   VALIDATE_WORKFLOW,
+  SELECT_WORKFLOW_ITEM,
+  CLEAR_WORKFLOW_SELECTION,
   CLEAR_VALIDATION,
 } from '../constants';
 
@@ -110,5 +112,21 @@ export function validateWorkflow(workflowId: string) {
 export function clearValidation() {
   return {
     type: CLEAR_VALIDATION,
+  };
+}
+
+export function selectWorkflowItem(item: {
+  kind: 'state' | 'transition';
+  id: string;
+}) {
+  return {
+    type: SELECT_WORKFLOW_ITEM,
+    payload: item,
+  };
+}
+
+export function clearWorkflowSelection() {
+  return {
+    type: CLEAR_WORKFLOW_SELECTION,
   };
 }
