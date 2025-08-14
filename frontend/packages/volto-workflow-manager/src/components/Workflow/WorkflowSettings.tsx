@@ -17,7 +17,7 @@ import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import clear from '@plone/volto/icons/clear.svg';
 import { updateState } from '../../actions/state';
-import { getWorkflows, updateWorkflow } from '../../actions/workflow';
+import { getWorkflow, updateWorkflow } from '../../actions/workflow';
 import { updateTransition } from '../../actions/transition';
 import State from '../States/State';
 import Transition from '../Transitions/Transition';
@@ -34,27 +34,25 @@ const WorkflowSettings: React.FC = (props) => {
   const [activeTab, setActiveTab] = useState<React.Key>('workflow');
   const [payloadToSave, setPayloadToSave] = useState<any | null>(null);
 
+  useEffect(() => {
+    if (workflowId) {
+      dispatch(getWorkflow(workflowId));
+    }
+  }, [dispatch, workflowId]);
+
   const {
-    currentWorkflow,
-    isLoadingWorkflow,
+    workflow,
+    isLoading,
     isSavingWorkflow,
     isSavingState,
     isSavingTransition,
   } = useSelector((state: GlobalRootState) => ({
-    currentWorkflow: state.workflow.workflows.items.find(
-      (w) => w.id === workflowId,
-    ),
-    isLoadingWorkflow: state.workflow.workflows.loading,
+    workflow: state.workflow.workflow.currentWorkflow,
+    isLoading: state.workflow.workflow.loading,
     isSavingWorkflow: state.workflow.operation.loading,
     isSavingState: state.state.update.loading,
     isSavingTransition: state.transition.update.loading,
   }));
-
-  useEffect(() => {
-    if (workflowId) {
-      dispatch(getWorkflows());
-    }
-  }, [dispatch, workflowId]);
 
   const handleDataChange = useCallback((payload: any | null) => {
     setPayloadToSave(payload);
@@ -80,16 +78,13 @@ const WorkflowSettings: React.FC = (props) => {
   const isSaving = isSavingWorkflow || isSavingState || isSavingTransition;
   const isSaveDisabled = !payloadToSave || isSaving;
 
-  if (isLoadingWorkflow && !currentWorkflow) {
+  if (isLoading || !workflow || workflow.id !== workflowId) {
     return <ProgressCircle isIndeterminate aria-label="Loading workflow..." />;
   }
 
   return (
     <View padding="size-400">
-      <WorkflowHeader
-        workflows={currentWorkflow ? [currentWorkflow] : []}
-        selectedWorkflowId={workflowId}
-      />
+      <WorkflowHeader workflow={workflow} />
       <Tabs
         aria-label="Workflow Settings"
         marginTop="size-300"
@@ -112,6 +107,7 @@ const WorkflowSettings: React.FC = (props) => {
           <Item key="states">
             <State
               workflowId={workflowId}
+              workflow={workflow}
               onDataChange={handleDataChange}
               isDisabled={isSaving}
             />
@@ -119,6 +115,7 @@ const WorkflowSettings: React.FC = (props) => {
           <Item key="transitions">
             <Transition
               workflowId={workflowId}
+              workflow={workflow}
               onDataChange={handleDataChange}
               isDisabled={isSaving}
             />

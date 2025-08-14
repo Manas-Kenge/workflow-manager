@@ -17,7 +17,7 @@ import {
 import { toast } from 'react-toastify';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
-import { addState, getWorkflows } from '../../actions';
+import { addState, getWorkflow } from '../../actions';
 import { useAppDispatch, useAppSelector } from '../../types';
 import type { GlobalRootState } from '../../types';
 import type { CreateStateProps } from '../../types/state';
@@ -45,11 +45,13 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   const [newStateDescription, setNewStateDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const currentWorkflow = useAppSelector((state: GlobalRootState) =>
-    state.workflow.workflows.items.find((wf) => wf.id === workflowId),
+  const currentWorkflow = useAppSelector(
+    (state: GlobalRootState) => state.workflow.workflow.currentWorkflow,
   );
 
-  const addStateStatus = useAppSelector((state: RootState) => state.state?.add);
+  const addStateStatus = useAppSelector(
+    (state: GlobalRootState) => state.state?.add,
+  );
 
   useEffect(() => {
     if (!isOpen) {
@@ -145,7 +147,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
       const result = await dispatch(addState(currentWorkflow.id, stateData));
 
       if (result && !result.error) {
-        await dispatch(getWorkflows());
+        await dispatch(getWorkflow(currentWorkflow.id));
       } else {
         setIsSubmitting(false);
         // The useEffect hook will handle the toast for the API error

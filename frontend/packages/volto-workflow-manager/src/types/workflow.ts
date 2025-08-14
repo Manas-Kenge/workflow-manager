@@ -10,8 +10,7 @@ export interface WorkflowViewProps {
 }
 
 export interface WorkflowHeaderProps {
-  workflows: Workflow[];
-  selectedWorkflowId: string;
+  workflow: Workflow | null | undefined;
 }
 
 export interface WorkflowTabProps {
@@ -68,7 +67,7 @@ export interface WorkflowState {
 export interface WorkflowTransition {
   id: string;
   title: string;
-  new_state_id: string; // Fixed: was "new_state", now matches usage in WorkflowGraph
+  new_state_id: string;
 }
 
 export interface ValidationError {
@@ -107,4 +106,5 @@ export interface WorkflowReduxState {
     result: any;
   };
   lastCreatedWorkflowId: string | null;
+  selectedItem: { kind: 'state' | 'transition'; id: string } | null;
 }

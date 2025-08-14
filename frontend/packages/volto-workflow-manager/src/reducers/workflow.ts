@@ -10,6 +10,8 @@ import {
   VALIDATE_WORKFLOW,
   CLEAR_VALIDATION,
   CLEAR_LAST_CREATED_WORKFLOW,
+  SELECT_WORKFLOW_ITEM,
+  CLEAR_WORKFLOW_SELECTION,
 } from '../constants';
 import type { WorkflowReduxState } from '../types/workflow';
 
@@ -37,6 +39,7 @@ const initialState: WorkflowReduxState = {
     result: null,
   },
   lastCreatedWorkflowId: null,
+  selectedItem: null,
 };
 
 export default function workflow(
@@ -350,6 +353,17 @@ export default function workflow(
       return {
         ...state,
         lastCreatedWorkflowId: null,
+      };
+    case SELECT_WORKFLOW_ITEM:
+      return {
+        ...state,
+        selectedItem: action.payload,
+      };
+
+    case CLEAR_WORKFLOW_SELECTION:
+      return {
+        ...state,
+        selectedItem: null,
       };
 
     default:

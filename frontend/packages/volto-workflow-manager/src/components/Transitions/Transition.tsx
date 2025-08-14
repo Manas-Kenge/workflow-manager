@@ -22,6 +22,7 @@ import type { TransitionData, TransitionProps } from '../../types/transition';
 
 const Transition: React.FC<TransitionProps> = ({
   workflowId,
+  workflow,
   onDataChange,
   isDisabled,
 }) => {
@@ -34,15 +35,13 @@ const Transition: React.FC<TransitionProps> = ({
   const [initialTransitionData, setInitialTransitionData] =
     useState<TransitionData | null>(null);
 
-  const { transitionsInfo, statesInfo, currentWorkflow, isLoading } =
-    useSelector((state: GlobalRootState) => ({
+  const { transitionsInfo, statesInfo, isLoading } = useSelector(
+    (state: GlobalRootState) => ({
       transitionsInfo: state.transition.list,
       statesInfo: state.state.list,
-      currentWorkflow: state.workflow.workflows.items.find(
-        (w) => w.id === workflowId,
-      ),
       isLoading: state.transition.list.loading || state.state.list.loading,
-    }));
+    }),
+  );
 
   useEffect(() => {
     if (workflowId) {
@@ -211,12 +210,10 @@ const Transition: React.FC<TransitionProps> = ({
           <Item key="guards">
             <GuardsTab
               data={localTransitionData?.guards}
-              availableRoles={
-                currentWorkflow?.context_data?.available_roles || []
-              }
-              availableGroups={currentWorkflow?.context_data?.groups || []}
+              availableRoles={workflow?.context_data?.available_roles || []}
+              availableGroups={workflow?.context_data?.groups || []}
               availablePermissions={
-                currentWorkflow?.context_data?.managed_permissions || []
+                workflow?.context_data?.managed_permissions || []
               }
               onChange={(guards) => handleTransitionChange({ guards })}
               isDisabled={isTabDisabled}

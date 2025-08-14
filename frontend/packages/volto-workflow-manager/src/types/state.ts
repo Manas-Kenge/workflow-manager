@@ -1,3 +1,5 @@
+import { type Workflow } from './workflow';
+
 export interface GroupRolesData {
   [groupId: string]: string[];
 }
@@ -71,6 +73,7 @@ export interface StateData {
 
 export interface StateProps {
   workflowId: string;
+  workflow: Workflow;
   onDataChange: (payload: any | null) => void;
   isDisabled: boolean;
 }

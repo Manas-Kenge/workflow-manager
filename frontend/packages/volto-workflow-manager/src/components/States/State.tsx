@@ -50,6 +50,7 @@ const propertiesSchema = {
 
 const State: React.FC<StateProps> = ({
   workflowId,
+  workflow,
   onDataChange,
   isDisabled,
 }) => {
@@ -60,15 +61,13 @@ const State: React.FC<StateProps> = ({
     null,
   );
 
-  const { statesInfo, currentWorkflow, transitionsInfo, isLoadingData } =
-    useSelector((state: GlobalRootState) => ({
+  const { statesInfo, transitionsInfo, isLoadingData } = useSelector(
+    (state: GlobalRootState) => ({
       statesInfo: state.state.list,
-      currentWorkflow: state.workflow.workflows.items.find(
-        (w) => w.id === workflowId,
-      ),
       transitionsInfo: state.transition.list,
       isLoadingData: state.state.list.loading || state.transition.list.loading,
-    }));
+    }),
+  );
 
   useEffect(() => {
     if (workflowId) {
@@ -81,12 +80,12 @@ const State: React.FC<StateProps> = ({
     const currentState = statesInfo.data?.states.find(
       (s) => s.id === selectedStateId,
     );
-    if (currentState && currentWorkflow) {
+    if (currentState && workflow) {
       const data: StateData = {
         properties: {
           title: currentState.title || '',
           description: currentState.description || '',
-          isInitialState: currentWorkflow.initial_state === currentState.id,
+          isInitialState: workflow.initial_state === currentState.id,
         },
         transitions: { selected: currentState.transitions || [] },
         permissions: currentState.permission_roles || {},
@@ -98,7 +97,7 @@ const State: React.FC<StateProps> = ({
       setLocalStateData(null);
       setInitialStateData(null);
     }
-  }, [selectedStateId, statesInfo.data, currentWorkflow]);
+  }, [selectedStateId, statesInfo.data, workflow]);
 
   useEffect(() => {
     if (
@@ -184,11 +183,9 @@ const State: React.FC<StateProps> = ({
             <PermissionRolesTab
               data={localStateData?.permissions}
               managedPermissions={
-                currentWorkflow?.context_data?.managed_permissions || []
+                workflow?.context_data?.managed_permissions || []
               }
-              availableRoles={
-                currentWorkflow?.context_data?.available_roles || []
-              }
+              availableRoles={workflow?.context_data?.available_roles || []}
               onChange={(permissions) => handleStateChange({ permissions })}
               isDisabled={areTabsDisabled}
             />
@@ -196,10 +193,8 @@ const State: React.FC<StateProps> = ({
           <Item key="group-roles">
             <GroupRolesTab
               data={localStateData?.groupRoles}
-              groups={currentWorkflow?.context_data?.groups || []}
-              availableRoles={
-                currentWorkflow?.context_data?.available_roles || []
-              }
+              groups={workflow?.context_data?.groups || []}
+              availableRoles={workflow?.context_data?.available_roles || []}
               onChange={(groupRoles) => handleStateChange({ groupRoles })}
               isDisabled={areTabsDisabled}
             />

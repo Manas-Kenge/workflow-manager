@@ -18,6 +18,7 @@ import { toast } from 'react-toastify';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
 import { createAndLinkTransition } from '../../actions/transition';
+import { getWorkflow } from '../../actions/workflow';
 import {
   type GlobalRootState,
   useAppDispatch,
@@ -66,8 +67,8 @@ const CreateTransition = ({
     null,
   );
 
-  const currentWorkflow = useAppSelector((state: GlobalRootState) =>
-    state.workflow.workflows.items.find((wf) => wf.id === workflowId),
+  const currentWorkflow = useAppSelector(
+    (state: GlobalRootState) => state.workflow.workflow.currentWorkflow,
   );
 
   useEffect(() => {
@@ -146,6 +147,7 @@ const CreateTransition = ({
           content={intl.formatMessage(messages.creationSuccessContent)}
         />,
       );
+      await dispatch(getWorkflow(workflowId));
       onClose();
     }
   };

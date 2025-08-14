@@ -21,11 +21,21 @@ def _serialize_workflow(workflow, base):
         "description": getattr(workflow, "description", ""),
         "initial_state": workflow.initial_state,
         "states": [
-            {"id": s.id, "title": s.title, "transitions": s.transitions}
+            {
+                "id": s.id,
+                "title": s.title,
+                "description": getattr(s, "description", ""),
+                "transitions": s.transitions
+            }
             for s in workflow.states.objectValues()
         ],
         "transitions": [
-            {"id": t.id, "title": t.title, "new_state_id": t.new_state_id}
+            {
+                "id": t.id,
+                "title": t.title,
+                "description": getattr(t, "description", ""),
+                "new_state_id": t.new_state_id
+            }
             for t in workflow.transitions.objectValues()
         ],
         "assigned_types": workflow_base.get_assigned_types_for(workflow.id),
