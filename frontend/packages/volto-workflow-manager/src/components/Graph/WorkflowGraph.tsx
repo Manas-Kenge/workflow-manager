@@ -1,4 +1,6 @@
 import { useCallback, useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { selectWorkflowItem } from '../../actions';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -8,6 +10,7 @@ import {
   reconnectEdge,
   useEdgesState,
   useNodesState,
+  type Node,
   type Edge,
   type FitViewOptions,
   type OnReconnect,
@@ -16,9 +19,10 @@ import {
 } from '@xyflow/react';
 import CustomEdge from './Edges/CustomEdge';
 import CustomNode from './Nodes/CustomNode';
-import type { Workflow, EdgeData } from '../../types/graph';
+import type { Workflow, EdgeData, NodeData } from '../../types/graph';
 import '@xyflow/react/dist/style.css';
 import CreateTransition from '../Transitions/CreateTransition';
+import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 
 const fitViewOptions: FitViewOptions = { padding: 0.2 };
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -33,6 +37,7 @@ interface WorkflowGraphProps {
 }
 
 const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
+  const dispatch = useDispatch();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isCreateTransitionOpen, setCreateTransitionOpen] = useState(false);
@@ -46,7 +51,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
 
     const nodeCount = workflow.states.length;
     const radius = Math.max(200, nodeCount * 40);
-    const newNodes = workflow.states.map((state, idx) => {
+    const newNodes: Node<NodeData>[] = workflow.states.map((state, idx) => {
       const angle = (idx * 2 * Math.PI) / nodeCount;
       return {
         id: state.id,
@@ -114,6 +119,27 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
     [setEdges],
   );
 
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node<NodeData>) => {
+      const selected = { kind: 'state' as const, id: node.id };
+      dispatch(selectWorkflowItem(selected));
+      dispatch(setSidebarTab(1)); // Switch to "States" tab
+    },
+    [dispatch],
+  );
+
+  const onEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge<EdgeData>) => {
+      const transitionId = edge.data?.transitionId;
+      if (transitionId) {
+        const selected = { kind: 'transition' as const, id: transitionId };
+        dispatch(selectWorkflowItem(selected));
+        dispatch(setSidebarTab(2)); // Switch to "Transitions" tab
+      }
+    },
+    [dispatch],
+  );
+
   return (
     <>
       <div style={{ width: '100%', height: '100%' }}>
@@ -124,6 +150,8 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onReconnect={onReconnect}
+          onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           edgeTypes={edgeTypes}
           nodeTypes={nodeTypes}
           fitView
