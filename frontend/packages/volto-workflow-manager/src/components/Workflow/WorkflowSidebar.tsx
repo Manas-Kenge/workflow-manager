@@ -1,7 +1,6 @@
 import React, { useState, Fragment, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Tab } from 'semantic-ui-react';
-import { Button } from '@plone/components';
+import { Tab, Button } from 'semantic-ui-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { compose } from 'redux';
 import { withCookies } from 'react-cookie';
