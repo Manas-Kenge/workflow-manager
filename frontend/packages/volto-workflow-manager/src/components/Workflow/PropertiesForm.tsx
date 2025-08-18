@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, ProgressCircle } from '@adobe/react-spectrum';
-import Form from '@plone/volto/components/manage/Form/Form';
+import BlockDataForm from '@plone/volto/components/manage/Form/BlockDataForm';
 
 interface PropertiesFormProps {
   schema: any;
@@ -34,15 +34,21 @@ const PropertiesForm: React.FC<PropertiesFormProps> = ({
     );
 
     if (hasUnsavedChanges) {
-      const payload = item.id ? { id: item.id, ...formData } : formData;
-      onDataChange(payload);
+      onDataChange(formData);
     } else {
       onDataChange(null);
     }
-  }, [formData, onDataChange, item]);
+  }, [formData, item, onDataChange]);
 
-  const handleFormChange = useCallback(
-    (newFormData: { [key: string]: any }) => {
+  const handleChangeField = useCallback((id: string, value: any) => {
+    setFormData((prevData) => ({
+      ...(prevData ?? {}),
+      [id]: value,
+    }));
+  }, []);
+
+  const handleBlockChange = useCallback(
+    (blockId: string, newFormData: { [key: string]: any }) => {
       setFormData(newFormData);
     },
     [],
@@ -54,10 +60,12 @@ const PropertiesForm: React.FC<PropertiesFormProps> = ({
 
   return (
     <View padding="size-200">
-      <Form
+      <BlockDataForm
         schema={schema}
         formData={formData}
-        onChangeFormData={handleFormChange}
+        block={item.id}
+        onChangeBlock={handleBlockChange}
+        onChangeField={handleChangeField}
         editable={!isDisabled}
         hideActions
       />

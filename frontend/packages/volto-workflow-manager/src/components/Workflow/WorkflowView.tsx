@@ -180,11 +180,13 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
           />,
           document.getElementById('toolbar'),
         )}
-      <WorkflowSidebar
-        currentWorkflow={workflow}
-        onDataChange={handleDataChange}
-        isDisabled={isSaving}
-      />
+      <div id="sidebar">
+        <WorkflowSidebar
+          currentWorkflow={workflow}
+          onDataChange={handleDataChange}
+          isDisabled={isSaving}
+        />
+      </div>
     </View>
   );
 };

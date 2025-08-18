@@ -109,9 +109,9 @@ const Sidebar = (props) => {
   const dispatch = useDispatch();
   const location = useLocation();
   const { currentWorkflow, onDataChange, isDisabled } = props;
-  const { selectedItem } = useSelector((state: GlobalRootState) => ({
-    selectedItem: state.workflow.selectedItem,
-  }));
+  const selectedItem = useSelector(
+    (state: GlobalRootState) => state.workflow.selectedItem,
+  );
 
   const selectedState = useMemo(
     () => currentWorkflow?.states.find((s) => s.id === selectedItem?.id),
