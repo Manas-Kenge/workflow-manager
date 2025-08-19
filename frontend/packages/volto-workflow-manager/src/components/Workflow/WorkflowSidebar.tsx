@@ -1,6 +1,7 @@
 import { useState, Fragment, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
+  ActionButton,
   Button,
   Flex,
   Item,
@@ -303,7 +304,6 @@ const Sidebar = (props) => {
               ? `${content.review_state} trigger`
               : 'trigger'
           }
-          UNSAFE_style={{ marginLeft: '-35px' }}
           aria-label={
             expanded
               ? intl.formatMessage(messages.shrinkSidebar)
@@ -323,12 +323,9 @@ const Sidebar = (props) => {
             direction="row"
             alignItems="center"
             gap="size-100"
-            UNSAFE_style={{
-              borderBottom: '1px solid var(--spectrum-gray-200)',
-            }}
+            UNSAFE_className="sidebar-tabs-header"
           >
-            <Button
-              variant="primary"
+            <ActionButton
               UNSAFE_className="full-size-sidenav-btn"
               aria-label="full-screen-sidenav"
               onPress={onToggleFullSize}
@@ -337,7 +334,7 @@ const Sidebar = (props) => {
                 className="full-size-icon"
                 name={showFull ? expandSVG : collapseSVG}
               />
-            </Button>
+            </ActionButton>
 
             <TabList flex="1">
               {workflowTabs.map((tab) => (
@@ -346,7 +343,7 @@ const Sidebar = (props) => {
             </TabList>
           </Flex>
 
-          <TabPanels flex="1" UNSAFE_style={{ overflow: 'auto' }}>
+          <TabPanels flex="1" UNSAFE_className="sidebar-tab-panels">
             {workflowTabs.map((tab) => (
               <Item key={tab.key}>{tab.content}</Item>
             ))}
