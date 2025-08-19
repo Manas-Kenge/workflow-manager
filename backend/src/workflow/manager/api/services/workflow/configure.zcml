@@ -49,10 +49,10 @@
         permission="cmf.ManagePortal"
     />
 
-    <!-- POST /@workflows/{workflow_id}/@assign -> Assigns workflow to a type -->
+    <!-- POST /@workflow-assign/{workflow_id} -> Assigns workflow to a type -->
     <plone:service
         method="POST"
-        name="@assign"
+        name="@workflow-assign"
         for="plone.restapi.bbb.IPloneSiteRoot"
         factory=".workflow.AssignWorkflow"
         permission="cmf.ManagePortal"

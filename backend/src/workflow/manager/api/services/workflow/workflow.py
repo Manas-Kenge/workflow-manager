@@ -254,7 +254,7 @@ class UpdateSecuritySettings(Service):
 class AssignWorkflow(Service):
     """
     Assigns a workflow to a specific content type.
-    Endpoint: POST /@workflows/{workflow_id}/@assign
+    Endpoint: POST /@workflow-assign/{workflow_id}
     """
     def __init__(self, context, request):
         super().__init__(context, request)
