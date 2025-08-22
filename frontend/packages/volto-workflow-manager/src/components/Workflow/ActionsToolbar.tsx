@@ -18,6 +18,7 @@ import blank from '@plone/volto/icons/blank.svg';
 import CreateState from '../States/CreateState';
 import CreateTransition from '../Transitions/CreateTransition';
 import WorkflowValidation from './WorkflowValidation';
+import AssignWorkflow from './AssignWorkflow';
 
 const messages = defineMessages({
   validationSuccessTitle: {
@@ -50,6 +51,10 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
   const intl = useIntl();
   const [isCreateStateOpen, setCreateStateOpen] = useState(false);
   const [isCreateTransitionOpen, setCreateTransitionOpen] = useState(false);
+  const [isAssignDialogOpen, setAssignDialogOpen] = useState(false);
+  const workflow = useAppSelector(
+    (state) => state.workflow.workflow.currentWorkflow,
+  );
   const validation = useAppSelector((state) => state.workflow.validation);
   const wasLoading = usePrevious(validation.loading);
 
@@ -121,7 +126,7 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             )}
             {validation.loading ? 'Checking...' : 'Sanity Check'}
           </Button>
-          <Button variant="secondary">
+          <Button variant="secondary" onPress={() => setAssignDialogOpen(true)}>
             <Icon name={adduser} size="20px" />
             Assign
           </Button>
@@ -142,6 +147,11 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
         workflowId={workflowId}
         isOpen={isCreateTransitionOpen}
         onClose={() => setCreateTransitionOpen(false)}
+      />
+      <AssignWorkflow
+        workflow={workflow}
+        isOpen={isAssignDialogOpen}
+        onClose={() => setAssignDialogOpen(false)}
       />
     </>
   );

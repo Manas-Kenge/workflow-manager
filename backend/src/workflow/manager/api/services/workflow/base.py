@@ -40,6 +40,12 @@ class Base:
     def portal_workflow(self):
         """Returns the portal_workflow tool."""
         return getToolByName(self.context, "portal_workflow")
+    
+    @property
+    @memoize
+    def portal_types(self):
+        """Returns the portal_types tool."""
+        return getToolByName(self.context, "portal_types")
 
     # --- Selected Object Properties (Driven by __init__) ---
 
@@ -189,6 +195,30 @@ class Base:
             key=lambda v: v['title']
         )
 
+    def get_assignable_types_for(self, workflow_id):
+        """
+        Returns a list of content types that do not currently have the
+        specified workflow assigned.
+        """
+        # Get the list of types already using this workflow
+        assigned_types = self.get_assigned_types_for(workflow_id)
+        
+        # Get all user-friendly content types
+        vocab_factory = getUtility(IVocabularyFactory,
+            name="plone.app.vocabularies.ReallyUserFriendlyTypes")
+        all_types = vocab_factory(self.context)
+        
+        assignable_types = []
+        for term in all_types:
+            # A type is assignable if its ID is not in the assigned list
+            if term.value not in assigned_types:
+                assignable_types.append({
+                    "id": term.value,
+                    "title": term.title
+                })
+        
+        return sorted(assignable_types, key=lambda v: v['title'])
+    
     def get_assigned_types_for(self, workflow_id):
         """Returns a list of content type IDs assigned to a workflow."""
         assigned = []

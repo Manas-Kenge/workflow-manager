@@ -40,6 +40,7 @@ def _serialize_workflow(workflow, base):
         ],
         "assigned_types": workflow_base.get_assigned_types_for(workflow.id),
         "context_data": {
+            "assignable_types": workflow_base.get_assignable_types_for(workflow.id),
             "managed_permissions": workflow_base.managed_permissions,
             "available_roles": list(workflow.getAvailableRoles()),
             "groups": workflow_base.getGroups()
