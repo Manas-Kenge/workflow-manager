@@ -6,8 +6,7 @@ import {
   Heading,
   Text,
   ProgressCircle,
-  DialogTrigger,
-  ActionButton,
+  DialogContainer,
   Flex,
   Form,
   Well,
@@ -22,6 +21,7 @@ import Icon from '@plone/volto/components/theme/Icon/Icon';
 import add from '@plone/volto/icons/add.svg';
 import back from '@plone/volto/icons/back.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
+import { toast } from 'react-toastify';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
@@ -44,8 +44,6 @@ const WorkflowControlPanel = (props) => {
   const isClient = useClient();
   const searchParams = new URLSearchParams(location.search);
   const [isCreateWorkflowOpen, setCreateWorkflowOpen] = useState(false);
-  const [showErrorToast, setShowErrorToast] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
   const selectedWorkflow = searchParams.get('workflow');
 
@@ -56,7 +54,6 @@ const WorkflowControlPanel = (props) => {
     loaded,
   } = useAppSelector((state) => state.workflow.workflows);
 
-  // Add selector for workflow creation state
   const { loading: operationLoading, error: operationError } = useAppSelector(
     (state) => state.workflow.operation,
   );
@@ -73,39 +70,44 @@ const WorkflowControlPanel = (props) => {
     }
   }, [dispatch, loaded]);
 
-  // Handle successful workflow creation
   useEffect(() => {
     if (lastCreatedWorkflowId && isProcessingCreation) {
-      // Navigate to the new workflow
       history.push(
         `/controlpanel/workflowmanager?workflow=${lastCreatedWorkflowId}`,
       );
-
-      // Reset the processing flag
       setIsProcessingCreation(false);
     }
   }, [lastCreatedWorkflowId, isProcessingCreation, history]);
 
-  // Show error toast when workflow loading fails
   useEffect(() => {
     if (error) {
-      setErrorMessage('Error loading workflows: ' + error.message);
-      setShowErrorToast(true);
+      toast.error(
+        <Toast
+          error
+          title="Error"
+          content={`Error loading workflows: ${error}`}
+        />,
+      );
     }
   }, [error]);
 
-  // Show error toast when operation fails
   useEffect(() => {
     if (operationError) {
-      setErrorMessage('Error creating workflow: ' + operationError.message);
-      setShowErrorToast(true);
+      toast.error(
+        <Toast
+          error
+          title="Error"
+          content={`Error creating workflow: ${operationError}`}
+        />,
+      );
+      setIsProcessingCreation(false);
     }
   }, [operationError]);
 
   const handleCreateWorkflow = (cloneFromWorkflow, workflowName) => {
     setIsProcessingCreation(true);
     dispatch(addWorkflow(cloneFromWorkflow, workflowName));
-    setCreateWorkflowOpen(false); // Close the dialog immediately
+    setCreateWorkflowOpen(false);
   };
 
   const handleWorkflowClick = (workflowId) => {
@@ -113,10 +115,11 @@ const WorkflowControlPanel = (props) => {
   };
 
   if (selectedWorkflow) {
-    return <WorkflowView workflowId={selectedWorkflow} />;
+    return (
+      <WorkflowView workflowId={selectedWorkflow} pathname={props.pathname} />
+    );
   }
 
-  // Show loading if we're creating a workflow or loading initial workflows
   const showLoading = (operationLoading && isProcessingCreation) || loading;
   const loadingText =
     operationLoading && isProcessingCreation
@@ -132,49 +135,40 @@ const WorkflowControlPanel = (props) => {
           </Well>
 
           <Well marginTop="size-300">
-            {/* Show loading state */}
-            {showLoading && (
+            {showLoading ? (
               <Flex alignItems="center" gap="size-200" marginTop="size-300">
                 <ProgressCircle aria-label={loadingText} isIndeterminate />
                 <Text>{loadingText}</Text>
               </Flex>
-            )}
-
-            {!showLoading && workflows && (
-              <>
-                <Heading level={2} marginBottom="size-200">
-                  Please select your workflow
-                </Heading>
-                <WorkflowTable
-                  workflows={workflows.filter(
-                    (workflow) =>
-                      !plone_shipped_workflows.includes(workflow.id),
-                  )}
-                  handleWorkflowClick={handleWorkflowClick}
-                  isClickable={true}
-                />
-              </>
+            ) : (
+              workflows && (
+                <>
+                  <Heading level={2} marginBottom="size-200">
+                    Please select your workflow
+                  </Heading>
+                  <WorkflowTable
+                    workflows={workflows.filter(
+                      (workflow) =>
+                        !plone_shipped_workflows.includes(workflow.id),
+                    )}
+                    handleWorkflowClick={handleWorkflowClick}
+                    isClickable={true}
+                  />
+                </>
+              )
             )}
           </Well>
         </Form>
 
-        <DialogTrigger
-          isOpen={isCreateWorkflowOpen}
-          onOpenChange={setCreateWorkflowOpen}
-          isDismissable
-        >
-          <ActionButton isHidden>Hidden Trigger</ActionButton>
-          {(close) => (
+        {isCreateWorkflowOpen && (
+          <DialogContainer onDismiss={() => setCreateWorkflowOpen(false)}>
             <CreateWorkflow
               workflows={workflows || []}
-              onCreate={(cloneFromWorkflow, workflowName) => {
-                handleCreateWorkflow(cloneFromWorkflow, workflowName);
-                // Dialog will close via state change above
-              }}
-              close={close}
+              onCreate={handleCreateWorkflow}
+              onClose={() => setCreateWorkflowOpen(false)}
             />
-          )}
-        </DialogTrigger>
+          </DialogContainer>
+        )}
 
         {isClient &&
           createPortal(
@@ -193,7 +187,7 @@ const WorkflowControlPanel = (props) => {
                   </Link>
                   <Button
                     id="toolbar-add-workflow"
-                    className="add-workflow"
+                    variant="primary"
                     aria-label="Add workflow"
                     onPress={() => setCreateWorkflowOpen(true)}
                   >
@@ -210,15 +204,6 @@ const WorkflowControlPanel = (props) => {
             document.getElementById('toolbar'),
           )}
       </View>
-
-      {showErrorToast && (
-        <Toast
-          error
-          title="Error"
-          content={errorMessage}
-          onDismiss={() => setShowErrorToast(false)}
-        />
-      )}
     </div>
   );
 };

@@ -18,7 +18,7 @@ import type { CreateWorkflowProps } from '../../types/workflow';
 const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
   workflows,
   onCreate,
-  close,
+  onClose,
 }) => {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
   const [workflowName, setWorkflowName] = useState('');
@@ -26,10 +26,6 @@ const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
   const handleCreate = () => {
     if (workflowName && onCreate) {
       onCreate(selectedWorkflow, workflowName);
-      // Reset form state
-      setSelectedWorkflow('');
-      setWorkflowName('');
-      // Don't call close() here - let the parent handle it
     }
   };
 
@@ -51,13 +47,13 @@ const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
             workflow you're creating.
           </Text>
           <Picker
+            aria-label="Select a workflow to clone from"
             selectedKey={selectedWorkflow}
             onSelectionChange={(selected) => setSelectedWorkflow(selected)}
             width="100%"
+            items={workflows}
           >
-            {workflows?.map((workflow) => (
-              <Item key={workflow.id}>{workflow.title}</Item>
-            ))}
+            {(workflow) => <Item key={workflow.id}>{workflow.title}</Item>}
           </Picker>
         </View>
 
@@ -69,23 +65,22 @@ const CreateWorkflow: React.FC<CreateWorkflowProps> = ({
             An id will be generated from this title.
           </Text>
           <TextField
-            defaultValue="Enter value"
+            aria-label="New workflow name"
             value={workflowName}
             onChange={setWorkflowName}
             isRequired
-            necessityIndicator="icon"
             width="100%"
           />
         </View>
 
         <ButtonGroup>
-          <Button variant="secondary" onPress={close}>
+          <Button variant="secondary" onPress={onClose}>
             Cancel
           </Button>
           <Button
             variant="accent"
             onPress={handleCreate}
-            isDisabled={!workflowName}
+            isDisabled={!workflowName || !selectedWorkflow}
           >
             Add
           </Button>

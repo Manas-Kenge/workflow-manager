@@ -1,7 +1,7 @@
 export interface CreateWorkflowProps {
   workflows: Workflow[];
   onCreate: (cloneFromId: string | null, newName: string) => void;
-  close: () => void;
+  onClose: () => void;
 }
 
 export interface WorkflowViewProps {

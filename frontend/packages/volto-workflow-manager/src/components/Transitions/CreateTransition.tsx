@@ -4,7 +4,7 @@ import {
   ButtonGroup,
   Content,
   Dialog,
-  DialogTrigger,
+  DialogContainer,
   Divider,
   Heading,
   Item,
@@ -152,7 +152,7 @@ const CreateTransition = ({
     }
   };
 
-  if (!currentWorkflow) {
+  if (!isOpen || !currentWorkflow) {
     return null;
   }
 
@@ -166,130 +166,122 @@ const CreateTransition = ({
     !isSubmitting;
 
   return (
-    <DialogTrigger
-      isOpen={isOpen}
-      onOpenChange={(isOpen) => !isOpen && onClose()}
-    >
-      <div style={{ display: 'none' }} />
+    <DialogContainer onDismiss={onClose}>
+      <Dialog>
+        <Content>
+          <Heading level={1}>Create new transition</Heading>
+          <Text slot="description" marginBottom="size-300">
+            This will add a new transition to the workflow "
+            {currentWorkflow.title}".
+          </Text>
 
-      {(close) => (
-        <Dialog>
-          <Content>
-            <Heading level={1}>Create new transition</Heading>
-            <Text slot="description" marginBottom="size-300">
-              This will add a new transition to the workflow "
-              {currentWorkflow.title}".
+          <Divider
+            marginTop="size-200"
+            marginBottom="size-200"
+            UNSAFE_style={{ height: '1px', backgroundColor: '#e1e1e1' }}
+          />
+
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Clone from existing transition (optional)
+            </Heading>
+            <Picker
+              aria-label="Clone from existing transition"
+              selectedKey={cloneFromTransitionId}
+              onSelectionChange={(selected) =>
+                setCloneFromTransitionId(selected as string)
+              }
+              width="100%"
+              items={currentWorkflow.transitions || []}
+              placeholder="Select a transition to clone from..."
+              isDisabled={isSubmitting}
+            >
+              {(transition) => (
+                <Item key={transition.id}>{transition.title}</Item>
+              )}
+            </Picker>
+            <Text slot="description" marginTop="size-75">
+              Cloning will copy the destination, guards, and other properties
+              from the selected transition.
             </Text>
+          </View>
 
-            <Divider
-              marginTop="size-200"
-              marginBottom="size-200"
-              UNSAFE_style={{ height: '1px', backgroundColor: '#e1e1e1' }}
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Destination State *
+            </Heading>
+            <Picker
+              aria-label="Select the destination state for the transition"
+              selectedKey={destinationStateId}
+              onSelectionChange={(selected) =>
+                setDestinationStateId(selected as string)
+              }
+              width="100%"
+              items={currentWorkflow.states || []}
+              placeholder="Select a destination state..."
+              isDisabled={isSubmitting || !!initialDestinationStateId}
+              isRequired
+            >
+              {(state) => <Item key={state.id}>{state.title}</Item>}
+            </Picker>
+          </View>
+
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Transition Name *
+            </Heading>
+            <TextField
+              aria-label="New transition name"
+              value={newTransitionTitle}
+              onChange={setNewTransitionTitle}
+              isRequired
+              width="100%"
+              validationState={titleError ? 'invalid' : 'valid'}
+              errorMessage={titleError}
+              isDisabled={isSubmitting}
+              description="Enter transition name..."
             />
+          </View>
 
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Clone from existing transition (optional)
-              </Heading>
-              <Picker
-                aria-label="Clone from existing transition"
-                selectedKey={cloneFromTransitionId}
-                onSelectionChange={(selected) =>
-                  setCloneFromTransitionId(selected as string)
-                }
-                width="100%"
-                items={currentWorkflow.transitions || []}
-                placeholder="Select a transition to clone from..."
-                isDisabled={isSubmitting}
-              >
-                {(transition) => (
-                  <Item key={transition.id}>{transition.title}</Item>
-                )}
-              </Picker>
-              <Text slot="description" marginTop="size-75">
-                Cloning will copy the destination, guards, and other properties
-                from the selected transition.
-              </Text>
-            </View>
-
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Destination State *
-              </Heading>
-              <Picker
-                aria-label="Select the destination state for the transition"
-                selectedKey={destinationStateId}
-                onSelectionChange={(selected) =>
-                  setDestinationStateId(selected as string)
-                }
-                width="100%"
-                items={currentWorkflow.states || []}
-                placeholder="Select a destination state..."
-                isDisabled={isSubmitting || !!initialDestinationStateId}
-                isRequired
-              >
-                {(state) => <Item key={state.id}>{state.title}</Item>}
-              </Picker>
-            </View>
-
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Transition Name *
-              </Heading>
-              <TextField
-                aria-label="New transition name"
-                value={newTransitionTitle}
-                onChange={setNewTransitionTitle}
-                isRequired
-                width="100%"
-                validationState={titleError ? 'invalid' : 'valid'}
-                errorMessage={titleError}
-                isDisabled={isSubmitting}
-                description="Enter transition name..."
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Description (optional)
+            </Heading>
+            <TextField
+              aria-label="Transition description"
+              value={newTransitionDescription}
+              onChange={setNewTransitionDescription}
+              width="100%"
+              isDisabled={isSubmitting}
+              description="Enter a brief description of this transition..."
+            />
+          </View>
+        </Content>
+        <ButtonGroup>
+          <Button
+            variant="secondary"
+            onPress={onClose}
+            isDisabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="accent"
+            onPress={handleCreate}
+            isDisabled={!isFormValid}
+          >
+            {isSubmitting && (
+              <ProgressCircle
+                aria-label="Creating transition..."
+                size="S"
+                isIndeterminate
               />
-            </View>
-
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Description (optional)
-              </Heading>
-              <TextField
-                aria-label="Transition description"
-                value={newTransitionDescription}
-                onChange={setNewTransitionDescription}
-                width="100%"
-                isDisabled={isSubmitting}
-                description="Enter a brief description of this transition..."
-              />
-            </View>
-
-            <ButtonGroup>
-              <Button
-                variant="secondary"
-                onPress={close}
-                isDisabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="accent"
-                onPress={handleCreate}
-                isDisabled={!isFormValid}
-              >
-                {isSubmitting && (
-                  <ProgressCircle
-                    aria-label="Creating transition..."
-                    size="S"
-                    isIndeterminate
-                  />
-                )}
-                {isSubmitting ? 'Creating...' : 'Add Transition'}
-              </Button>
-            </ButtonGroup>
-          </Content>
-        </Dialog>
-      )}
-    </DialogTrigger>
+            )}
+            {isSubmitting ? 'Creating...' : 'Add Transition'}
+          </Button>
+        </ButtonGroup>
+      </Dialog>
+    </DialogContainer>
   );
 };
 

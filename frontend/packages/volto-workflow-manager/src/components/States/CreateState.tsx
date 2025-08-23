@@ -4,7 +4,7 @@ import {
   ButtonGroup,
   Content,
   Dialog,
-  DialogTrigger,
+  DialogContainer,
   Divider,
   Heading,
   Item,
@@ -150,7 +150,6 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
         await dispatch(getWorkflow(currentWorkflow.id));
       } else {
         setIsSubmitting(false);
-        // The useEffect hook will handle the toast for the API error
       }
     } catch (error: any) {
       setIsSubmitting(false);
@@ -165,7 +164,7 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
     }
   };
 
-  if (!currentWorkflow) {
+  if (!isOpen || !currentWorkflow) {
     return null;
   }
 
@@ -173,99 +172,94 @@ const CreateState = ({ workflowId, isOpen, onClose }: CreateStateProps) => {
   const isFormValid = newStateTitle.trim() && !titleError && !isSubmitting;
 
   return (
-    <DialogTrigger
-      isOpen={isOpen}
-      onOpenChange={(isOpen) => !isOpen && onClose()}
-    >
-      <div style={{ display: 'none' }} />
+    <DialogContainer onDismiss={onClose}>
+      <Dialog>
+        <Content>
+          <Heading level={1}>Create new state</Heading>
+          <Text slot="description" marginBottom="size-300">
+            This will add a new state to the workflow "{currentWorkflow.title}
+            ".
+          </Text>
 
-      {(close) => (
-        <Dialog>
-          <Content>
-            <Heading level={1}>Create new state</Heading>
-            <Text slot="description" marginBottom="size-300">
-              This will add a new state to the workflow "{currentWorkflow.title}
-              ".
+          <Divider
+            marginTop="size-200"
+            marginBottom="size-200"
+            UNSAFE_style={{ height: '1px', backgroundColor: '#e1e1e1' }}
+          />
+
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Clone from existing state (optional)
+            </Heading>
+            <Picker
+              aria-label="Clone from existing state"
+              selectedKey={cloneFromStateId}
+              onSelectionChange={(selected) =>
+                setCloneFromStateId(selected as string)
+              }
+              width="100%"
+              items={currentWorkflow.states || []}
+              placeholder="Select a state to clone from..."
+              isDisabled={isSubmitting}
+            >
+              {(state) => <Item key={state.id}>{state.title}</Item>}
+            </Picker>
+            <Text slot="description" marginTop="size-75">
+              Cloning will copy permissions, roles, and transitions from the
+              selected state.
             </Text>
+          </View>
 
-            <Divider
-              marginTop="size-200"
-              marginBottom="size-200"
-              UNSAFE_style={{ height: '1px', backgroundColor: '#e1e1e1' }}
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              State Name *
+            </Heading>
+            <TextField
+              aria-label="State name"
+              value={newStateTitle}
+              onChange={setNewStateTitle}
+              isRequired
+              width="100%"
+              validationState={titleError ? 'invalid' : 'valid'}
+              errorMessage={titleError}
+              isDisabled={isSubmitting}
+              description="Enter state name..."
             />
+          </View>
 
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Clone from existing state (optional)
-              </Heading>
-              <Picker
-                selectedKey={cloneFromStateId}
-                onSelectionChange={(selected) =>
-                  setCloneFromStateId(selected as string)
-                }
-                width="100%"
-                items={currentWorkflow.states || []}
-                placeholder="Select a state to clone from..."
-                isDisabled={isSubmitting}
-              >
-                {(state) => <Item key={state.id}>{state.title}</Item>}
-              </Picker>
-              <Text slot="description" marginTop="size-75">
-                Cloning will copy permissions, roles, and transitions from the
-                selected state.
-              </Text>
-            </View>
-
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                State Name *
-              </Heading>
-              <TextField
-                value={newStateTitle}
-                onChange={setNewStateTitle}
-                isRequired
-                width="100%"
-                validationState={titleError ? 'invalid' : 'valid'}
-                errorMessage={titleError}
-                isDisabled={isSubmitting}
-                description="Enter state name..."
-              />
-            </View>
-
-            <View marginBottom="size-300">
-              <Heading level={3} marginBottom="size-100">
-                Description (optional)
-              </Heading>
-              <TextField
-                value={newStateDescription}
-                onChange={setNewStateDescription}
-                width="100%"
-                isDisabled={isSubmitting}
-                description="Enter a brief description of this state..."
-              />
-            </View>
-
-            <ButtonGroup>
-              <Button
-                variant="secondary"
-                onPress={close}
-                isDisabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="accent"
-                onPress={handleCreate}
-                isDisabled={!isFormValid}
-              >
-                {isSubmitting && <ProgressCircle size="S" />}
-                {isSubmitting ? 'Creating...' : 'Add State'}
-              </Button>
-            </ButtonGroup>
-          </Content>
-        </Dialog>
-      )}
-    </DialogTrigger>
+          <View marginBottom="size-300">
+            <Heading level={3} marginBottom="size-100">
+              Description (optional)
+            </Heading>
+            <TextField
+              aria-label="State description"
+              value={newStateDescription}
+              onChange={setNewStateDescription}
+              width="100%"
+              isDisabled={isSubmitting}
+              description="Enter a brief description of this state..."
+            />
+          </View>
+        </Content>
+        <ButtonGroup>
+          <Button
+            variant="secondary"
+            onPress={onClose}
+            isDisabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="accent"
+            onPress={handleCreate}
+            isDisabled={!isFormValid}
+          >
+            {isSubmitting && <ProgressCircle size="S" />}
+            {isSubmitting ? 'Creating...' : 'Add State'}
+          </Button>
+        </ButtonGroup>
+      </Dialog>
+    </DialogContainer>
   );
 };
 
