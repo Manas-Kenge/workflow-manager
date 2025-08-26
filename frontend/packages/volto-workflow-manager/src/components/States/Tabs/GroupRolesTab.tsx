@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Heading,
   Text,
   TableView,
   TableHeader,
@@ -54,7 +53,6 @@ const GroupRolesTab: React.FC<GroupRolesTabProps> = ({
 
   return (
     <View>
-      <Heading level={3}>Group Roles</Heading>
       <Text>
         Select the local roles that are assigned to each group in this state.
       </Text>

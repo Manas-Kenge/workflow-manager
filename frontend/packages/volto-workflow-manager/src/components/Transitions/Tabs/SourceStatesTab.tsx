@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox, Flex, View, Text, Heading } from '@adobe/react-spectrum';
+import { Checkbox, Flex, View, Text } from '@adobe/react-spectrum';
 import type { SourceStatesTabProps } from '../../../types/transition';
 
 const SourceStatesTab: React.FC<SourceStatesTabProps> = ({
@@ -28,7 +28,6 @@ const SourceStatesTab: React.FC<SourceStatesTabProps> = ({
 
   return (
     <View>
-      <Heading level={3}>Source States</Heading>
       <Text>
         Select the states from which this transition can be triggered.
       </Text>

@@ -26,6 +26,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
   return (
     <View>
       <Form
+        key={JSON.stringify(data)}
         schema={schema}
         formData={data}
         onChangeField={handleChangeField}

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  Accordion,
+  Disclosure,
+  DisclosureTitle,
+  DisclosurePanel,
   Flex,
   Picker,
   View,
-  Tabs,
-  TabList,
-  TabPanels,
   Item,
   Heading,
   ProgressCircle,
@@ -16,7 +17,6 @@ import { listStates } from '../../actions/state';
 import PropertiesTab from './Tabs/PropertiesTab';
 import GuardsTab from './Tabs/GuardsTab';
 import SourceStatesTab from './Tabs/SourceStatesTab';
-import ActionsTab from './Tabs/ActionsTab';
 import type { GlobalRootState } from '../../types';
 import type { TransitionData, TransitionProps } from '../../types/transition';
 
@@ -35,11 +35,12 @@ const Transition: React.FC<TransitionProps> = ({
   const [initialTransitionData, setInitialTransitionData] =
     useState<TransitionData | null>(null);
 
-  const { transitionsInfo, statesInfo, isLoading } = useSelector(
+  const { transitionsInfo, statesInfo, isLoading, selectedItem } = useSelector(
     (state: GlobalRootState) => ({
       transitionsInfo: state.transition.list,
       statesInfo: state.state.list,
       isLoading: state.transition.list.loading || state.state.list.loading,
+      selectedItem: state.workflow.selectedItem,
     }),
   );
 
@@ -49,6 +50,16 @@ const Transition: React.FC<TransitionProps> = ({
       dispatch(listStates(workflowId));
     }
   }, [dispatch, workflowId]);
+
+  // Sync selectedTransitionId with selectedItem from graph
+  useEffect(() => {
+    if (
+      selectedItem?.kind === 'transition' &&
+      selectedItem.id !== selectedTransitionId
+    ) {
+      setSelectedTransitionId(selectedItem.id);
+    }
+  }, [selectedItem, selectedTransitionId]);
 
   useEffect(() => {
     const currentTransition = transitionsInfo.data?.transitions.find(
@@ -187,53 +198,58 @@ const Transition: React.FC<TransitionProps> = ({
         </Picker>
       </Flex>
 
-      <Tabs
-        key={selectedTransitionId}
-        aria-label="Transition Configuration"
-        marginTop="size-300"
-      >
-        <TabList>
-          <Item key="properties">Properties</Item>
-          <Item key="guards">Guards</Item>
-          <Item key="source-states">Source States</Item>
-          <Item key="actions">Actions</Item>
-        </TabList>
-        <TabPanels>
-          <Item key="properties">
-            <PropertiesTab
-              data={localTransitionData?.properties}
-              schema={propertiesSchema}
-              onChange={(properties) => handleTransitionChange({ properties })}
-              isDisabled={isTabDisabled}
-            />
-          </Item>
-          <Item key="guards">
-            <GuardsTab
-              data={localTransitionData?.guards}
-              availableRoles={workflow?.context_data?.available_roles || []}
-              availableGroups={workflow?.context_data?.groups || []}
-              availablePermissions={
-                workflow?.context_data?.managed_permissions || []
-              }
-              onChange={(guards) => handleTransitionChange({ guards })}
-              isDisabled={isTabDisabled}
-            />
-          </Item>
-          <Item key="source-states">
-            <SourceStatesTab
-              data={localTransitionData?.sourceStates}
-              availableStates={statesInfo.data?.states || []}
-              onChange={(sourceStates) =>
-                handleTransitionChange({ sourceStates })
-              }
-              isDisabled={isTabDisabled}
-            />
-          </Item>
-          <Item key="actions">
-            <ActionsTab />
-          </Item>
-        </TabPanels>
-      </Tabs>
+      {selectedTransitionId && (
+        <Accordion
+          defaultExpandedKeys={['properties']}
+          key={selectedTransitionId}
+          aria-label="Transition Configuration"
+        >
+          <Disclosure id="properties">
+            <DisclosureTitle>Properties</DisclosureTitle>
+            <DisclosurePanel>
+              <PropertiesTab
+                key={`properties-${selectedTransitionId}`}
+                data={localTransitionData?.properties}
+                schema={propertiesSchema}
+                onChange={(properties) =>
+                  handleTransitionChange({ properties })
+                }
+                isDisabled={isTabDisabled}
+              />
+            </DisclosurePanel>
+          </Disclosure>
+          <Disclosure id="guards">
+            <DisclosureTitle>Guard Configuration</DisclosureTitle>
+            <DisclosurePanel>
+              <GuardsTab
+                key={`guards-${selectedTransitionId}`}
+                data={localTransitionData?.guards}
+                availableRoles={workflow?.context_data?.available_roles || []}
+                availableGroups={workflow?.context_data?.groups || []}
+                availablePermissions={
+                  workflow?.context_data?.managed_permissions || []
+                }
+                onChange={(guards) => handleTransitionChange({ guards })}
+                isDisabled={isTabDisabled}
+              />
+            </DisclosurePanel>
+          </Disclosure>
+          <Disclosure id="source-states">
+            <DisclosureTitle>Source States</DisclosureTitle>
+            <DisclosurePanel>
+              <SourceStatesTab
+                key={`source-states-${selectedTransitionId}`}
+                data={localTransitionData?.sourceStates}
+                availableStates={statesInfo.data?.states || []}
+                onChange={(sourceStates) =>
+                  handleTransitionChange({ sourceStates })
+                }
+                isDisabled={isTabDisabled}
+              />
+            </DisclosurePanel>
+          </Disclosure>
+        </Accordion>
+      )}
     </View>
   );
 };

@@ -20,7 +20,9 @@ import Icon from '@plone/volto/components/theme/Icon/Icon';
 import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
-import PropertiesForm from 'volto-workflow-manager/components/Workflow/PropertiesForm';
+import WorkflowTab from './WorkflowTab';
+import State from '../States/State';
+import Transition from '../Transitions/Transition';
 import type { GlobalRootState } from 'volto-workflow-manager/types';
 
 const messages = defineMessages({
@@ -62,99 +64,11 @@ const messages = defineMessages({
   },
 });
 
-const workflowSchema = {
-  title: 'Workflow Properties',
-  fieldsets: [
-    {
-      id: 'default',
-      title: 'Workflow Properties',
-      fields: ['title', 'description'],
-    },
-  ],
-  properties: {
-    title: { title: 'Title', type: 'string' },
-    description: { title: 'Description', type: 'string', widget: 'textarea' },
-  },
-  required: ['title'],
-};
-
-const stateSchema = {
-  title: 'State Properties',
-  fieldsets: [
-    {
-      id: 'default',
-      title: 'State Properties',
-      fields: ['title', 'description'],
-    },
-  ],
-  properties: {
-    title: { title: 'Title', type: 'string' },
-    description: { title: 'Description', type: 'string', widget: 'textarea' },
-  },
-  required: ['title'],
-};
-
-const transitionSchema = {
-  title: 'Transition Properties',
-  fieldsets: [
-    {
-      id: 'default',
-      title: 'Transition Properties',
-      fields: ['title', 'description'],
-    },
-  ],
-  properties: {
-    title: { title: 'Title', type: 'string' },
-    description: { title: 'Description', type: 'string', widget: 'textarea' },
-  },
-  required: ['title'],
-};
-
 const Sidebar = (props) => {
   const dispatch = useDispatch();
   const { currentWorkflow, onDataChange, isDisabled } = props;
   const selectedItem = useSelector(
     (state: GlobalRootState) => state.workflow.selectedItem,
-  );
-
-  const selectedState = useMemo(
-    () => currentWorkflow?.states.find((s) => s.id === selectedItem?.id),
-    [currentWorkflow?.states, selectedItem],
-  );
-  const selectedTransition = useMemo(
-    () => currentWorkflow?.transitions.find((t) => t.id === selectedItem?.id),
-    [currentWorkflow?.transitions, selectedItem],
-  );
-
-  const handleWorkflowChange = useCallback(
-    (payload) => {
-      onDataChange(payload, 'workflow');
-    },
-    [onDataChange],
-  );
-
-  const handleStateChange = useCallback(
-    (formData) => {
-      if (selectedState) {
-        onDataChange(
-          formData ? { id: selectedState.id, ...formData } : null,
-          'state',
-        );
-      }
-    },
-    [onDataChange, selectedState],
-  );
-
-  const handleTransitionChange = useCallback(
-    (formData) => {
-      if (selectedTransition) {
-        onDataChange(
-          formData ? { id: selectedTransition.id, ...formData } : null,
-          'transition',
-        );
-      }
-    },
-    [onDataChange, selectedTransition],
   );
 
   const intl = useIntl();
@@ -217,11 +131,9 @@ const Sidebar = (props) => {
           key: 'workflow',
           title: intl.formatMessage(messages.workflow),
           content: (
-            <PropertiesForm
-              key={currentWorkflow.id}
-              schema={workflowSchema}
-              item={currentWorkflow}
-              onDataChange={handleWorkflowChange}
+            <WorkflowTab
+              workflowId={currentWorkflow.id}
+              onDataChange={(payload) => onDataChange(payload, 'workflow')}
               isDisabled={isDisabled}
             />
           ),
@@ -229,53 +141,37 @@ const Sidebar = (props) => {
         statesTab && {
           key: 'states',
           title: intl.formatMessage(messages.states),
-          content:
-            selectedItem?.kind === 'state' && selectedState ? (
-              <PropertiesForm
-                key={selectedState.id}
-                schema={stateSchema}
-                item={selectedState}
-                onDataChange={handleStateChange}
-                isDisabled={isDisabled}
-              />
-            ) : (
-              <p style={{ padding: '1rem' }}>
-                Select a state from the graph to edit its properties.
-              </p>
-            ),
+          content: (
+            <State
+              workflowId={currentWorkflow.id}
+              workflow={currentWorkflow}
+              onDataChange={(payload) => onDataChange(payload, 'state')}
+              isDisabled={isDisabled}
+            />
+          ),
         },
         transitionsTab && {
           key: 'transitions',
           title: intl.formatMessage(messages.transitions),
-          content:
-            selectedItem?.kind === 'transition' && selectedTransition ? (
-              <PropertiesForm
-                key={selectedTransition.id}
-                schema={transitionSchema}
-                item={selectedTransition}
-                onDataChange={handleTransitionChange}
-                isDisabled={isDisabled}
-              />
-            ) : (
-              <p style={{ padding: '1rem' }}>
-                Select a transition from the graph to edit its properties.
-              </p>
-            ),
+          content: (
+            <Transition
+              workflowId={currentWorkflow.id}
+              workflow={currentWorkflow}
+              onDataChange={(payload) => onDataChange(payload, 'transition')}
+              isDisabled={isDisabled}
+            />
+          ),
         },
       ].filter(Boolean),
     [
+      onDataChange,
       workflowTab,
       statesTab,
       transitionsTab,
       intl,
       currentWorkflow,
       isDisabled,
-      handleWorkflowChange,
       selectedItem,
-      selectedState,
-      handleStateChange,
-      selectedTransition,
-      handleTransitionChange,
     ],
   );
 
