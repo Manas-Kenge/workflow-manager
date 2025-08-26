@@ -1,6 +1,14 @@
-import React, { useState, Fragment, useCallback, useMemo } from 'react';
+import { useState, Fragment, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Tab, Button } from 'semantic-ui-react';
+import {
+  ActionButton,
+  Button,
+  Flex,
+  Item,
+  TabList,
+  TabPanels,
+  Tabs,
+} from '@adobe/react-spectrum';
 import { useDispatch, useSelector } from 'react-redux';
 import { compose } from 'redux';
 import { withCookies } from 'react-cookie';
@@ -9,11 +17,9 @@ import cx from 'classnames';
 import BodyClass from '@plone/volto/helpers/BodyClass/BodyClass';
 import { getCookieOptions } from '@plone/volto/helpers/Cookies/cookies';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
-import forbiddenSVG from '@plone/volto/icons/forbidden.svg';
 import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 import expandSVG from '@plone/volto/icons/left-key.svg';
 import collapseSVG from '@plone/volto/icons/right-key.svg';
-import { useLocation } from 'react-router-dom';
 import PropertiesForm from 'volto-workflow-manager/components/Workflow/PropertiesForm';
 import type { GlobalRootState } from 'volto-workflow-manager/types';
 
@@ -106,7 +112,6 @@ const transitionSchema = {
 
 const Sidebar = (props) => {
   const dispatch = useDispatch();
-  const location = useLocation();
   const { currentWorkflow, onDataChange, isDisabled } = props;
   const selectedItem = useSelector(
     (state: GlobalRootState) => state.workflow.selectedItem,
@@ -156,10 +161,6 @@ const Sidebar = (props) => {
   const {
     cookies,
     content,
-    documentTab,
-    blockTab,
-    settingsTab,
-    orderTab = true,
     workflowTab = true,
     statesTab = true,
     transitionsTab = true,
@@ -170,9 +171,8 @@ const Sidebar = (props) => {
   const [size] = useState(0);
   const [showFull, setshowFull] = useState(true);
 
-  const tab = useSelector((state) => state.sidebar.tab);
-  const toolbarExpanded = useSelector((state) => state.toolbar.expanded);
-  const type = useSelector((state) => state.schema?.schema?.title);
+  const tabIndex = useSelector((state) => state?.sidebar.tab);
+  const toolbarExpanded = useSelector((state) => state?.toolbar.expanded);
 
   const onToggleExpanded = () => {
     cookies.set('sidebar_expanded', !expanded, getCookieOptions());
@@ -210,14 +210,83 @@ const Sidebar = (props) => {
     setshowFull(!showFull);
   }, [showFull, toolbarExpanded]);
 
-  const onTabChange = (event, data) => {
-    event.nativeEvent.stopImmediatePropagation();
-    dispatch(setSidebarTab(data.activeIndex));
-  };
-
-  const isWorkflowPage = location.pathname.startsWith(
-    '/controlpanel/workflowmanager',
+  const workflowTabs = useMemo(
+    () =>
+      [
+        workflowTab && {
+          key: 'workflow',
+          title: intl.formatMessage(messages.workflow),
+          content: (
+            <PropertiesForm
+              key={currentWorkflow.id}
+              schema={workflowSchema}
+              item={currentWorkflow}
+              onDataChange={handleWorkflowChange}
+              isDisabled={isDisabled}
+            />
+          ),
+        },
+        statesTab && {
+          key: 'states',
+          title: intl.formatMessage(messages.states),
+          content:
+            selectedItem?.kind === 'state' && selectedState ? (
+              <PropertiesForm
+                key={selectedState.id}
+                schema={stateSchema}
+                item={selectedState}
+                onDataChange={handleStateChange}
+                isDisabled={isDisabled}
+              />
+            ) : (
+              <p style={{ padding: '1rem' }}>
+                Select a state from the graph to edit its properties.
+              </p>
+            ),
+        },
+        transitionsTab && {
+          key: 'transitions',
+          title: intl.formatMessage(messages.transitions),
+          content:
+            selectedItem?.kind === 'transition' && selectedTransition ? (
+              <PropertiesForm
+                key={selectedTransition.id}
+                schema={transitionSchema}
+                item={selectedTransition}
+                onDataChange={handleTransitionChange}
+                isDisabled={isDisabled}
+              />
+            ) : (
+              <p style={{ padding: '1rem' }}>
+                Select a transition from the graph to edit its properties.
+              </p>
+            ),
+        },
+      ].filter(Boolean),
+    [
+      workflowTab,
+      statesTab,
+      transitionsTab,
+      intl,
+      currentWorkflow,
+      isDisabled,
+      handleWorkflowChange,
+      selectedItem,
+      selectedState,
+      handleStateChange,
+      selectedTransition,
+      handleTransitionChange,
+    ],
   );
+
+  const selectedKey = workflowTabs[tabIndex]?.key;
+
+  const handleTabChange = (key) => {
+    const newIndex = workflowTabs.findIndex((tab) => tab.key === key);
+    if (newIndex > -1) {
+      dispatch(setSidebarTab(newIndex));
+    }
+  };
 
   return (
     <Fragment>
@@ -229,187 +298,57 @@ const Sidebar = (props) => {
         style={size > 0 ? { width: size } : null}
       >
         <Button
-          type="button"
+          variant="primary"
+          UNSAFE_className={
+            content && content.review_state
+              ? `${content.review_state} trigger`
+              : 'trigger'
+          }
           aria-label={
             expanded
               ? intl.formatMessage(messages.shrinkSidebar)
               : intl.formatMessage(messages.expandSidebar)
           }
-          className={
-            content && content.review_state
-              ? `${content.review_state} trigger`
-              : 'trigger'
-          }
-          onClick={onToggleExpanded}
+          onPress={onToggleExpanded}
         />
-        <Button
-          type="button"
-          className="full-size-sidenav-btn"
-          onClick={onToggleFullSize}
-          aria-label="full-screen-sidenav"
+
+        <Tabs
+          aria-label="Workflow Manager Sidebar"
+          selectedKey={selectedKey}
+          onSelectionChange={handleTabChange}
+          isQuiet
+          height="100%"
         >
-          <Icon
-            className="full-size-icon"
-            name={showFull ? expandSVG : collapseSVG}
-          />
-        </Button>
-        <Tab
-          menu={{
-            secondary: true,
-            pointing: true,
-            attached: true,
-            tabular: true,
-            className: 'formtabs',
-          }}
-          className="tabs-wrapper"
-          renderActiveOnly={false}
-          activeIndex={tab}
-          onTabChange={onTabChange}
-          panes={[
-            ...(isWorkflowPage
-              ? [
-                  !!workflowTab && {
-                    menuItem: intl.formatMessage(messages.workflow),
-                    pane: (
-                      <Tab.Pane
-                        key="workflow"
-                        className="tab-wrapper"
-                        id="sidebar-workflow"
-                      >
-                        <PropertiesForm
-                          key={currentWorkflow.id}
-                          schema={workflowSchema}
-                          item={currentWorkflow}
-                          onDataChange={handleWorkflowChange}
-                          isDisabled={isDisabled}
-                        />
-                      </Tab.Pane>
-                    ),
-                  },
-                  !!statesTab && {
-                    menuItem: intl.formatMessage(messages.states),
-                    pane: (
-                      <Tab.Pane
-                        key="states"
-                        className="tab-wrapper"
-                        id="sidebar-states"
-                      >
-                        {selectedItem?.kind === 'state' && selectedState ? (
-                          <PropertiesForm
-                            key={selectedState.id}
-                            schema={stateSchema}
-                            item={selectedState}
-                            onDataChange={handleStateChange}
-                            isDisabled={isDisabled}
-                          />
-                        ) : (
-                          <p style={{ padding: '1rem' }}>
-                            Select a state from the graph to edit its
-                            properties.
-                          </p>
-                        )}
-                      </Tab.Pane>
-                    ),
-                  },
-                  !!transitionsTab && {
-                    menuItem: intl.formatMessage(messages.transitions),
-                    pane: (
-                      <Tab.Pane
-                        key="transitions"
-                        className="tab-wrapper"
-                        id="sidebar-transitions"
-                      >
-                        {selectedItem?.kind === 'transition' &&
-                        selectedTransition ? (
-                          <PropertiesForm
-                            key={selectedTransition.id}
-                            schema={transitionSchema}
-                            item={selectedTransition}
-                            onDataChange={handleTransitionChange}
-                            isDisabled={isDisabled}
-                          />
-                        ) : (
-                          <p style={{ padding: '1rem' }}>
-                            Select a transition from the graph to edit its
-                            properties.
-                          </p>
-                        )}
-                      </Tab.Pane>
-                    ),
-                  },
-                ].filter(Boolean)
-              : [
-                  !!documentTab && {
-                    menuItem: {
-                      key: 'documentTab',
-                      as: 'button',
-                      className: 'ui button',
-                      content: type || intl.formatMessage(messages.document),
-                    },
-                    pane: (
-                      <Tab.Pane
-                        key="metadata"
-                        className="tab-wrapper"
-                        id="sidebar-metadata"
-                      />
-                    ),
-                  },
-                  !!blockTab && {
-                    menuItem: {
-                      key: 'blockTab',
-                      as: 'button',
-                      className: 'ui button',
-                      content: intl.formatMessage(messages.block),
-                    },
-                    pane: (
-                      <Tab.Pane
-                        key="properties"
-                        className="tab-wrapper"
-                        id="sidebar-properties"
-                      >
-                        <Icon
-                          className="tab-forbidden"
-                          name={forbiddenSVG}
-                          size="48px"
-                        />
-                      </Tab.Pane>
-                    ),
-                  },
-                  !!orderTab && {
-                    menuItem: intl.formatMessage(messages.order),
-                    pane: (
-                      <Tab.Pane
-                        key="order"
-                        className="tab-wrapper"
-                        id="sidebar-order"
-                      >
-                        <Icon
-                          className="tab-forbidden"
-                          name={forbiddenSVG}
-                          size="48px"
-                        />
-                      </Tab.Pane>
-                    ),
-                  },
-                  !!settingsTab && {
-                    menuItem: intl.formatMessage(messages.settings),
-                    pane: (
-                      <Tab.Pane
-                        key="settings"
-                        className="tab-wrapper"
-                        id="sidebar-settings"
-                      >
-                        <Icon
-                          className="tab-forbidden"
-                          name={forbiddenSVG}
-                          size="48px"
-                        />
-                      </Tab.Pane>
-                    ),
-                  },
-                ].filter(Boolean)),
-          ].filter((tab) => tab)}
-        />
+          <Flex
+            direction="row"
+            alignItems="center"
+            gap="size-100"
+            UNSAFE_className="sidebar-tabs-header"
+          >
+            <ActionButton
+              UNSAFE_className="full-size-sidenav-btn"
+              aria-label="full-screen-sidenav"
+              onPress={onToggleFullSize}
+            >
+              <Icon
+                className="full-size-icon"
+                name={showFull ? expandSVG : collapseSVG}
+              />
+            </ActionButton>
+
+            <TabList flex="1">
+              {workflowTabs.map((tab) => (
+                <Item key={tab.key}>{tab.title}</Item>
+              ))}
+            </TabList>
+          </Flex>
+
+          <TabPanels flex="1" UNSAFE_className="sidebar-tab-panels">
+            {workflowTabs.map((tab) => (
+              <Item key={tab.key}>{tab.content}</Item>
+            ))}
+          </TabPanels>
+        </Tabs>
       </div>
       <div className={expanded ? 'pusher expanded' : 'pusher'} />
     </Fragment>

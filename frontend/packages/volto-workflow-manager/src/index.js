@@ -3,7 +3,6 @@ import WorkflowSettings from './components/Workflow/WorkflowSettings';
 // import State from './components/States/State';
 import { workflow, state, transition } from './reducers';
 import './theme/main.scss';
-
 const applyConfig = (config) => {
   config.settings.isMultilingual = false;
   config.settings.supportedLanguages = ['en'];
