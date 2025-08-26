@@ -1,0 +1,28 @@
+body.section-controlpanel.section-workflowmanager.is-authenticated.cms-ui.has-toolbar {
+  overflow-x: visible;
+}
+
+.sidebar-container {
+  .trigger {
+    margin-left: -35px;
+  }
+
+  .sidebar-tabs-header {
+    border-bottom: 1px solid var(--spectrum-gray-200);
+  }
+
+  .sidebar-tab-panels {
+    overflow: auto;
+  }
+
+  .full-size-sidenav-btn {
+    padding-top: 14px;
+    padding-right: 6px;
+    padding-bottom: 12px;
+    padding-left: 6px;
+
+    &:hover {
+      background-color: transparent !important;
+    }
+  }
+}
