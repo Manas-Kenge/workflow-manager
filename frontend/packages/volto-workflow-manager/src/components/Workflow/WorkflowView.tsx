@@ -149,18 +149,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
                     title="back"
                   />
                 </Link>
-                <Link
-                  to={`/controlpanel/workflowmanager/${workflowId}/settings`}
-                  className="settings"
-                >
-                  <Icon
-                    name={settings}
-                    className="circled"
-                    aria-label="Workflow Settings"
-                    size="30px"
-                    title="Workflow Settings"
-                  />
-                </Link>
                 <Button
                   id="toolbar-saving-workflow"
                   aria-label="Save changes"

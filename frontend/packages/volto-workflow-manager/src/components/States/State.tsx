@@ -20,7 +20,6 @@ import PermissionRolesTab from './Tabs/PermissionRolesTab';
 import GroupRolesTab from './Tabs/GroupRolesTab';
 import type { GlobalRootState } from '../../types';
 import type { StateData, StateProps } from '../../types/state';
-import { Label } from 'react-aria-components';
 
 const propertiesSchema = {
   title: 'State Properties',
