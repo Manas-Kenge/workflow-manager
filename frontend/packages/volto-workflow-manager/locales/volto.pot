@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Plone\n"
-"POT-Creation-Date: 2024-03-22T12:43:34.158Z\n"
+"POT-Creation-Date: 2025-08-27T07:49:22.899Z\n"
 "Last-Translator: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
 "Language-Team: Plone i18n <plone-i18n@lists.sourceforge.net>\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -12,3 +12,98 @@ msgstr ""
 "Language-Name: English\n"
 "Preferred-Encodings: utf-8\n"
 "Domain: volto\n"
+
+#. Default: "Block"
+#: components/Workflow/WorkflowSidebar
+msgid "Block"
+msgstr ""
+
+#. Default: "Document"
+#: components/Workflow/WorkflowSidebar
+msgid "Document"
+msgstr ""
+
+#. Default: "Errors were found. Click "View Results" for details."
+#: components/Workflow/ActionsToolbar
+msgid "Errors were found. Click "View Results" for details."
+msgstr ""
+
+#. Default: "Expand sidebar"
+#: components/Workflow/WorkflowSidebar
+msgid "Expand sidebar"
+msgstr ""
+
+#. Default: "No errors found in the workflow."
+#: components/Workflow/ActionsToolbar
+msgid "No errors found in the workflow."
+msgstr ""
+
+#. Default: "Order"
+#: components/Workflow/WorkflowSidebar
+msgid "Order"
+msgstr ""
+
+#. Default: "Settings"
+#: components/Workflow/WorkflowSidebar
+msgid "Settings"
+msgstr ""
+
+#. Default: "Shrink sidebar"
+#: components/Workflow/WorkflowSidebar
+msgid "Shrink sidebar"
+msgstr ""
+
+#. Default: "State Created"
+#: components/States/CreateState
+msgid "State Created"
+msgstr ""
+
+#. Default: "State Creation Failed"
+#: components/States/CreateState
+msgid "State Creation Failed"
+msgstr ""
+
+#. Default: "States"
+#: components/Workflow/WorkflowSidebar
+msgid "States"
+msgstr ""
+
+#. Default: "The new state has been added successfully."
+#: components/States/CreateState
+msgid "The new state has been added successfully."
+msgstr ""
+
+#. Default: "The new transition has been added successfully."
+#: components/Transitions/CreateTransition
+msgid "The new transition has been added successfully."
+msgstr ""
+
+#. Default: "Transition Created"
+#: components/Transitions/CreateTransition
+msgid "Transition Created"
+msgstr ""
+
+#. Default: "Transition Creation Failed"
+#: components/Transitions/CreateTransition
+msgid "Transition Creation Failed"
+msgstr ""
+
+#. Default: "Transitions"
+#: components/Workflow/WorkflowSidebar
+msgid "Transitions"
+msgstr ""
+
+#. Default: "Validation Failed"
+#: components/Workflow/ActionsToolbar
+msgid "Validation Failed"
+msgstr ""
+
+#. Default: "Validation Successful"
+#: components/Workflow/ActionsToolbar
+msgid "Validation Successful"
+msgstr ""
+
+#. Default: "Workflow"
+#: components/Workflow/WorkflowSidebar
+msgid "Workflow"
+msgstr ""
