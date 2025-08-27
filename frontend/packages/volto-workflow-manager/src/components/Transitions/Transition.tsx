@@ -184,7 +184,12 @@ const Transition: React.FC<TransitionProps> = ({
 
   return (
     <View>
-      <Flex direction="column" gap="size-200" marginY="size-300">
+      <Flex
+        direction="column"
+        gap="size-200"
+        marginY="size-300"
+        marginX="size-300"
+      >
         <Heading level={3}>Configure a Transition</Heading>
         <Picker
           label="Select a transition to edit"
@@ -196,60 +201,60 @@ const Transition: React.FC<TransitionProps> = ({
         >
           {(item) => <Item key={item.id}>{item.title}</Item>}
         </Picker>
-      </Flex>
 
-      {selectedTransitionId && (
-        <Accordion
-          defaultExpandedKeys={['properties']}
-          key={selectedTransitionId}
-          aria-label="Transition Configuration"
-        >
-          <Disclosure id="properties">
-            <DisclosureTitle>Properties</DisclosureTitle>
-            <DisclosurePanel>
-              <PropertiesTab
-                key={`properties-${selectedTransitionId}`}
-                data={localTransitionData?.properties}
-                schema={propertiesSchema}
-                onChange={(properties) =>
-                  handleTransitionChange({ properties })
-                }
-                isDisabled={isTabDisabled}
-              />
-            </DisclosurePanel>
-          </Disclosure>
-          <Disclosure id="guards">
-            <DisclosureTitle>Guard Configuration</DisclosureTitle>
-            <DisclosurePanel>
-              <GuardsTab
-                key={`guards-${selectedTransitionId}`}
-                data={localTransitionData?.guards}
-                availableRoles={workflow?.context_data?.available_roles || []}
-                availableGroups={workflow?.context_data?.groups || []}
-                availablePermissions={
-                  workflow?.context_data?.managed_permissions || []
-                }
-                onChange={(guards) => handleTransitionChange({ guards })}
-                isDisabled={isTabDisabled}
-              />
-            </DisclosurePanel>
-          </Disclosure>
-          <Disclosure id="source-states">
-            <DisclosureTitle>Source States</DisclosureTitle>
-            <DisclosurePanel>
-              <SourceStatesTab
-                key={`source-states-${selectedTransitionId}`}
-                data={localTransitionData?.sourceStates}
-                availableStates={statesInfo.data?.states || []}
-                onChange={(sourceStates) =>
-                  handleTransitionChange({ sourceStates })
-                }
-                isDisabled={isTabDisabled}
-              />
-            </DisclosurePanel>
-          </Disclosure>
-        </Accordion>
-      )}
+        {selectedTransitionId && (
+          <Accordion
+            defaultExpandedKeys={['properties']}
+            key={selectedTransitionId}
+            aria-label="Transition Configuration"
+          >
+            <Disclosure id="properties">
+              <DisclosureTitle>Properties</DisclosureTitle>
+              <DisclosurePanel>
+                <PropertiesTab
+                  key={`properties-${selectedTransitionId}`}
+                  data={localTransitionData?.properties}
+                  schema={propertiesSchema}
+                  onChange={(properties) =>
+                    handleTransitionChange({ properties })
+                  }
+                  isDisabled={isTabDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+            <Disclosure id="guards">
+              <DisclosureTitle>Guard Configuration</DisclosureTitle>
+              <DisclosurePanel>
+                <GuardsTab
+                  key={`guards-${selectedTransitionId}`}
+                  data={localTransitionData?.guards}
+                  availableRoles={workflow?.context_data?.available_roles || []}
+                  availableGroups={workflow?.context_data?.groups || []}
+                  availablePermissions={
+                    workflow?.context_data?.managed_permissions || []
+                  }
+                  onChange={(guards) => handleTransitionChange({ guards })}
+                  isDisabled={isTabDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+            <Disclosure id="source-states">
+              <DisclosureTitle>Source States</DisclosureTitle>
+              <DisclosurePanel>
+                <SourceStatesTab
+                  key={`source-states-${selectedTransitionId}`}
+                  data={localTransitionData?.sourceStates}
+                  availableStates={statesInfo.data?.states || []}
+                  onChange={(sourceStates) =>
+                    handleTransitionChange({ sourceStates })
+                  }
+                  isDisabled={isTabDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+          </Accordion>
+        )}
+      </Flex>
     </View>
   );
 };
