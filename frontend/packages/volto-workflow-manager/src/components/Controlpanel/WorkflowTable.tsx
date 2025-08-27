@@ -235,11 +235,7 @@ const WorkflowTable = ({ workflows, handleWorkflowClick, isClickable }) => {
               >
                 Cancel
               </Button>
-              <Button
-                variant="negative"
-                style="fill"
-                onPress={handleConfirmDelete}
-              >
+              <Button variant="negative" onPress={handleConfirmDelete}>
                 Delete
               </Button>
             </ButtonGroup>
