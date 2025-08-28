@@ -1,6 +1,4 @@
 import WorkflowControlPanel from './components/Controlpanel/WorkflowPanel';
-import WorkflowSettings from './components/Workflow/WorkflowSettings';
-// import State from './components/States/State';
 import { workflow, state, transition } from './reducers';
 import './theme/main.scss';
 const applyConfig = (config) => {
@@ -18,11 +16,6 @@ const applyConfig = (config) => {
 
   config.addonRoutes = [
     ...config.addonRoutes,
-    {
-      path: '/controlpanel/workflowmanager/:workflowId/settings',
-      exact: true,
-      component: WorkflowSettings,
-    },
     {
       path: '/controlpanel/workflowmanager',
       exact: true,

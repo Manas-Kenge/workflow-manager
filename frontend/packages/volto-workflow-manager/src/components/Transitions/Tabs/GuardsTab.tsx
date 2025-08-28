@@ -33,7 +33,6 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
 
   return (
     <View>
-      <Heading level={3}>Guard Configuration</Heading>
       <Text>
         Guards restrict this transition to being run by only certain people or
         under certain conditions.

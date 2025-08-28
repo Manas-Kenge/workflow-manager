@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Heading,
   Text,
   TableView,
   TableHeader,
@@ -53,7 +52,6 @@ const PermissionRolesTab: React.FC<PermissionRolesTabProps> = ({
 
   return (
     <View>
-      <Heading level={3}>Permission Roles</Heading>
       <Text>Select the permissions that each role has in this state.</Text>
 
       <TableView

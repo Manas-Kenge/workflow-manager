@@ -1,13 +1,13 @@
 /* Custom Node Styles */
 .custom-node {
+  position: relative;
+  min-width: 100px;
   padding: 10px 15px;
   border: 2px solid #ddd;
   border-radius: 8px;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-width: 100px;
   transition: all 0.2s ease;
-  position: relative;
 }
 
 .custom-node:hover {
@@ -22,14 +22,14 @@
 
 /* Node content layout */
 .node-content {
-  text-align: center;
   line-height: 1.4;
+  text-align: center;
 }
 
 .node-description {
-  font-size: 11px;
-  color: #666;
   margin-top: 4px;
+  color: #666;
+  font-size: 11px;
   font-weight: normal;
 }
 
@@ -57,8 +57,8 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .custom-node {
-    padding: 8px 12px;
     min-width: 80px;
+    padding: 8px 12px;
   }
 
   .node-description {

@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  Accordion,
+  Disclosure,
+  DisclosureTitle,
+  DisclosurePanel,
   View,
   Heading,
   Flex,
   Picker,
   Item,
-  Tabs,
-  TabList,
-  TabPanels,
   ProgressCircle,
 } from '@adobe/react-spectrum';
 import { listStates } from '../../actions/state';
@@ -61,13 +62,13 @@ const State: React.FC<StateProps> = ({
     null,
   );
 
-  const { statesInfo, transitionsInfo, isLoadingData } = useSelector(
-    (state: GlobalRootState) => ({
+  const { statesInfo, transitionsInfo, isLoadingData, selectedItem } =
+    useSelector((state: GlobalRootState) => ({
       statesInfo: state.state.list,
       transitionsInfo: state.transition.list,
       isLoadingData: state.state.list.loading || state.transition.list.loading,
-    }),
-  );
+      selectedItem: state.workflow.selectedItem,
+    }));
 
   useEffect(() => {
     if (workflowId) {
@@ -75,6 +76,13 @@ const State: React.FC<StateProps> = ({
       dispatch(listTransitions(workflowId));
     }
   }, [dispatch, workflowId]);
+
+  // Sync selectedStateId with selectedItem from graph
+  useEffect(() => {
+    if (selectedItem?.kind === 'state' && selectedItem.id !== selectedStateId) {
+      setSelectedStateId(selectedItem.id);
+    }
+  }, [selectedItem, selectedStateId]);
 
   useEffect(() => {
     const currentState = statesInfo.data?.states.find(
@@ -137,10 +145,14 @@ const State: React.FC<StateProps> = ({
 
   return (
     <View>
-      <Flex direction="column" gap="size-200" marginY="size-300">
+      <Flex
+        direction="column"
+        gap="size-200"
+        marginY="size-300"
+        marginX="size-300"
+      >
         <Heading level={3}>Configure a State</Heading>
         <Picker
-          label="Select a state to edit"
           placeholder="Choose a state..."
           items={statesInfo.data?.states || []}
           selectedKey={selectedStateId}
@@ -149,58 +161,68 @@ const State: React.FC<StateProps> = ({
         >
           {(item) => <Item key={item.id}>{item.title}</Item>}
         </Picker>
-      </Flex>
 
-      <Tabs
-        key={selectedStateId}
-        aria-label="State Configuration"
-        marginTop="size-300"
-      >
-        <TabList>
-          <Item key="properties">Properties</Item>
-          <Item key="transitions">Transitions</Item>
-          <Item key="permissions">Permission Roles</Item>
-          <Item key="group-roles">Group Roles</Item>
-        </TabList>
-        <TabPanels>
-          <Item key="properties">
-            <PropertiesTab
-              data={localStateData?.properties}
-              schema={propertiesSchema}
-              onChange={(properties) => handleStateChange({ properties })}
-              isDisabled={areTabsDisabled}
-            />
-          </Item>
-          <Item key="transitions">
-            <TransitionsTab
-              data={localStateData?.transitions}
-              availableTransitions={transitionsInfo.data?.transitions || []}
-              onChange={(transitions) => handleStateChange({ transitions })}
-              isDisabled={areTabsDisabled}
-            />
-          </Item>
-          <Item key="permissions">
-            <PermissionRolesTab
-              data={localStateData?.permissions}
-              managedPermissions={
-                workflow?.context_data?.managed_permissions || []
-              }
-              availableRoles={workflow?.context_data?.available_roles || []}
-              onChange={(permissions) => handleStateChange({ permissions })}
-              isDisabled={areTabsDisabled}
-            />
-          </Item>
-          <Item key="group-roles">
-            <GroupRolesTab
-              data={localStateData?.groupRoles}
-              groups={workflow?.context_data?.groups || []}
-              availableRoles={workflow?.context_data?.available_roles || []}
-              onChange={(groupRoles) => handleStateChange({ groupRoles })}
-              isDisabled={areTabsDisabled}
-            />
-          </Item>
-        </TabPanels>
-      </Tabs>
+        {selectedStateId && (
+          <Accordion
+            defaultExpandedKeys={['properties']}
+            key={selectedStateId}
+            aria-label="State Configuration"
+          >
+            <Disclosure id="properties">
+              <DisclosureTitle>Properties</DisclosureTitle>
+              <DisclosurePanel>
+                <PropertiesTab
+                  key={`properties-${selectedStateId}`}
+                  data={localStateData?.properties}
+                  schema={propertiesSchema}
+                  onChange={(properties) => handleStateChange({ properties })}
+                  isDisabled={areTabsDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+            <Disclosure id="transitions">
+              <DisclosureTitle>Transitions</DisclosureTitle>
+              <DisclosurePanel>
+                <TransitionsTab
+                  key={`transitions-${selectedStateId}`}
+                  data={localStateData?.transitions}
+                  availableTransitions={transitionsInfo.data?.transitions || []}
+                  onChange={(transitions) => handleStateChange({ transitions })}
+                  isDisabled={areTabsDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+            <Disclosure id="permissions">
+              <DisclosureTitle>Permission Roles</DisclosureTitle>
+              <DisclosurePanel>
+                <PermissionRolesTab
+                  key={`permissions-${selectedStateId}`}
+                  data={localStateData?.permissions}
+                  managedPermissions={
+                    workflow?.context_data?.managed_permissions || []
+                  }
+                  availableRoles={workflow?.context_data?.available_roles || []}
+                  onChange={(permissions) => handleStateChange({ permissions })}
+                  isDisabled={areTabsDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+            <Disclosure id="group-roles">
+              <DisclosureTitle>Group Roles</DisclosureTitle>
+              <DisclosurePanel>
+                <GroupRolesTab
+                  key={`group-roles-${selectedStateId}`}
+                  data={localStateData?.groupRoles}
+                  groups={workflow?.context_data?.groups || []}
+                  availableRoles={workflow?.context_data?.available_roles || []}
+                  onChange={(groupRoles) => handleStateChange({ groupRoles })}
+                  isDisabled={areTabsDisabled}
+                />
+              </DisclosurePanel>
+            </Disclosure>
+          </Accordion>
+        )}
+      </Flex>
     </View>
   );
 };
