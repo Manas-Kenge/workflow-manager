@@ -12,7 +12,7 @@ import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import add from '@plone/volto/icons/add.svg';
-import adduser from '@plone/volto/icons/add-user.svg';
+import contentexisting from '@plone/volto/icons/content-existing.svg';
 import checkboxChecked from '@plone/volto/icons/checkbox-checked.svg';
 import blank from '@plone/volto/icons/blank.svg';
 import CreateState from '../States/CreateState';
@@ -127,7 +127,7 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             {validation.loading ? 'Checking...' : 'Sanity Check'}
           </Button>
           <Button variant="secondary" onPress={() => setAssignDialogOpen(true)}>
-            <Icon name={adduser} size="20px" />
+            <Icon name={contentexisting} size="20px" />
             Assign
           </Button>
         </ButtonGroup>

@@ -200,17 +200,14 @@ class Base:
         Returns a list of content types that do not currently have the
         specified workflow assigned.
         """
-        # Get the list of types already using this workflow
-        assigned_types = self.get_assigned_types_for(workflow_id)
+        assigned_types = self._get_assigned_types_for(workflow_id)
         
-        # Get all user-friendly content types
         vocab_factory = getUtility(IVocabularyFactory,
             name="plone.app.vocabularies.ReallyUserFriendlyTypes")
         all_types = vocab_factory(self.context)
         
         assignable_types = []
         for term in all_types:
-            # A type is assignable if its ID is not in the assigned list
             if term.value not in assigned_types:
                 assignable_types.append({
                     "id": term.value,
@@ -219,7 +216,7 @@ class Base:
         
         return sorted(assignable_types, key=lambda v: v['title'])
     
-    def get_assigned_types_for(self, workflow_id):
+    def _get_assigned_types_for(self, workflow_id):
         """Returns a list of content type IDs assigned to a workflow."""
         assigned = []
         for p_type, chain in self.portal_workflow.listChainOverrides():
