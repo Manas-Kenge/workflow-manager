@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Accordion,
+  Button,
   Disclosure,
   DisclosureTitle,
   DisclosurePanel,
@@ -11,8 +12,12 @@ import {
   Picker,
   Item,
   ProgressCircle,
+  AlertDialog,
+  DialogTrigger,
 } from '@adobe/react-spectrum';
-import { listStates } from '../../actions/state';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import deleteIcon from '@plone/volto/icons/delete.svg';
+import { listStates, deleteState } from '../../actions/state';
 import { listTransitions } from '../../actions/transition';
 import PropertiesTab from './Tabs/PropertiesTab';
 import TransitionsTab from './Tabs/TransitionsTab';
@@ -137,6 +142,17 @@ const State: React.FC<StateProps> = ({
     });
   }, []);
 
+  const handleDeleteState = useCallback(
+    (stateId: string) => {
+      dispatch(deleteState(workflowId, stateId));
+      setSelectedStateId(null);
+      setLocalStateData(null);
+      setInitialStateData(null);
+      onDataChange(null);
+    },
+    [dispatch, workflowId, onDataChange],
+  );
+
   if (isLoadingData && !statesInfo.loaded) {
     return <ProgressCircle isIndeterminate />;
   }
@@ -180,6 +196,24 @@ const State: React.FC<StateProps> = ({
                   isDisabled={areTabsDisabled}
                 />
               </DisclosurePanel>
+              <Flex justifyContent="end" margin="size-100">
+                <DialogTrigger>
+                  <Button variant="negative" isDisabled={isDisabled}>
+                    <Icon name={deleteIcon} size="20px" />
+                    Delete
+                  </Button>
+                  <AlertDialog
+                    title="Delete State"
+                    variant="destructive"
+                    primaryActionLabel="Delete"
+                    cancelLabel="Cancel"
+                    onPrimaryAction={() => handleDeleteState(selectedStateId)}
+                  >
+                    Are you sure you want to delete this state? This action
+                    cannot be undone.
+                  </AlertDialog>
+                </DialogTrigger>
+              </Flex>
             </Disclosure>
             <Disclosure id="transitions">
               <DisclosureTitle>Transitions</DisclosureTitle>

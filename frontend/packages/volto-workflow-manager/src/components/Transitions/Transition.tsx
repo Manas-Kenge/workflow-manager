@@ -11,8 +11,13 @@ import {
   Item,
   Heading,
   ProgressCircle,
+  Button,
+  AlertDialog,
+  DialogTrigger,
 } from '@adobe/react-spectrum';
-import { listTransitions } from '../../actions/transition';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import deleteIcon from '@plone/volto/icons/delete.svg';
+import { listTransitions, deleteTransition } from '../../actions/transition';
 import { listStates } from '../../actions/state';
 import PropertiesTab from './Tabs/PropertiesTab';
 import GuardsTab from './Tabs/GuardsTab';
@@ -144,6 +149,17 @@ const Transition: React.FC<TransitionProps> = ({
     setSelectedTransitionId(key as string);
   };
 
+  const handleDeleteTransition = useCallback(
+    (transitionId: string) => {
+      dispatch(deleteTransition(workflowId, transitionId));
+      setSelectedTransitionId(null);
+      setLocalTransitionData(null);
+      setInitialTransitionData(null);
+      onDataChange(null);
+    },
+    [dispatch, workflowId, onDataChange],
+  );
+
   const propertiesSchema = useMemo(
     () => ({
       title: 'Transition Properties',
@@ -221,6 +237,26 @@ const Transition: React.FC<TransitionProps> = ({
                   isDisabled={isTabDisabled}
                 />
               </DisclosurePanel>
+              <Flex justifyContent="end" margin="size-100">
+                <DialogTrigger>
+                  <Button variant="negative" isDisabled={isTabDisabled}>
+                    <Icon name={deleteIcon} size="20px" />
+                    Delete
+                  </Button>
+                  <AlertDialog
+                    title="Delete Transition"
+                    variant="destructive"
+                    primaryActionLabel="Delete"
+                    cancelLabel="Cancel"
+                    onPrimaryAction={() =>
+                      handleDeleteTransition(selectedTransitionId)
+                    }
+                  >
+                    Are you sure you want to delete this transition? This action
+                    cannot be undone.
+                  </AlertDialog>
+                </DialogTrigger>
+              </Flex>
             </Disclosure>
             <Disclosure id="guards">
               <DisclosureTitle>Guard Configuration</DisclosureTitle>
