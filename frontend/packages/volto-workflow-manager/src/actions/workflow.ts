@@ -91,7 +91,7 @@ export function assignWorkflow(workflowId: string, contentType: string) {
     type: ASSIGN_WORKFLOW,
     request: {
       op: 'post',
-      path: `/@workflows/${workflowId}/@assign`, // Fixed path
+      path: `/@workflow-assign/${workflowId}`,
       data: {
         type_id: contentType,
       },

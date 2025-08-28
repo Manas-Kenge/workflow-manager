@@ -32,7 +32,19 @@ export interface GroupInfo {
   title: string;
 }
 
+export interface AssignableType {
+  id: string;
+  title: string;
+}
+
+export interface AssignWorkflowProps {
+  workflow: Workflow | null | undefined;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 export interface ContextData {
+  assignable_types: AssignableType[];
   available_roles: string[];
   groups: GroupInfo[];
   managed_permissions: PermissionInfo[];

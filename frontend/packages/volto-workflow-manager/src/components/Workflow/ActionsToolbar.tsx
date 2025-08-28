@@ -12,12 +12,13 @@ import Toast from '@plone/volto/components/manage/Toast/Toast';
 import { useIntl, defineMessages } from 'react-intl';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import add from '@plone/volto/icons/add.svg';
-import adduser from '@plone/volto/icons/add-user.svg';
+import contentexisting from '@plone/volto/icons/content-existing.svg';
 import checkboxChecked from '@plone/volto/icons/checkbox-checked.svg';
 import blank from '@plone/volto/icons/blank.svg';
 import CreateState from '../States/CreateState';
 import CreateTransition from '../Transitions/CreateTransition';
 import WorkflowValidation from './WorkflowValidation';
+import AssignWorkflow from './AssignWorkflow';
 
 const messages = defineMessages({
   validationSuccessTitle: {
@@ -50,6 +51,10 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
   const intl = useIntl();
   const [isCreateStateOpen, setCreateStateOpen] = useState(false);
   const [isCreateTransitionOpen, setCreateTransitionOpen] = useState(false);
+  const [isAssignDialogOpen, setAssignDialogOpen] = useState(false);
+  const workflow = useAppSelector(
+    (state) => state.workflow.workflow.currentWorkflow,
+  );
   const validation = useAppSelector((state) => state.workflow.validation);
   const wasLoading = usePrevious(validation.loading);
 
@@ -121,8 +126,8 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
             )}
             {validation.loading ? 'Checking...' : 'Sanity Check'}
           </Button>
-          <Button variant="secondary">
-            <Icon name={adduser} size="20px" />
+          <Button variant="secondary" onPress={() => setAssignDialogOpen(true)}>
+            <Icon name={contentexisting} size="20px" />
             Assign
           </Button>
         </ButtonGroup>
@@ -142,6 +147,11 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
         workflowId={workflowId}
         isOpen={isCreateTransitionOpen}
         onClose={() => setCreateTransitionOpen(false)}
+      />
+      <AssignWorkflow
+        workflow={workflow}
+        isOpen={isAssignDialogOpen}
+        onClose={() => setAssignDialogOpen(false)}
       />
     </>
   );
