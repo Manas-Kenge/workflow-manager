@@ -40,10 +40,6 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
     (state: GlobalRootState) => state.workflow.workflow.currentWorkflow,
   );
 
-  const loading = useSelector(
-    (state: GlobalRootState) => state.workflow.workflow.loading,
-  );
-
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
