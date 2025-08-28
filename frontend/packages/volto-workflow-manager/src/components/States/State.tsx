@@ -158,6 +158,7 @@ const State: React.FC<StateProps> = ({
           selectedKey={selectedStateId}
           onSelectionChange={(key) => setSelectedStateId(key as string)}
           isDisabled={isDisabled}
+          UNSAFE_className="sidebar-picker"
         >
           {(item) => <Item key={item.id}>{item.title}</Item>}
         </Picker>

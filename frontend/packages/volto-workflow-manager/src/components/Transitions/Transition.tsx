@@ -192,12 +192,12 @@ const Transition: React.FC<TransitionProps> = ({
       >
         <Heading level={3}>Configure a Transition</Heading>
         <Picker
-          label="Select a transition to edit"
           placeholder="Choose a transition..."
           items={transitionsInfo.data?.transitions || []}
           selectedKey={selectedTransitionId}
           onSelectionChange={handleSelectionChange}
           isDisabled={isPickerDisabled}
+          UNSAFE_className="sidebar-picker"
         >
           {(item) => <Item key={item.id}>{item.title}</Item>}
         </Picker>

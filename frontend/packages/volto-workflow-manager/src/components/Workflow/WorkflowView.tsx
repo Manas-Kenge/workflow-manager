@@ -16,7 +16,6 @@ import ActionsToolbar from './ActionsToolbar';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
-import settings from '@plone/volto/icons/settings.svg';
 import Toolbar from '@plone/volto/components/manage/Toolbar/Toolbar';
 import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
