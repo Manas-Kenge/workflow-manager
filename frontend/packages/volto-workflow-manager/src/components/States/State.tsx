@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Accordion,
+  Button,
   Disclosure,
   DisclosureTitle,
   DisclosurePanel,
@@ -11,7 +12,11 @@ import {
   Picker,
   Item,
   ProgressCircle,
+  AlertDialog,
+  DialogTrigger,
 } from '@adobe/react-spectrum';
+import Icon from '@plone/volto/components/theme/Icon/Icon';
+import deleteIcon from '@plone/volto/icons/delete.svg';
 import { listStates, deleteState } from '../../actions/state';
 import { listTransitions } from '../../actions/transition';
 import PropertiesTab from './Tabs/PropertiesTab';
@@ -27,19 +32,10 @@ const propertiesSchema = {
     {
       id: 'default',
       title: 'Default',
-      fields: ['delete_action', 'title', 'description', 'isInitialState'],
+      fields: ['title', 'description', 'isInitialState'],
     },
   ],
   properties: {
-    delete_action: {
-      widget: 'action',
-      title: '',
-      buttonTitle: '',
-      dialogTitle: 'Delete State',
-      dialogText:
-        'Are you sure you want to delete this state? This action cannot be undone.',
-      onPrimaryAction: () => handleDeleteState(selectedStateId),
-    },
     title: {
       title: 'Title',
       type: 'string',
@@ -148,11 +144,13 @@ const State: React.FC<StateProps> = ({
 
   const handleDeleteState = useCallback(
     (stateId: string) => {
-      if (!stateId) return;
       dispatch(deleteState(workflowId, stateId));
       setSelectedStateId(null);
+      setLocalStateData(null);
+      setInitialStateData(null);
+      onDataChange(null);
     },
-    [dispatch, workflowId],
+    [dispatch, workflowId, onDataChange],
   );
 
   if (isLoadingData && !statesInfo.loaded) {
@@ -193,6 +191,8 @@ const State: React.FC<StateProps> = ({
                 <PropertiesTab
                   key={`properties-${selectedStateId}`}
                   data={localStateData?.properties}
+                  handleDeleteState={handleDeleteState}
+                  selectedStateId={selectedStateId}
                   schema={propertiesSchema}
                   onChange={(properties) => handleStateChange({ properties })}
                   isDisabled={areTabsDisabled}

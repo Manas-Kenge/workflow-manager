@@ -231,31 +231,14 @@ const Transition: React.FC<TransitionProps> = ({
                   key={`properties-${selectedTransitionId}`}
                   data={localTransitionData?.properties}
                   schema={propertiesSchema}
+                  handleDeleteTransition={handleDeleteTransition}
+                  selectedTransitionId={selectedTransitionId}
                   onChange={(properties) =>
                     handleTransitionChange({ properties })
                   }
                   isDisabled={isTabDisabled}
                 />
               </DisclosurePanel>
-              <Flex justifyContent="end" margin="size-100">
-                <DialogTrigger>
-                  <Button variant="negative" isDisabled={isTabDisabled}>
-                    <Icon name={deleteIcon} size="20px" />
-                  </Button>
-                  <AlertDialog
-                    title="Delete Transition"
-                    variant="destructive"
-                    primaryActionLabel="Delete"
-                    cancelLabel="Cancel"
-                    onPrimaryAction={() =>
-                      handleDeleteTransition(selectedTransitionId)
-                    }
-                  >
-                    Are you sure you want to delete this transition? This action
-                    cannot be undone.
-                  </AlertDialog>
-                </DialogTrigger>
-              </Flex>
             </Disclosure>
             <Disclosure id="guards">
               <DisclosureTitle>Guard Configuration</DisclosureTitle>
