@@ -241,7 +241,6 @@ const Transition: React.FC<TransitionProps> = ({
                 <DialogTrigger>
                   <Button variant="negative" isDisabled={isTabDisabled}>
                     <Icon name={deleteIcon} size="20px" />
-                    Delete
                   </Button>
                   <AlertDialog
                     title="Delete Transition"
