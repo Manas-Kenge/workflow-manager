@@ -1,149 +1,89 @@
-# workflow-manager 🚀
+# Volto Workflow Manager
 
-[![Built with Cookieplone](https://img.shields.io/badge/built%20with-Cookieplone-0083be.svg?logo=cookiecutter)](https://github.com/plone/cookieplone-templates/)
-[![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Backend Tests](https://github.com/collective/workflow-manager/actions/workflows/backend.yml/badge.svg)](https://github.com/collective/workflow-manager/actions/workflows/backend.yml)
-[![Frontend Tests](https://github.com/collective/workflow-manager/actions/workflows/frontend.yml/badge.svg)](https://github.com/collective/workflow-manager/actions/workflows/frontend.yml)
+Volto Workflow Manager is a visual workflow editor for Plone.  
+It lets you create, manage, and edit workflows inside the Volto UI using a simple graph-based interface.
 
-A new project using Plone 6.
+---
 
-## Quick Start 🏁
+## Installation
 
-### Prerequisites ✅
+This package is a Volto add-on. To install it in your Volto project:
 
--   An [operating system](https://6.docs.plone.org/install/create-project-cookieplone.html#prerequisites-for-installation) that runs all the requirements mentioned.
--   [uv](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
--   [nvm](https://6.docs.plone.org/install/create-project-cookieplone.html#nvm)
--   [Node.js and pnpm](https://6.docs.plone.org/install/create-project.html#node-js) 22
--   [Make](https://6.docs.plone.org/install/create-project-cookieplone.html#make)
--   [Git](https://6.docs.plone.org/install/create-project-cookieplone.html#git)
--   [Docker](https://docs.docker.com/get-started/get-docker/) (optional)
+1. Add `workflow-manager` to your project's `package.json`:
 
-
-### Installation 🔧
-
-1.  Clone this repository, then change your working directory.
-
-    ```shell
-    git clone git@github.com:collective/workflow-manager.git
-    cd workflow-manager
+    ```json
+    {
+      "addons": ["workflow-manager"]
+    }
     ```
 
-2.  Install this code base.
+2. Install dependencies:
 
-    ```shell
-    make install
+    ```bash
+    pnpm install
     ```
 
+3. Start the Volto development server:
 
-### Fire Up the Servers 🔥
-
-1.  Create a new Plone site on your first run.
-
-    ```shell
-    make backend-create-site
+    ```bash
+    pnpm start
     ```
 
-2.  Start the backend at http://localhost:8080/.
+---
 
-    ```shell
-    make backend-start
-    ```
+## How to Use
 
-3.  In a new shell session, start the frontend at http://localhost:3000/.
+1. Open the **Control Panel** and select **Workflow Manager**.
+2. Create a new workflow if one does not exist.
+3. Add states and transitions using the graph interface.
+4. Edit state and transition details from the sidebar.
+5. Assign permissions and roles as needed.
+6. Save changes using the Volto toolbar.
 
-    ```shell
-    make frontend-start
-    ```
+---
 
-Voila! Your Plone site should be live and kicking! 🎉
+## Development Setup
 
-### Local Stack Deployment 📦
+If you want to contribute or customize the add-on locally:
 
-Deploy a local `Docker Compose` environment that includes:
+## Requirements
 
-- Docker images for Backend and Frontend 🖼️
-- A stack with a Traefik router and a Postgres database 🗃️
-- Accessible at [http://workflow-manager.localhost](http://workflow-manager.localhost) 🌐
+- [Node.js 22](https://6.docs.plone.org/install/create-project.html#node-js) 
+- [pnpm](https://pnpm.io/)
+- [UV](https://6.docs.plone.org/install/create-project-cookieplone.html#uv)
 
-Execute the following:
+### Installation 
 
-```shell
-make stack-start
-make stack-create-site
+1. Clone the repository:
+
+```sh
+git clone https://github.com/Manas-Kenge/workflow-manager.git
+cd workflow-manager
 ```
 
-And... you're all set! Your Plone site is up and running locally! 🚀
+2. Install dependencies for both Backend and Frontend:
 
-## Project Structure 🏗️
-
-This monorepo consists of the following distinct sections:
-
-- **backend**: Houses the API and Plone installation, utilizing pip instead of buildout, and includes a policy package named workflow.manager.
-- **frontend**: Contains the React (Volto) package.
-- **devops**: Encompasses Docker Stack, Ansible playbooks, and Cache settings.
-- **docs**: Scaffold for writing documentation for your project.
-
-### Why This Structure? 🤔
-
-- All necessary codebases to run the site are contained within the repo (excluding existing addons for Plone and React).
-- Specific GitHub Workflows are triggered based on changes in each codebase (refer to .github/workflows).
-- Simplifies the creation of Docker images for each codebase.
-- Demonstrates Plone installation/setup without buildout.
-
-## Code Quality Assurance 🧐
-
-To automatically format your code and ensure it adheres to quality standards, execute:
-
-```shell
-make check
+```sh
+make install
 ```
 
-### Format the codebase
+### Start the Servers
 
-To format the codebase, it is possible to run `format`:
+1. Start the **Backend** (Plone) at [http://localhost:8080/](http://localhost:8080/):
 
-```shell
-make format
+```sh
+make backend-start
 ```
 
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Python code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | `zpretty` | XML and ZCML formatting  | -- |
-| frontend | ESLint | Fixes most common frontend issues | [`frontend/.eslintrc.js`](.frontend/.eslintrc.js) |
-| frontend | prettier | Format JS and Typescript code  | [`frontend/.prettierrc`](.frontend/.prettierrc) |
-| frontend | Stylelint | Format Styles (css, less, sass)  | [`frontend/.stylelintrc`](.frontend/.stylelintrc) |
+2. In a new terminal, start the **Frontend** (Volto) at [http://localhost:3000/](http://localhost:3000/):
 
-Formatters can also be run within the `backend` or `frontend` folders.
-
-### Linting the codebase
-or `lint`:
-
- ```shell
-make lint
+```sh
+make frontend-start
 ```
 
-| Section | Tool | Description | Configuration |
-| --- | --- | --- | --- |
-| backend | Ruff | Checks code formatting, imports sorting  | [`backend/pyproject.toml`](./backend/pyproject.toml) |
-| backend | Pyroma | Checks Python package metadata  | -- |
-| backend | check-python-versions | Checks Python version information  | -- |
-| backend | `zpretty` | Checks XML and ZCML formatting  | -- |
-| frontend | ESLint | Checks JS / Typescript lint | [`frontend/.eslintrc.js`](.frontend/.eslintrc.js) |
-| frontend | prettier | Check JS / Typescript formatting  | [`frontend/.prettierrc`](.frontend/.prettierrc) |
-| frontend | Stylelint | Check Styles (css, less, sass) formatting  | [`frontend/.stylelintrc`](.frontend/.stylelintrc) |
+ Your Plone development environment is now live!
 
-Linters can be run individually within the `backend` or `frontend` folders.
 
-## Internationalization 🌐
+# License
 
-Generate translation files for Plone and Volto with ease:
-
-```shell
-make i18n
-```
-
-## Credits and Acknowledgements 🙏
-
-Generated using [Cookieplone (0.9.7)](https://github.com/plone/cookieplone) and [cookieplone-templates (684d5c7)](https://github.com/plone/cookieplone-templates/commit/684d5c7f43a6ebc3184e2a0106b0160820a96e66) on 2025-05-22 13:24:17.198737. A special thanks to all contributors and supporters!
+This project is licensed under the MIT License.
