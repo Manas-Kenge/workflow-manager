@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { View, ProgressCircle } from '@adobe/react-spectrum';
-import Form from '@plone/volto/components/manage/Form/Form';
+import BlockDataForm from '@plone/volto/components/manage/Form/BlockDataForm';
 import { getWorkflow } from '../../actions/workflow';
 import type { GlobalRootState } from '../../types';
 import type { WorkflowTabProps } from '../../types/workflow';
@@ -84,13 +84,11 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
 
   return (
     <View padding="size-200">
-      <Form
+      <BlockDataForm
         key={workflowId}
         schema={workflowSchema}
         formData={formData}
         onChangeField={handleChangeField}
-        editable={!isDisabled}
-        hideActions
       />
     </View>
   );

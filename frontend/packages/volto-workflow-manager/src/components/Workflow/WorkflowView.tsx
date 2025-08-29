@@ -69,6 +69,8 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
 
   const prevIsSaving = useRef(isSaving);
   const prevIsDeleting = useRef(isDeleting);
+  const prevIsDeletingState = useRef(isDeletingState);
+  const prevIsDeletingTransition = useRef(isDeletingTransition);
 
   useEffect(() => {
     if (prevIsSaving.current && !isSaving) {
@@ -80,11 +82,27 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
 
   useEffect(() => {
     if (prevIsDeleting.current && !isDeleting) {
-      toast.success(<Toast success title="Success" content="Item deleted." />);
+      const stateDeleteSuccess =
+        !isDeletingState && prevIsDeletingState.current;
+      const transitionDeleteSuccess =
+        !isDeletingTransition && prevIsDeletingTransition.current;
+
+      if (stateDeleteSuccess) {
+        toast.success(
+          <Toast success title="Success" content="State deleted." />,
+        );
+      } else if (transitionDeleteSuccess) {
+        toast.success(
+          <Toast success title="Success" content="Transition deleted." />,
+        );
+      }
+
       dispatch(getWorkflow(workflowId));
     }
     prevIsDeleting.current = isDeleting;
-  }, [isDeleting, dispatch, workflowId]);
+    prevIsDeletingState.current = isDeletingState;
+    prevIsDeletingTransition.current = isDeletingTransition;
+  }, [isDeleting, isDeletingState, isDeletingTransition, dispatch, workflowId]);
 
   const handleDataChange = useCallback(
     (payload: any | null, kind: 'workflow' | 'state' | 'transition') => {

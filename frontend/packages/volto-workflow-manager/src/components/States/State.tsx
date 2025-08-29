@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Accordion,
-  Button,
   Disclosure,
   DisclosureTitle,
   DisclosurePanel,
@@ -12,11 +11,7 @@ import {
   Picker,
   Item,
   ProgressCircle,
-  AlertDialog,
-  DialogTrigger,
 } from '@adobe/react-spectrum';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import deleteIcon from '@plone/volto/icons/delete.svg';
 import { listStates, deleteState } from '../../actions/state';
 import { listTransitions } from '../../actions/transition';
 import PropertiesTab from './Tabs/PropertiesTab';

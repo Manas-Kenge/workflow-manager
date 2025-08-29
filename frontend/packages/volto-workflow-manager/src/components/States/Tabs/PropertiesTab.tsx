@@ -49,8 +49,8 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
             cancelLabel="Cancel"
             onPrimaryAction={() => handleDeleteState(selectedStateId)}
           >
-            Are you sure you want to delete this state? This action cannot be
-            undone.
+            Are you sure you want to delete '{data.title}' state? This action
+            cannot be undone.
           </AlertDialog>
         </DialogTrigger>
       </Flex>

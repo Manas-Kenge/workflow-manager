@@ -1,6 +1,5 @@
 import WorkflowControlPanel from './components/Controlpanel/WorkflowPanel';
 import { workflow, state, transition } from './reducers';
-import Buttons from './components/Widgets/Buttons';
 import './theme/main.scss';
 
 const applyConfig = (config) => {
@@ -30,7 +29,6 @@ const applyConfig = (config) => {
     state,
     transition,
   };
-  config.widgets.widget.action = Buttons;
 
   return config;
 };

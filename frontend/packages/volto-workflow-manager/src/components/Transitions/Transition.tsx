@@ -11,12 +11,7 @@ import {
   Item,
   Heading,
   ProgressCircle,
-  Button,
-  AlertDialog,
-  DialogTrigger,
 } from '@adobe/react-spectrum';
-import Icon from '@plone/volto/components/theme/Icon/Icon';
-import deleteIcon from '@plone/volto/icons/delete.svg';
 import { listTransitions, deleteTransition } from '../../actions/transition';
 import { listStates } from '../../actions/state';
 import PropertiesTab from './Tabs/PropertiesTab';

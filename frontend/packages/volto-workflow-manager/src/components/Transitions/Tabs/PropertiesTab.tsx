@@ -50,8 +50,8 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
             cancelLabel="Cancel"
             onPrimaryAction={() => handleDeleteTransition(selectedTransitionId)}
           >
-            Are you sure you want to delete this transition? This action cannot
-            be undone.
+            Are you sure you want to delete '{data.title}' transition? This
+            action cannot be undone.
           </AlertDialog>
         </DialogTrigger>
       </Flex>
@@ -60,14 +60,6 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
         schema={schema}
         onChangeField={handleChangeField}
       />
-      {/* <Form
-        key={JSON.stringify(data)}
-        schema={schema}
-        formData={data}
-        onChangeField={handleChangeField}
-        editable={!isDisabled}
-        hideActions
-      /> */}
     </View>
   );
 };
