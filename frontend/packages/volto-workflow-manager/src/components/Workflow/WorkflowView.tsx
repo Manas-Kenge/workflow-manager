@@ -57,10 +57,21 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
   const isSavingWorkflow = useAppSelector(
     (state) => state.workflow.operation.loading,
   );
+  const isDeletingState = useAppSelector(
+    (state) => state.state.delete?.loading || false,
+  );
+  const isDeletingTransition = useAppSelector(
+    (state) => state.transition.delete?.loading || false,
+  );
 
   const isSaving = isSavingState || isSavingTransition || isSavingWorkflow;
+  const isDeleting = isDeletingState || isDeletingTransition;
 
   const prevIsSaving = useRef(isSaving);
+  const prevIsDeleting = useRef(isDeleting);
+  const prevIsDeletingState = useRef(isDeletingState);
+  const prevIsDeletingTransition = useRef(isDeletingTransition);
+
   useEffect(() => {
     if (prevIsSaving.current && !isSaving) {
       toast.success(<Toast success title="Success" content="Changes saved." />);
@@ -68,6 +79,30 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
     }
     prevIsSaving.current = isSaving;
   }, [isSaving, dispatch, workflowId]);
+
+  useEffect(() => {
+    if (prevIsDeleting.current && !isDeleting) {
+      const stateDeleteSuccess =
+        !isDeletingState && prevIsDeletingState.current;
+      const transitionDeleteSuccess =
+        !isDeletingTransition && prevIsDeletingTransition.current;
+
+      if (stateDeleteSuccess) {
+        toast.success(
+          <Toast success title="Success" content="State deleted." />,
+        );
+      } else if (transitionDeleteSuccess) {
+        toast.success(
+          <Toast success title="Success" content="Transition deleted." />,
+        );
+      }
+
+      dispatch(getWorkflow(workflowId));
+    }
+    prevIsDeleting.current = isDeleting;
+    prevIsDeletingState.current = isDeletingState;
+    prevIsDeletingTransition.current = isDeletingTransition;
+  }, [isDeleting, isDeletingState, isDeletingTransition, dispatch, workflowId]);
 
   const handleDataChange = useCallback(
     (payload: any | null, kind: 'workflow' | 'state' | 'transition') => {
@@ -171,7 +206,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
         <WorkflowSidebar
           currentWorkflow={workflow}
           onDataChange={handleDataChange}
-          isDisabled={isSaving}
+          isDisabled={isSaving || isDeleting}
         />
       </div>
     </View>

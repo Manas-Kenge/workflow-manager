@@ -46,6 +46,8 @@ export interface PropertiesTabProps {
   schema: any;
   onChange: (newData: PropertiesData) => void;
   isDisabled: boolean;
+  handleDeleteState: (stateId: string) => void;
+  selectedStateId: string | null;
 }
 
 export interface TransitionsData {
