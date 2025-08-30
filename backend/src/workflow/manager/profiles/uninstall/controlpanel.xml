@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="portal_controlpanel"
+        xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+        i18n:domain="plone.workflowmanager">
+
+  <!-- -*- extra stuff goes here -*- -->
+    <configlet 
+        i18n:attributes="title"
+        remove="True" 
+        title="Workflow Manager" 
+        action_id="workflowmanager"
+        appId="workflow.manager" 
+        category="Plone" 
+        condition_expr=""
+        url_expr="string:${portal_url}/@@workflowmanager"
+        icon_expr="string:"
+        visible="True" 
+    >
+    <permission>workflow.manager: Manage Workflows</permission>
+  </configlet>
+
+</object>

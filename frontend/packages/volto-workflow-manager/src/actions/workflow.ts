@@ -1,0 +1,132 @@
+import {
+  GET_WORKFLOWS,
+  GET_WORKFLOW,
+  ADD_WORKFLOW,
+  DELETE_WORKFLOW,
+  UPDATE_WORKFLOW,
+  ASSIGN_WORKFLOW,
+  UPDATE_WORKFLOW_SECURITY,
+  VALIDATE_WORKFLOW,
+  SELECT_WORKFLOW_ITEM,
+  CLEAR_WORKFLOW_SELECTION,
+  CLEAR_VALIDATION,
+} from '../constants';
+
+export function getWorkflows() {
+  return {
+    type: GET_WORKFLOWS,
+    request: {
+      op: 'get',
+      path: '/@workflows',
+    },
+  };
+}
+
+export function addWorkflow(cloneFromWorkflow: string, workflowName: string) {
+  return {
+    type: ADD_WORKFLOW,
+    request: {
+      op: 'post',
+      path: '/@workflows',
+      data: {
+        'clone-from-workflow': cloneFromWorkflow,
+        'workflow-name': workflowName,
+      },
+    },
+  };
+}
+export function getWorkflow(workflowId: string) {
+  return {
+    type: GET_WORKFLOW,
+    request: {
+      op: 'get',
+      path: `/@workflows/${workflowId}`,
+    },
+    meta: {
+      workflowId,
+    },
+  };
+}
+
+export function deleteWorkflow(workflowId: string) {
+  return {
+    type: DELETE_WORKFLOW,
+    request: {
+      op: 'del',
+      path: `/@workflows/${workflowId}`,
+    },
+    meta: {
+      workflowId,
+    },
+  };
+}
+
+export function updateWorkflow(
+  workflowId: string,
+  data: { title?: string; description?: string },
+) {
+  return {
+    type: UPDATE_WORKFLOW,
+    request: {
+      op: 'patch',
+      path: `/@workflows/${workflowId}`,
+      data,
+    },
+  };
+}
+
+export function updateWorkflowSecurity(workflowId: string) {
+  return {
+    type: UPDATE_WORKFLOW_SECURITY,
+    request: {
+      op: 'post',
+      path: `/@workflows/${workflowId}/@update-security`,
+      data: {},
+    },
+  };
+}
+
+export function assignWorkflow(workflowId: string, contentType: string) {
+  return {
+    type: ASSIGN_WORKFLOW,
+    request: {
+      op: 'post',
+      path: `/@workflow-assign/${workflowId}`,
+      data: {
+        type_id: contentType,
+      },
+    },
+  };
+}
+
+export function validateWorkflow(workflowId: string) {
+  return {
+    type: VALIDATE_WORKFLOW,
+    request: {
+      op: 'get',
+      path: `/@sanity-check/${workflowId}`,
+    },
+  };
+}
+
+export function clearValidation() {
+  return {
+    type: CLEAR_VALIDATION,
+  };
+}
+
+export function selectWorkflowItem(item: {
+  kind: 'state' | 'transition';
+  id: string;
+}) {
+  return {
+    type: SELECT_WORKFLOW_ITEM,
+    payload: item,
+  };
+}
+
+export function clearWorkflowSelection() {
+  return {
+    type: CLEAR_WORKFLOW_SELECTION,
+  };
+}

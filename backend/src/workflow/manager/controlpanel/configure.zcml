@@ -6,5 +6,8 @@
     >
 
   <!-- -*- extra stuff goes here -*- -->
+   <include
+        package=".control_panel"
+    />
 
 </configure>

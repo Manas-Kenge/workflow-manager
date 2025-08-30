@@ -1,0 +1,71 @@
+/* Custom Node Styles */
+.custom-node {
+  position: relative;
+  min-width: 100px;
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.custom-node:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.custom-node.selected {
+  border-color: #0078d4;
+  box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.2);
+}
+
+/* Node content layout */
+.node-content {
+  line-height: 1.4;
+  text-align: center;
+}
+
+.node-description {
+  margin-top: 4px;
+  color: #666;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+/* Handle styles */
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.react-flow__handle-left {
+  left: -4px;
+}
+
+.react-flow__node.draggable {
+  top: 0px;
+  left: 0px;
+}
+
+.react-flow__handle-right {
+  right: -4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-node {
+    min-width: 80px;
+    padding: 8px 12px;
+  }
+
+  .node-description {
+    display: none; /* Hide descriptions on small screens */
+  }
+}
+
+.react-flow__attribution {
+  display: none;
+}

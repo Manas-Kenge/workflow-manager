@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<registry
+    xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+    i18n:domain="workflow.manager">
+
+<!-- -*- extra stuff goes here -*- -->
+
+  <records interface="workflow.manager.controlpanel.control_panel.controlpanel.IControlPanel"
+           prefix="workflow.manager.control_panel" />
+
+
+</registry>

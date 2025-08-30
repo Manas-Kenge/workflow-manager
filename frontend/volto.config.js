@@ -3,5 +3,5 @@ const theme = '';
 
 module.exports = {
   addons,
-  theme
+  theme,
 };

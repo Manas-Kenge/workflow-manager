@@ -17,3 +17,98 @@ msgstr ""
 "Domain: volto\n"
 "X-Is-Fallback-For: es-ar es-bo es-cl es-co es-cr es-do es-ec es-es es-sv es-gt es-hn es-mx es-ni es-pa es-py es-pe es-pr es-us es-uy es-ve\n"
 "X-Generator: Poedit 2.2.1\n"
+
+#. Default: "Block"
+#: components/Workflow/WorkflowSidebar
+msgid "Block"
+msgstr ""
+
+#. Default: "Document"
+#: components/Workflow/WorkflowSidebar
+msgid "Document"
+msgstr ""
+
+#. Default: "Errors were found. Click "View Results" for details."
+#: components/Workflow/ActionsToolbar
+msgid "Errors were found. Click "View Results" for details."
+msgstr ""
+
+#. Default: "Expand sidebar"
+#: components/Workflow/WorkflowSidebar
+msgid "Expand sidebar"
+msgstr ""
+
+#. Default: "No errors found in the workflow."
+#: components/Workflow/ActionsToolbar
+msgid "No errors found in the workflow."
+msgstr ""
+
+#. Default: "Order"
+#: components/Workflow/WorkflowSidebar
+msgid "Order"
+msgstr ""
+
+#. Default: "Settings"
+#: components/Workflow/WorkflowSidebar
+msgid "Settings"
+msgstr ""
+
+#. Default: "Shrink sidebar"
+#: components/Workflow/WorkflowSidebar
+msgid "Shrink sidebar"
+msgstr ""
+
+#. Default: "State Created"
+#: components/States/CreateState
+msgid "State Created"
+msgstr ""
+
+#. Default: "State Creation Failed"
+#: components/States/CreateState
+msgid "State Creation Failed"
+msgstr ""
+
+#. Default: "States"
+#: components/Workflow/WorkflowSidebar
+msgid "States"
+msgstr ""
+
+#. Default: "The new state has been added successfully."
+#: components/States/CreateState
+msgid "The new state has been added successfully."
+msgstr ""
+
+#. Default: "The new transition has been added successfully."
+#: components/Transitions/CreateTransition
+msgid "The new transition has been added successfully."
+msgstr ""
+
+#. Default: "Transition Created"
+#: components/Transitions/CreateTransition
+msgid "Transition Created"
+msgstr ""
+
+#. Default: "Transition Creation Failed"
+#: components/Transitions/CreateTransition
+msgid "Transition Creation Failed"
+msgstr ""
+
+#. Default: "Transitions"
+#: components/Workflow/WorkflowSidebar
+msgid "Transitions"
+msgstr ""
+
+#. Default: "Validation Failed"
+#: components/Workflow/ActionsToolbar
+msgid "Validation Failed"
+msgstr ""
+
+#. Default: "Validation Successful"
+#: components/Workflow/ActionsToolbar
+msgid "Validation Successful"
+msgstr ""
+
+#. Default: "Workflow"
+#: components/Workflow/WorkflowSidebar
+msgid "Workflow"
+msgstr ""

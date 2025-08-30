@@ -1,0 +1,169 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+>
+
+    <!-- GET /@workflows -> Lists all workflows -->
+    <plone:service
+        method="GET"
+        name="@workflows"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.GetWorkflows"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@workflows -> Adds a new workflow -->
+    <plone:service
+        method="POST"
+        name="@workflows"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.AddWorkflow"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- DELETE /@workflows/{workflow_id} -> Deletes a workflow -->
+    <plone:service
+        method="DELETE"
+        name="@workflows"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.DeleteWorkflow"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- UPDATE /@workflows/{workflow_id} -> Updates a workflow -->
+    <plone:service
+        method="PATCH"
+        name="@workflows"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.UpdateWorkflow"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@workflows/{workflow_id}/@update-security -> Updates security mappings -->
+    <plone:service
+        method="POST"
+        name="@update-security"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.UpdateSecuritySettings"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@workflow-assign/{workflow_id} -> Assigns workflow to a type -->
+    <plone:service
+        method="POST"
+        name="@workflow-assign"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.AssignWorkflow"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- GET /@sanity-check/{workflow_id} -> Validates a workflow -->
+    <plone:service
+        method="GET"
+        name="@sanity-check"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".workflow.SanityCheck"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- GET /@states/{workflow_id} -> Lists all states in workflow -->
+    <plone:service
+        method="GET"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.ListStates"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@states/{workflow_id} -> Add a new state to workflow -->
+    <plone:service
+        method="POST"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.AddState"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- PATCH /@states/{workflow_id}/{state_id} -> Update/Edit a state -->
+    <plone:service
+        method="PATCH"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.EditState"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- DELETE /@states/{workflow_id}/{state_id} -> Delete a state -->
+    <plone:service
+        method="DELETE"
+        name="@states"
+        for="plone.restapi.bbb.IPloneSiteRoot"
+        factory=".state.DeleteState"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- GET /@transitions/{workflow_id} -> Lists all transitions in a workflow -->
+    <plone:service
+        method="GET"
+        name="@transitions"
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        factory=".transition.ListTransitions"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- GET /@transitions/{workflow_id}/{transition_id} -> Gets details for one transition -->
+    <plone:service
+        method="GET"
+        name="@transition"
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        factory=".transition.GetTransition"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@transitions/{workflow_id}/{transition_id} -> Creates a new transition -->
+    <plone:service
+        method="POST"
+        name="@transitions"
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        factory=".transition.AddTransition"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- PATCH /@transitions/{workflow_id}/{transition_id} -> Updates an existing transition -->
+    <plone:service
+        method="PATCH"
+        name="@transitions"
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        factory=".transition.UpdateTransition"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- DELETE /@transitions/{workflow_id}/{transition_id} -> Deletes a transition -->
+    <plone:service
+        method="DELETE"
+        name="@transitions"
+        for="Products.CMFCore.interfaces.IWorkflowAware"
+        factory=".transition.DeleteTransition"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- GET /@workflow-layout -> Gets the workflow layout -->
+    <plone:service
+        method="GET"
+        name="@workflow-layout"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        factory=".layout.WorkflowLayout"
+        permission="cmf.ManagePortal"
+    />
+
+    <!-- POST /@workflow-layout -> Updates the workflow layout -->
+    <plone:service
+        method="POST"
+        name="@workflow-layout"
+        for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+        factory=".layout.WorkflowLayout"
+        permission="cmf.ManagePortal"
+    />
+
+</configure>

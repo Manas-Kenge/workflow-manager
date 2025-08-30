@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layers>
-  <layer interface="workflow.manager.interfaces.IBrowserLayer"
+  <layer interface="workflow.manager.interfaces.IPloneWorkflowmanagerLayer"
          name="workflow.manager"
   />
 </layers>
