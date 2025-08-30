@@ -149,7 +149,7 @@ const State: React.FC<StateProps> = ({
   );
 
   if (isLoadingData && !statesInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
+    return <ProgressCircle isIndeterminate aria-label="Loading states..." />;
   }
 
   const areTabsDisabled = isDisabled || !localStateData;
@@ -164,6 +164,7 @@ const State: React.FC<StateProps> = ({
       >
         <Heading level={3}>Configure a State</Heading>
         <Picker
+          aria-label="Choose state"
           placeholder="Choose a state..."
           items={statesInfo.data?.states || []}
           selectedKey={selectedStateId}

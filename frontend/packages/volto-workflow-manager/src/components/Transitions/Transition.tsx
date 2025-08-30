@@ -187,7 +187,9 @@ const Transition: React.FC<TransitionProps> = ({
   );
 
   if (isLoading && !transitionsInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
+    return (
+      <ProgressCircle isIndeterminate aria-label="Loading transitions..." />
+    );
   }
 
   const isPickerDisabled = isDisabled || !transitionsInfo.loaded;
@@ -203,6 +205,7 @@ const Transition: React.FC<TransitionProps> = ({
       >
         <Heading level={3}>Configure a Transition</Heading>
         <Picker
+          aria-label="Choose transition"
           placeholder="Choose a transition..."
           items={transitionsInfo.data?.transitions || []}
           selectedKey={selectedTransitionId}
