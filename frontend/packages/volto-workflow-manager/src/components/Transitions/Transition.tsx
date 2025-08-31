@@ -12,7 +12,7 @@ import {
   Heading,
   ProgressCircle,
 } from '@adobe/react-spectrum';
-import { listTransitions } from '../../actions/transition';
+import { listTransitions, deleteTransition } from '../../actions/transition';
 import { listStates } from '../../actions/state';
 import PropertiesTab from './Tabs/PropertiesTab';
 import GuardsTab from './Tabs/GuardsTab';
@@ -144,6 +144,17 @@ const Transition: React.FC<TransitionProps> = ({
     setSelectedTransitionId(key as string);
   };
 
+  const handleDeleteTransition = useCallback(
+    (transitionId: string) => {
+      dispatch(deleteTransition(workflowId, transitionId));
+      setSelectedTransitionId(null);
+      setLocalTransitionData(null);
+      setInitialTransitionData(null);
+      onDataChange(null);
+    },
+    [dispatch, workflowId, onDataChange],
+  );
+
   const propertiesSchema = useMemo(
     () => ({
       title: 'Transition Properties',
@@ -176,7 +187,9 @@ const Transition: React.FC<TransitionProps> = ({
   );
 
   if (isLoading && !transitionsInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
+    return (
+      <ProgressCircle isIndeterminate aria-label="Loading transitions..." />
+    );
   }
 
   const isPickerDisabled = isDisabled || !transitionsInfo.loaded;
@@ -192,6 +205,7 @@ const Transition: React.FC<TransitionProps> = ({
       >
         <Heading level={3}>Configure a Transition</Heading>
         <Picker
+          aria-label="Choose transition"
           placeholder="Choose a transition..."
           items={transitionsInfo.data?.transitions || []}
           selectedKey={selectedTransitionId}
@@ -215,6 +229,8 @@ const Transition: React.FC<TransitionProps> = ({
                   key={`properties-${selectedTransitionId}`}
                   data={localTransitionData?.properties}
                   schema={propertiesSchema}
+                  handleDeleteTransition={handleDeleteTransition}
+                  selectedTransitionId={selectedTransitionId}
                   onChange={(properties) =>
                     handleTransitionChange({ properties })
                   }

@@ -1,6 +1,7 @@
 import WorkflowControlPanel from './components/Controlpanel/WorkflowPanel';
 import { workflow, state, transition } from './reducers';
 import './theme/main.scss';
+
 const applyConfig = (config) => {
   config.settings.isMultilingual = false;
   config.settings.supportedLanguages = ['en'];
@@ -28,10 +29,7 @@ const applyConfig = (config) => {
     state,
     transition,
   };
-  config.views = {
-    ...config.views,
-    contentTypesViews: {},
-  };
+
   return config;
 };
 

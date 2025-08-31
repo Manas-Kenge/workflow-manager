@@ -12,7 +12,7 @@ import {
   Item,
   ProgressCircle,
 } from '@adobe/react-spectrum';
-import { listStates } from '../../actions/state';
+import { listStates, deleteState } from '../../actions/state';
 import { listTransitions } from '../../actions/transition';
 import PropertiesTab from './Tabs/PropertiesTab';
 import TransitionsTab from './Tabs/TransitionsTab';
@@ -137,8 +137,19 @@ const State: React.FC<StateProps> = ({
     });
   }, []);
 
+  const handleDeleteState = useCallback(
+    (stateId: string) => {
+      dispatch(deleteState(workflowId, stateId));
+      setSelectedStateId(null);
+      setLocalStateData(null);
+      setInitialStateData(null);
+      onDataChange(null);
+    },
+    [dispatch, workflowId, onDataChange],
+  );
+
   if (isLoadingData && !statesInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
+    return <ProgressCircle isIndeterminate aria-label="Loading states..." />;
   }
 
   const areTabsDisabled = isDisabled || !localStateData;
@@ -153,6 +164,7 @@ const State: React.FC<StateProps> = ({
       >
         <Heading level={3}>Configure a State</Heading>
         <Picker
+          aria-label="Choose state"
           placeholder="Choose a state..."
           items={statesInfo.data?.states || []}
           selectedKey={selectedStateId}
@@ -175,6 +187,8 @@ const State: React.FC<StateProps> = ({
                 <PropertiesTab
                   key={`properties-${selectedStateId}`}
                   data={localStateData?.properties}
+                  handleDeleteState={handleDeleteState}
+                  selectedStateId={selectedStateId}
                   schema={propertiesSchema}
                   onChange={(properties) => handleStateChange({ properties })}
                   isDisabled={areTabsDisabled}

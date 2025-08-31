@@ -1,5 +1,6 @@
 import json
 from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC, TRIGGER_USER_ACTION
+from Products.DCWorkflow.Expression import Expression
 from plone.protect.interfaces import IDisableCSRFProtection
 from plone.restapi.deserializer import json_body
 from plone.restapi.services import Service
@@ -290,13 +291,21 @@ class UpdateTransition(Service):
                 guard = transition.getGuard()
                 guard_data = body['guard']
                 if 'permissions' in guard_data:
-                    guard.permissions = tuple(guard_data['permissions'])
+                    guard.permissions = tuple(
+                        Expression('string:%s' % p) for p in guard_data['permissions']
+                    )
                 if 'roles' in guard_data:
-                    guard.roles = tuple(guard_data['roles'])
+                    guard.roles = tuple(
+                        Expression('string:%s' % r) for r in guard_data['roles']
+                    )
                 if 'groups' in guard_data:
-                    guard.groups = tuple(guard_data['groups'])
-                if 'expr' in guard_data:
-                    guard.expr = guard_data['expr']
+                    guard.groups = tuple(
+                        Expression('string:%s' % g) for g in guard_data['groups']
+                    )
+                if 'expr' in guard_data and guard_data['expr']:
+                    guard.expr = Expression(guard_data['expr'])
+                else:
+                    guard.expr = Expression('')
                 transition.guard = guard
 
             # Update states that have this transition

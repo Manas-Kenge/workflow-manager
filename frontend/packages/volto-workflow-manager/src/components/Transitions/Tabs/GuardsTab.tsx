@@ -47,7 +47,6 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
             items={roleItems}
             selectedKeys={new Set(data.roles)}
             onSelectionChange={(keys) => handleSelectionChange(keys, 'roles')}
-            isDisabled={isDisabled}
             height="size-2000"
           >
             {(item) => <Item key={item.id}>{item.name}</Item>}
@@ -62,7 +61,6 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
             items={availableGroups}
             selectedKeys={new Set(data.groups)}
             onSelectionChange={(keys) => handleSelectionChange(keys, 'groups')}
-            isDisabled={isDisabled}
             height="size-2000"
           >
             {(item) => <Item key={item.id}>{item.title}</Item>}
@@ -79,7 +77,6 @@ const GuardsTab: React.FC<GuardsTabProps> = ({
             onSelectionChange={(keys) =>
               handleSelectionChange(keys, 'permissions')
             }
-            isDisabled={isDisabled}
             height="size-2000"
           >
             {(item) => <Item key={item.perm}>{item.name}</Item>}
