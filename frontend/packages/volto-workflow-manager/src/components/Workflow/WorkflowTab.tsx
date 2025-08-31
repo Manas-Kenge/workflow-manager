@@ -69,26 +69,26 @@ const WorkflowTab: React.FC<WorkflowTabProps> = ({
     } else {
       onDataChange(formData);
     }
-  }, [formData, currentWorkflow, workflowId, onDataChange]);
+  }, [formData, currentWorkflow, workflowId]);
 
-  const handleChangeField = useCallback((id: string, value: any) => {
-    setFormData((prevData) => ({
-      ...(prevData ?? { title: '', description: '' }),
-      [id]: value,
-    }));
-  }, []);
+  const handleChangeField = useCallback(
+    (data: any) => {
+      setFormData(data);
+    },
+    [dispatch, workflowId],
+  );
 
   if (!formData) {
     return <ProgressCircle isIndeterminate aria-label="Loading workflow..." />;
   }
-
+  console.log('formData', formData);
   return (
     <View padding="size-200">
       <Form
         key={workflowId}
         schema={workflowSchema}
         formData={formData}
-        onChangeField={handleChangeField}
+        onChangeFormData={handleChangeField} //use onChangeFormData
         editable={!isDisabled}
         hideActions
       />

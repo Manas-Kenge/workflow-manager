@@ -1,5 +1,4 @@
 import {
-  Button,
   ProgressCircle,
   Text,
   Form,
@@ -13,6 +12,7 @@ import '@xyflow/react/dist/style.css';
 import { Link } from 'react-router-dom';
 import { useAppSelector } from '../../types';
 import ActionsToolbar from './ActionsToolbar';
+import { Button } from '@plone/components';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import save from '@plone/volto/icons/save.svg';
 import back from '@plone/volto/icons/back.svg';
@@ -21,14 +21,20 @@ import { createPortal } from 'react-dom';
 import { useClient } from '@plone/volto/hooks/client/useClient';
 import type { WorkflowViewProps } from '../../types/workflow';
 import WorkflowSidebar from './WorkflowSidebar';
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useDebugValue,
+} from 'react';
 import { useDispatch } from 'react-redux';
 import { updateState } from '../../actions/state';
 import { updateTransition } from '../../actions/transition';
 import { getWorkflow, updateWorkflow } from '../../actions/workflow';
 import { toast } from 'react-toastify';
 import Toast from '@plone/volto/components/manage/Toast/Toast';
-
+import Hello from './Hello';
 const WorkflowView: React.FC<WorkflowViewProps> = ({
   workflowId,
   pathname,
@@ -61,6 +67,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
   const isSaving = isSavingState || isSavingTransition || isSavingWorkflow;
 
   const prevIsSaving = useRef(isSaving);
+
   useEffect(() => {
     if (prevIsSaving.current && !isSaving) {
       toast.success(<Toast success title="Success" content="Changes saved." />);
@@ -69,21 +76,22 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
     prevIsSaving.current = isSaving;
   }, [isSaving, dispatch, workflowId]);
 
-  const handleDataChange = useCallback(
-    (payload: any | null, kind: 'workflow' | 'state' | 'transition') => {
-      if (payload) {
-        setPayloadToSave({ payload, kind });
-      } else {
-        setPayloadToSave(null);
-      }
-    },
-    [],
-  );
+  const handleDataChange = (
+    payload: any | null,
+    kind: 'workflow' | 'state' | 'transition',
+  ) => {
+    if (payload && kind) {
+      console.log('data change', kind, payload);
+      const newPayloadData = { payload, kind };
 
-  const handleSave = useCallback(() => {
+      setPayloadToSave(newPayloadData);
+    }
+  };
+  const handleSave = () => {
     if (!payloadToSave || !workflowId) return;
 
     const { payload, kind } = payloadToSave;
+    console.log('handle save', kind, payload);
 
     if (kind === 'workflow') {
       dispatch(updateWorkflow(workflowId, payload));
@@ -92,7 +100,7 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
     } else if (kind === 'transition') {
       dispatch(updateTransition(workflowId, payload.id, payload));
     }
-  }, [dispatch, payloadToSave, workflowId]);
+  };
 
   if (isLoading || !workflow || workflow.id !== workflowId) {
     return (
@@ -151,9 +159,8 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
                 <Button
                   id="toolbar-saving-workflow"
                   aria-label="Save changes"
-                  variant="primary"
                   onPress={handleSave}
-                  isDisabled={!payloadToSave || isSaving}
+                  // isDisabled={!payloadToSave || isSaving}
                 >
                   <Icon
                     name={save}
@@ -174,6 +181,11 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
           isDisabled={isSaving}
         />
       </div>
+      {/* {isClient &&
+        createPortal(
+          <Hello />,
+          document.getElementById('sidebar-soumya'),
+        )} */}
     </View>
   );
 };
