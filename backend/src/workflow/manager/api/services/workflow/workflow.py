@@ -105,7 +105,6 @@ class AddWorkflow(Service):
             self.request.response.setStatus(400)
             return {"error": "Missing 'workflow-name' or 'clone-from-workflow'."}
 
-        # Note: CSRF protection disabled above, no need for base.authorize()
         workflow_id = workflow_title.strip().replace(" ", "_").lower()
         cloned_from_workflow = base.portal_workflow[clone_from_id]
 
@@ -151,7 +150,6 @@ class DeleteWorkflow(Service):
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        # Safety Check: Prevent deletion if workflow is in use.
         assigned_types = base.get_assigned_types_for(workflow_id)
         if assigned_types:
             self.request.response.setStatus(400)
@@ -204,7 +202,6 @@ class UpdateWorkflow(Service):
         if changed:
             workflow._p_changed = True
         
-        # Return the full, updated workflow object to the frontend
         return _serialize_workflow(workflow, base)
 
 
@@ -220,7 +217,6 @@ class UpdateSecuritySettings(Service):
         self.params = []
 
     def publishTraverse(self, request, name):
-        # Capture the workflow_id from the URL
         self.params.append(name)
         return self
 
@@ -239,7 +235,6 @@ class UpdateSecuritySettings(Service):
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        # Note: CSRF protection disabled above, no need for base.authorize()
         count = base.portal_workflow._recursiveUpdateRoleMappings(
             base.portal,
             {base.selected_workflow.id: base.selected_workflow},
@@ -262,7 +257,6 @@ class AssignWorkflow(Service):
         self.params = []
 
     def publishTraverse(self, request, name):
-        # Capture the workflow_id from the URL
         self.params.append(name)
         return self
 
@@ -286,7 +280,6 @@ class AssignWorkflow(Service):
             self.request.response.setStatus(400)
             return {"error": "No content type ('type_id') specified."}
 
-        # Note: CSRF protection disabled above, no need for base.authorize()
         chain = (workflow_id,)
         base.portal_workflow.setChainForPortalTypes((type_id,), chain)
 
@@ -336,12 +329,9 @@ class SanityCheck(Service):
             "initial_state_error": False,
         }
 
-        # Check for a valid initial state
         if not workflow.initial_state or workflow.initial_state not in state_ids:
             errors["initial_state_error"] = True
 
-        # Check each state for reachability
-        # A state is unreachable if it's not the initial state AND no transition points to it.
         all_destination_ids = {t.new_state_id for t in transitions}
         for state in states:
             if state.id != workflow.initial_state and state.id not in all_destination_ids:
@@ -351,14 +341,12 @@ class SanityCheck(Service):
                     "error": "State is not reachable by any transition."
                 })
         
-        # Check each transition for issues
         all_used_transition_ids = set()
         for state in states:
             for transition_id in getattr(state, 'transitions', ()):
                 all_used_transition_ids.add(transition_id)
 
         for transition in transitions:
-            # Check for invalid destination
             if not transition.new_state_id or transition.new_state_id not in state_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,
@@ -366,7 +354,6 @@ class SanityCheck(Service):
                     "error": f"Transition points to a non-existent state: '{transition.new_state_id}'."
                 })
             
-            # Check for unused transitions
             if transition.id not in all_used_transition_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,

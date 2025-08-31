@@ -158,12 +158,10 @@ class AddTransition(Service):
             self.request.response.setStatus(400)
             return {"error": "A 'title' for the new transition is required in the request body."}
 
-        # Validate transition_id format
         if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', transition_id):
             self.request.response.setStatus(400)
             return {"error": "Invalid transition ID format. Use only letters, numbers, and underscores."}
 
-        # Check if transition already exists
         if transition_id in base.selected_workflow.transitions.objectIds():
             self.request.response.setStatus(409)
             return {"error": f"Transition with id '{transition_id}' already exists."}
@@ -171,16 +169,13 @@ class AddTransition(Service):
         try:
             workflow = base.selected_workflow
             
-            # Create the transition
             workflow.transitions.addTransition(transition_id)
             new_transition = workflow.transitions[transition_id]
             new_transition.title = title
             
-            # Set description if provided
             if 'description' in body:
                 new_transition.description = body['description']
             
-            # Set new_state_id if provided
             if 'new_state_id' in body:
                 new_state_id = body['new_state_id']
                 if new_state_id in workflow.states.objectIds():
@@ -189,15 +184,12 @@ class AddTransition(Service):
                     self.request.response.setStatus(400)
                     return {"error": f"State '{new_state_id}' does not exist in workflow."}
 
-            # Clone from existing transition if requested
             clone_from_id = body.get('clone_from_id')
             if clone_from_id and clone_from_id in workflow.transitions.objectIds():
                 clone_transition(new_transition, workflow.transitions[clone_from_id])
             else:
-                # Set default values for core functionality only
                 new_transition.trigger_type = TRIGGER_USER_ACTION
 
-            # Add transition to specified states
             initial_states = body.get('initial_states', [])
             if initial_states:
                 for state in base.available_states:
@@ -207,7 +199,6 @@ class AddTransition(Service):
                             current_transitions.append(transition_id)
                             state.transitions = tuple(current_transitions)
 
-            # Mark the workflow as modified
             workflow._p_changed = True
 
             self.request.response.setStatus(201)
@@ -265,7 +256,6 @@ class UpdateTransition(Service):
             transition = base.selected_transition
             workflow = base.selected_workflow
 
-            # Update basic properties
             if 'title' in body:
                 transition.title = body['title']
             if 'description' in body:
@@ -285,7 +275,6 @@ class UpdateTransition(Service):
                     self.request.response.setStatus(400)
                     return {"error": f"Invalid trigger_type. Must be {TRIGGER_AUTOMATIC} or {TRIGGER_USER_ACTION}."}
 
-            # Update guard settings
             if 'guard' in body:
                 guard = transition.getGuard()
                 guard_data = body['guard']
@@ -299,7 +288,6 @@ class UpdateTransition(Service):
                     guard.expr = guard_data['expr']
                 transition.guard = guard
 
-            # Update states that have this transition
             if 'states_with_this_transition' in body:
                 new_state_ids = set(body['states_with_this_transition'])
                 for state in base.available_states:
@@ -314,7 +302,6 @@ class UpdateTransition(Service):
                         current_transitions.remove(transition_id)
                         state.transitions = tuple(current_transitions)
 
-            # Mark the workflow as modified
             workflow._p_changed = True
 
             return {
@@ -364,20 +351,16 @@ class DeleteTransition(Service):
         try:
             workflow = base.selected_workflow
             
-            # Delete any action rules associated with this transition
             base.actions.delete_rule_for(base.selected_transition)
             
-            # Remove the transition from all states
             for state in base.available_states:
                 current_transitions = list(getattr(state, 'transitions', ()))
                 if transition_id in current_transitions:
                     current_transitions.remove(transition_id)
                     state.transitions = tuple(current_transitions)
             
-            # Delete the transition
             workflow.transitions.deleteTransitions([transition_id])
             
-            # Mark the workflow as modified
             workflow._p_changed = True
 
             return {
