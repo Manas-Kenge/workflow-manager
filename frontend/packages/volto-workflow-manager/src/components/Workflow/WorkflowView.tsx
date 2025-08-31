@@ -181,11 +181,6 @@ const WorkflowView: React.FC<WorkflowViewProps> = ({
           isDisabled={isSaving}
         />
       </div>
-      {/* {isClient &&
-        createPortal(
-          <Hello />,
-          document.getElementById('sidebar-soumya'),
-        )} */}
     </View>
   );
 };
