@@ -16,9 +16,34 @@ msgstr ""
 "Preferred-Encodings: utf-8\n"
 "Domain: volto\n"
 
+#. Default: "Assign"
+#: components/Workflow/AssignWorkflow
+msgid "Assign"
+msgstr ""
+
+#. Default: "Assign Workflow"
+#: components/Workflow/AssignWorkflow
+msgid "Assign Workflow"
+msgstr ""
+
+#. Default: "Assigning..."
+#: components/Workflow/AssignWorkflow
+msgid "Assigning..."
+msgstr ""
+
+#. Default: "Assignment Failed"
+#: components/Workflow/AssignWorkflow
+msgid "Assignment Failed"
+msgstr ""
+
 #. Default: "Block"
 #: components/Workflow/WorkflowSidebar
 msgid "Block"
+msgstr ""
+
+#. Default: "Cancel"
+#: components/Workflow/AssignWorkflow
+msgid "Cancel"
 msgstr ""
 
 #. Default: "Document"
@@ -36,6 +61,16 @@ msgstr ""
 msgid "Expand sidebar"
 msgstr ""
 
+#. Default: "Failed to delete workflow."
+#: components/Controlpanel/WorkflowTable
+msgid "Failed to delete workflow."
+msgstr ""
+
+#. Default: "Failed to rename workflow."
+#: components/Controlpanel/WorkflowTable
+msgid "Failed to rename workflow."
+msgstr ""
+
 #. Default: "No errors found in the workflow."
 #: components/Workflow/ActionsToolbar
 msgid "No errors found in the workflow."
@@ -44,6 +79,16 @@ msgstr ""
 #. Default: "Order"
 #: components/Workflow/WorkflowSidebar
 msgid "Order"
+msgstr ""
+
+#. Default: "Select a content type..."
+#: components/Workflow/AssignWorkflow
+msgid "Select a content type..."
+msgstr ""
+
+#. Default: "Select the content type you would like to assign this workflow to."
+#: components/Workflow/AssignWorkflow
+msgid "Select the content type you would like to assign this workflow to."
 msgstr ""
 
 #. Default: "Settings"
@@ -81,6 +126,11 @@ msgstr ""
 msgid "The new transition has been added successfully."
 msgstr ""
 
+#. Default: "The workflow has been assigned successfully."
+#: components/Workflow/AssignWorkflow
+msgid "The workflow has been assigned successfully."
+msgstr ""
+
 #. Default: "Transition Created"
 #: components/Transitions/CreateTransition
 msgid "Transition Created"
@@ -109,4 +159,24 @@ msgstr ""
 #. Default: "Workflow"
 #: components/Workflow/WorkflowSidebar
 msgid "Workflow"
+msgstr ""
+
+#. Default: "Workflow Assigned"
+#: components/Workflow/AssignWorkflow
+msgid "Workflow Assigned"
+msgstr ""
+
+#. Default: "Workflow Manager"
+#: components/Controlpanel/WorkflowPanel
+msgid "Workflow Manager"
+msgstr ""
+
+#. Default: "Workflow deleted successfully."
+#: components/Controlpanel/WorkflowTable
+msgid "Workflow deleted successfully."
+msgstr ""
+
+#. Default: "Workflow renamed successfully."
+#: components/Controlpanel/WorkflowTable
+msgid "Workflow renamed successfully."
 msgstr ""
