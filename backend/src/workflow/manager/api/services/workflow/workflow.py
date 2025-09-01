@@ -152,7 +152,7 @@ class DeleteWorkflow(Service):
             return {"error": f"Workflow '{workflow_id}' not found."}
 
         # Safety Check: Prevent deletion if workflow is in use.
-        assigned_types = base.get_assigned_types_for(workflow_id)
+        assigned_types = base._get_assigned_types_for(workflow_id)
         if assigned_types:
             self.request.response.setStatus(400)
             return {"error": f"Cannot delete workflow. It is still assigned to: {', '.join(assigned_types)}"}

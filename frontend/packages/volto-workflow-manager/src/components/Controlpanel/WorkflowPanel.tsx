@@ -102,17 +102,17 @@ const WorkflowControlPanel = (props) => {
   }, [error]);
 
   useEffect(() => {
-    if (operationError) {
+    if (operationError && isProcessingCreation) {
       toast.error(
         <Toast
           error
-          title="Error"
-          content={`Error creating workflow: ${operationError}`}
+          title="Error Creating Workflow"
+          content={operationError}
         />,
       );
       setIsProcessingCreation(false);
     }
-  }, [operationError]);
+  }, [operationError, isProcessingCreation]);
 
   const handleCreateWorkflow = (cloneFromWorkflow, workflowName) => {
     setIsProcessingCreation(true);

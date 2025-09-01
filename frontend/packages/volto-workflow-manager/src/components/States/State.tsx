@@ -62,13 +62,17 @@ const State: React.FC<StateProps> = ({
     null,
   );
 
-  const { statesInfo, transitionsInfo, isLoadingData, selectedItem } =
-    useSelector((state: GlobalRootState) => ({
-      statesInfo: state.state.list,
-      transitionsInfo: state.transition.list,
-      isLoadingData: state.state.list.loading || state.transition.list.loading,
-      selectedItem: state.workflow.selectedItem,
-    }));
+  const statesInfo = useSelector((state: GlobalRootState) => state.state.list);
+  const transitionsInfo = useSelector(
+    (state: GlobalRootState) => state.transition.list,
+  );
+  const isLoadingData = useSelector(
+    (state: GlobalRootState) =>
+      state.state.list.loading || state.transition.list.loading,
+  );
+  const selectedItem = useSelector(
+    (state: GlobalRootState) => state.workflow.selectedItem,
+  );
 
   useEffect(() => {
     if (workflowId) {
