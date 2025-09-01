@@ -19,7 +19,6 @@ def serialize_state(state):
     if not state:
         return None
     
-    # Safely get transitions - handle None case
     transitions = getattr(state, 'transitions', None)
     if transitions is None:
         transitions = []
@@ -28,7 +27,6 @@ def serialize_state(state):
     else:
         transitions = list(transitions)
     
-    # Safely get permission_roles - handle None case
     permission_roles = getattr(state, 'permission_roles', None)
     if permission_roles is None:
         permission_roles = {}
@@ -36,8 +34,7 @@ def serialize_state(state):
         permission_roles = dict(permission_roles)
     else:
         permission_roles = {}
-    
-    # Safely get group_roles - handle None case
+
     group_roles = getattr(state, 'group_roles', None)
     if group_roles is None:
         group_roles = {}
@@ -73,8 +70,6 @@ class EditState(Service):
         # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
         
-        # Extract workflow_id and state_id from params
-        # URL structure: /@states/{workflow_id}/{state_id}
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}/{state_id}"}
@@ -82,22 +77,18 @@ class EditState(Service):
         workflow_id = self.params[0]
         state_id = self.params[1]
         
-        # Initialize Base with the extracted IDs
         base = Base(self.context, self.request, workflow_id=workflow_id, state_id=state_id)
         
-        # Parse JSON body
         try:
             body = json_body(self.request)
         except Exception as e:
             self.request.response.setStatus(400)
             return {"error": f"Invalid JSON payload: {str(e)}"}
 
-        # Validate workflow exists
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
             
-        # Validate state exists
         if not base.selected_state:
             self.request.response.setStatus(404)
             return {"error": f"State '{state_id}' in workflow '{workflow_id}' not found."}
@@ -105,7 +96,6 @@ class EditState(Service):
         state = base.selected_state
         workflow = base.selected_workflow
 
-        # Update state properties from request body
         if 'title' in body:
             state.title = body['title']
         if 'description' in body:
@@ -144,36 +134,29 @@ class AddState(Service):
         # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
         
-        # Extract workflow_id from params
-        # URL structure: /@states/{workflow_id}
         if len(self.params) < 1:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}"}
             
         workflow_id = self.params[0]
         
-        # Initialize Base with workflow_id
         base = Base(self.context, self.request, workflow_id=workflow_id)
         
-        # Parse JSON body
         try:
             body = json_body(self.request)
         except Exception as e:
             self.request.response.setStatus(400)
             return {"error": f"Invalid JSON payload: {str(e)}"}
 
-        # Validate workflow exists
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        # Validate required fields
         title = body.get('title')
         if not title:
             self.request.response.setStatus(400)
             return {"error": "A 'title' for the new state is required."}
 
-        # Generate state ID from title
         state_id = title.strip().replace(" ", "_").lower()
         state_id = re.sub(r'[^a-z0-9_]', '', state_id)
         
@@ -182,26 +165,22 @@ class AddState(Service):
             return {"error": "Unable to generate valid state ID from title."}
             
         if state_id in base.selected_workflow.states.objectIds():
-            self.request.response.setStatus(409)  # Conflict
+            self.request.response.setStatus(409)
             return {"error": f"State with id '{state_id}' already exists."}
 
         try:
             workflow = base.selected_workflow
             
-            # Create the state using the proper DCWorkflow method
             from Products.DCWorkflow.States import StateDefinition
             new_state = StateDefinition(state_id)
             new_state.title = title
             
-            # Set description if provided
             if 'description' in body:
                 new_state.description = body['description']
             
-            # Add the state to the workflow
             workflow.states._setObject(state_id, new_state)
-            new_state = workflow.states[state_id]  # Get the managed object
+            new_state = workflow.states[state_id]  
             
-            # Initialize default properties if they don't exist
             if not hasattr(new_state, 'permission_roles'):
                 new_state.permission_roles = PersistentMapping()
             if not hasattr(new_state, 'group_roles'):
@@ -209,15 +188,13 @@ class AddState(Service):
             if not hasattr(new_state, 'transitions'):
                 new_state.transitions = ()
 
-            # Clone from existing state if requested
             clone_from_id = body.get('clone_from_id')
             if clone_from_id and clone_from_id in workflow.states.objectIds():
                 clone_state(new_state, workflow.states[clone_from_id])
 
-            # Mark the workflow as modified
             workflow._p_changed = True
 
-            self.request.response.setStatus(201)  # Created
+            self.request.response.setStatus(201)
             return {
                 "status": "success",
                 "state": serialize_state(new_state),
@@ -246,8 +223,6 @@ class DeleteState(Service):
         # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
         
-        # Extract workflow_id and state_id from params
-        # URL structure: /@states/{workflow_id}/{state_id}
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}/{state_id}"}
@@ -255,22 +230,18 @@ class DeleteState(Service):
         workflow_id = self.params[0]
         state_id = self.params[1]
         
-        # Initialize Base with the extracted IDs
         base = Base(self.context, self.request, workflow_id=workflow_id, state_id=state_id)
 
-        # Validate workflow exists
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
             
-        # Validate state exists
         if not base.selected_state:
             self.request.response.setStatus(404)
             return {"error": f"State '{state_id}' in workflow '{workflow_id}' not found."}
 
         workflow = base.selected_workflow
         
-        # Check if state is used by transitions
         is_using_state = any(
             getattr(t, 'new_state_id', None) == state_id 
             for t in base.available_transitions
@@ -288,18 +259,15 @@ class DeleteState(Service):
                 self.request.response.setStatus(400)
                 return {"error": "This state is a destination for one or more transitions. A valid 'replacement_state_id' is required in the request body."}
 
-            # Update transitions that reference this state
             for transition in base.available_transitions:
                 if getattr(transition, 'new_state_id', None) == state_id:
                     transition.new_state_id = replacement_id
 
-            # Remap content using this workflow
             chains = base.portal_workflow.listChainOverrides()
             types_ids = [c[0] for c in chains if workflow_id in c[1]]
             if types_ids:
                 remap_workflow(self.context, types_ids, (workflow_id,), {state_id: replacement_id})
 
-        # Delete the state
         workflow.states.deleteStates([state_id])
         
         return {
@@ -323,23 +291,18 @@ class ListStates(Service):
         return self
 
     def reply(self):
-        # Extract workflow_id from params
-        # URL structure: /@states/{workflow_id}
         if len(self.params) < 1:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}"}
             
         workflow_id = self.params[0]
         
-        # Initialize Base with workflow_id
         base = Base(self.context, self.request, workflow_id=workflow_id)
 
-        # Validate workflow exists
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        # Serialize all states
         states = [serialize_state(state) for state in base.available_states]
         
         return {
