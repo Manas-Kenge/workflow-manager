@@ -6,7 +6,7 @@ import {
   DELETE_TRANSITION,
 } from '../constants';
 import { updateState } from './state';
-import { getWorkflows } from './workflow';
+import { getWorkflow } from './workflow';
 
 export interface AddTransitionPayload {
   title: string;
@@ -178,7 +178,7 @@ export const createAndLinkTransition = (
         }
       }
 
-      await dispatch(getWorkflows());
+      await dispatch(getWorkflow(workflowId));
 
       return result;
     } catch (error) {

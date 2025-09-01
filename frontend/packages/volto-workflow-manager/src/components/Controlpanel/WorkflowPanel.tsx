@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../../types';
 import { useLocation, useHistory, Link } from 'react-router-dom';
+import { useIntl, defineMessages } from 'react-intl';
 import {
   Button,
   Heading,
@@ -17,6 +18,7 @@ import CreateWorkflow from '../Workflow/CreateWorkflow';
 import WorkflowView from '../Workflow/WorkflowView';
 import WorkflowTable from './WorkflowTable';
 import ThemeProvider from '../../Provider';
+import Helmet from '@plone/volto/helpers/Helmet/Helmet';
 import Icon from '@plone/volto/components/theme/Icon/Icon';
 import add from '@plone/volto/icons/add.svg';
 import back from '@plone/volto/icons/back.svg';
@@ -37,7 +39,15 @@ const plone_shipped_workflows = [
   'comment_one_state_workflow',
 ];
 
+const messages = defineMessages({
+  workflowManager: {
+    id: 'Workflow Manager',
+    defaultMessage: 'Workflow Manager',
+  },
+});
+
 const WorkflowControlPanel = (props) => {
+  const intl = useIntl();
   const dispatch = useAppDispatch();
   const history = useHistory();
   const location = useLocation();
@@ -92,17 +102,17 @@ const WorkflowControlPanel = (props) => {
   }, [error]);
 
   useEffect(() => {
-    if (operationError) {
+    if (operationError && isProcessingCreation) {
       toast.error(
         <Toast
           error
-          title="Error"
-          content={`Error creating workflow: ${operationError}`}
+          title="Error Creating Workflow"
+          content={operationError}
         />,
       );
       setIsProcessingCreation(false);
     }
-  }, [operationError]);
+  }, [operationError, isProcessingCreation]);
 
   const handleCreateWorkflow = (cloneFromWorkflow, workflowName) => {
     setIsProcessingCreation(true);
@@ -129,6 +139,7 @@ const WorkflowControlPanel = (props) => {
   return (
     <div id="page-controlpanel" className="ui container">
       <View width="100%" padding="size-400">
+        <Helmet title={intl.formatMessage(messages.workflowManager)} />
         <Form width="100%">
           <Well>
             <Heading level={1}>Workflow Manager</Heading>

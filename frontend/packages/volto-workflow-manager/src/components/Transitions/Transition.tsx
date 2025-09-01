@@ -35,13 +35,16 @@ const Transition: React.FC<TransitionProps> = ({
   const [initialTransitionData, setInitialTransitionData] =
     useState<TransitionData | null>(null);
 
-  const { transitionsInfo, statesInfo, isLoading, selectedItem } = useSelector(
-    (state: GlobalRootState) => ({
-      transitionsInfo: state.transition.list,
-      statesInfo: state.state.list,
-      isLoading: state.transition.list.loading || state.state.list.loading,
-      selectedItem: state.workflow.selectedItem,
-    }),
+  const transitionsInfo = useSelector(
+    (state: GlobalRootState) => state.transition.list,
+  );
+  const statesInfo = useSelector((state: GlobalRootState) => state.state.list);
+  const isLoading = useSelector(
+    (state: GlobalRootState) =>
+      state.transition.list.loading || state.state.list.loading,
+  );
+  const selectedItem = useSelector(
+    (state: GlobalRootState) => state.workflow.selectedItem,
   );
 
   useEffect(() => {
@@ -187,7 +190,9 @@ const Transition: React.FC<TransitionProps> = ({
   );
 
   if (isLoading && !transitionsInfo.loaded) {
-    return <ProgressCircle isIndeterminate />;
+    return (
+      <ProgressCircle isIndeterminate aria-label="Loading transitions..." />
+    );
   }
 
   const isPickerDisabled = isDisabled || !transitionsInfo.loaded;
@@ -203,6 +208,7 @@ const Transition: React.FC<TransitionProps> = ({
       >
         <Heading level={3}>Configure a Transition</Heading>
         <Picker
+          aria-label="Choose transition"
           placeholder="Choose a transition..."
           items={transitionsInfo.data?.transitions || []}
           selectedKey={selectedTransitionId}
