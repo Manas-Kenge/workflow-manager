@@ -24,7 +24,12 @@
     "dry-release": "release-it --dry-run",
     "release": "release-it",
     "release-major-alpha": "release-it major --preRelease=alpha",
-    "release-alpha": "release-it --preRelease=alpha"
+    "release-alpha": "release-it --preRelease=alpha",
+    "cypress:open": "cypress open --config-file cypress.config.js",
+    "cypress:run": "cypress run --config-file cypress.config.js",
+    "cypress:run:headless": "cypress run --config-file cypress.config.js --headless",
+    "test:e2e": "cypress run --config-file cypress.config.js",
+    "test:e2e:open": "cypress open --config-file cypress.config.js"
   },
   "addons": [],
   "dependencies": {
@@ -53,6 +58,7 @@
     "@plone/scripts": "^3.6.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "cypress": "13.13.2",
     "release-it": "^17.1.1"
   }
 }

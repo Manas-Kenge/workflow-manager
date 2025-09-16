@@ -1614,6 +1614,9 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.3.7(@types/react@18.3.22)
+      cypress:
+        specifier: 13.13.2
+        version: 13.13.2
       release-it:
         specifier: ^17.1.1
         version: 17.1.1(typescript@5.8.3)
