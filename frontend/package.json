@@ -1,9 +1,8 @@
 {
-  "name": "volto-workflow-manager-dev",
-  "version": "1.0.0-alpha.0",
+  "name": "volto-workflow-manager",
+  "version": "1.0.0",
   "description": "A new project using Plone 6.",
   "author": "Plone Foundation",
-  "homepage": "https://github.com/collective/workflow-manager",
   "license": "MIT",
   "keywords": [
     "volto-addon",
@@ -11,6 +10,11 @@
     "plone",
     "react"
   ],
+  "homepage": "https://github.com/Manas-Kenge/workflow-manager#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Manas-Kenge/workflow-manager.git"
+  },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "start": "VOLTOCONFIG=$(pwd)/volto.config.js pnpm --filter @plone/volto start",
