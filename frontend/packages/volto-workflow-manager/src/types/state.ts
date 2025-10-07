@@ -95,7 +95,6 @@ export interface StateObject {
   group_roles: Record<string, string[]>;
 }
 
-// Response from LIST_STATES endpoint (GET /@states/{workflow_id})
 export interface ListStatesResponse {
   workflow_id: string;
   workflow_title: string;
@@ -103,14 +102,12 @@ export interface ListStatesResponse {
   states: StateObject[];
 }
 
-// Response from ADD_STATE and UPDATE_STATE endpoints
 export interface StateActionResponse {
   status: string;
   state: StateObject;
   message: string;
 }
 
-// Response from DELETE_STATE endpoint
 export interface DeleteStateResponse {
   status: string;
   message: string;

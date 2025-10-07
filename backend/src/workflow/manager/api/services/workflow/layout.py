@@ -12,10 +12,7 @@ from Products.CMFPlone.interfaces import IPloneSiteRoot
 @implementer(IPublishTraverse)
 @adapter(IPloneSiteRoot, Interface)
 class WorkflowLayout(Service):
-    """
-    Accessed via the /@workflow-layout/{workflow_id} endpoint.
-    """
-    
+
     REGISTRY_KEY = "workflow.manager.layouts"
 
     def __init__(self, context, request):
@@ -23,7 +20,6 @@ class WorkflowLayout(Service):
         self.params = []
 
     def publishTraverse(self, request, name):
-        """Captures the workflow_id from the URL path."""
         self.params.append(name)
         return self
 
@@ -56,7 +52,7 @@ class WorkflowLayout(Service):
         new_layout_data = json_body(self.request)
 
         all_layouts[workflow_id] = json.dumps(new_layout_data)
-        
+
         api.portal.set_registry_record(self.REGISTRY_KEY, all_layouts)
 
         self.request.response.setStatus(200)
@@ -66,7 +62,6 @@ class WorkflowLayout(Service):
         }
 
     def _get_all_layouts_from_registry(self):
-        """Helper to safely retrieve the main layouts dictionary."""
         try:
             layouts = api.portal.get_registry_record(self.REGISTRY_KEY)
             return layouts if isinstance(layouts, dict) else {}

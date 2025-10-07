@@ -97,7 +97,7 @@ const ActionsToolbar = ({ workflowId }: { workflowId: string }) => {
 
   return (
     <>
-      <Flex justifyContent="space-between" alignItems="center">
+      <Flex justifyContent="start" alignItems="center" gap="size-100">
         <ButtonGroup>
           <Button variant="accent" onPress={() => setCreateStateOpen(true)}>
             <Icon name={add} size="20px" />

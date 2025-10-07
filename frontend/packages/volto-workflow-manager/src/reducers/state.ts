@@ -45,7 +45,6 @@ export default function state(
   action: AnyAction,
 ): StateReduxState {
   switch (action.type) {
-    // LIST STATES
     case `${LIST_STATES}_PENDING`:
       return { ...state, list: { ...initialState.list, loading: true } };
     case `${LIST_STATES}_SUCCESS`:
@@ -56,14 +55,12 @@ export default function state(
     case `${LIST_STATES}_FAIL`:
       return { ...state, list: { ...initialState.list, error: action.error } };
 
-    // ADD STATE
     case `${ADD_STATE}_PENDING`:
       return { ...state, add: { ...initialState.add, loading: true } };
     case `${ADD_STATE}_SUCCESS`:
       return {
         ...state,
         add: { ...initialState.add, loaded: true, data: action.result },
-        // Optionally update the list data if it exists
         list: state.list.data
           ? {
               ...state.list,
@@ -77,14 +74,12 @@ export default function state(
     case `${ADD_STATE}_FAIL`:
       return { ...state, add: { ...initialState.add, error: action.error } };
 
-    // UPDATE STATE
     case `${UPDATE_STATE}_PENDING`:
       return { ...state, update: { ...initialState.update, loading: true } };
     case `${UPDATE_STATE}_SUCCESS`:
       return {
         ...state,
         update: { ...initialState.update, loaded: true, data: action.result },
-        // Update the individual state data if it matches
         get:
           state.get.data?.id === action.result.state.id
             ? {
@@ -92,7 +87,6 @@ export default function state(
                 data: action.result.state,
               }
             : state.get,
-        // Update the list data if it exists
         list: state.list.data
           ? {
               ...state.list,
@@ -111,14 +105,12 @@ export default function state(
         update: { ...initialState.update, error: action.error },
       };
 
-    // DELETE STATE
     case `${DELETE_STATE}_PENDING`:
       return { ...state, delete: { ...initialState.delete, loading: true } };
     case `${DELETE_STATE}_SUCCESS`:
       return {
         ...state,
         delete: { ...initialState.delete, loaded: true, data: action.result },
-        // Clear individual state data if it was the deleted state
         get:
           state.get.data?.id === action.meta?.stateId
             ? {
@@ -126,7 +118,6 @@ export default function state(
                 data: null,
               }
             : state.get,
-        // Remove from list data if it exists
         list: state.list.data
           ? {
               ...state.list,

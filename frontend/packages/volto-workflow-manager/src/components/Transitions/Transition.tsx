@@ -54,7 +54,6 @@ const Transition: React.FC<TransitionProps> = ({
     }
   }, [dispatch, workflowId]);
 
-  // Sync selectedTransitionId with selectedItem from graph
   useEffect(() => {
     if (
       selectedItem?.kind === 'transition' &&

@@ -14,7 +14,6 @@ import re
 
 
 def serialize_transition(transition):
-    """Serializes a workflow transition object to a dictionary."""
     if not transition:
         return None
     guard = transition.getGuard()
@@ -35,10 +34,6 @@ def serialize_transition(transition):
 
 @implementer(IPublishTraverse)
 class ListTransitions(Service):
-    """
-    Lists all transitions in a workflow.
-    Endpoint: GET /@transitions/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -51,7 +46,7 @@ class ListTransitions(Service):
         if len(self.params) < 1:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}"}
-            
+
         workflow_id = self.params[0]
         base = Base(self.context, self.request, workflow_id=workflow_id)
 
@@ -69,10 +64,6 @@ class ListTransitions(Service):
 
 @implementer(IPublishTraverse)
 class GetTransition(Service):
-    """
-    Gets details for a specific transition.
-    Endpoint: GET /@transitions/{workflow_id}/{transition_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -85,16 +76,16 @@ class GetTransition(Service):
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
-            
+
         workflow_id = self.params[0]
         transition_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
 
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
         if not base.selected_transition:
             self.request.response.setStatus(404)
             return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
@@ -120,10 +111,6 @@ class GetTransition(Service):
 
 @implementer(IPublishTraverse)
 class AddTransition(Service):
-    """
-    Creates a new transition within a workflow.
-    Endpoint: POST /@transitions/{workflow_id}/{transition_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -134,16 +121,16 @@ class AddTransition(Service):
 
     def reply(self):
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
-            
+
         workflow_id = self.params[0]
         transition_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id)
-        
+
         try:
             body = json_body(self.request)
         except Exception as e:
@@ -169,14 +156,14 @@ class AddTransition(Service):
 
         try:
             workflow = base.selected_workflow
-            
+
             workflow.transitions.addTransition(transition_id)
             new_transition = workflow.transitions[transition_id]
             new_transition.title = title
-            
+
             if 'description' in body:
                 new_transition.description = body['description']
-            
+
             if 'new_state_id' in body:
                 new_state_id = body['new_state_id']
                 if new_state_id in workflow.states.objectIds():
@@ -215,10 +202,6 @@ class AddTransition(Service):
 
 @implementer(IPublishTraverse)
 class UpdateTransition(Service):
-    """
-    Updates an existing transition from a JSON payload.
-    Endpoint: PATCH /@transitions/{workflow_id}/{transition_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -229,16 +212,16 @@ class UpdateTransition(Service):
 
     def reply(self):
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
-            
+
         workflow_id = self.params[0]
         transition_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
-        
+
         try:
             body = json_body(self.request)
         except Exception as e:
@@ -248,7 +231,7 @@ class UpdateTransition(Service):
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
         if not base.selected_transition:
             self.request.response.setStatus(404)
             return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
@@ -303,7 +286,7 @@ class UpdateTransition(Service):
                     current_transitions = list(getattr(state, 'transitions', ()))
                     has_transition = transition_id in current_transitions
                     should_have_transition = state.id in new_state_ids
-                    
+
                     if should_have_transition and not has_transition:
                         current_transitions.append(transition_id)
                         state.transitions = tuple(current_transitions)
@@ -325,10 +308,6 @@ class UpdateTransition(Service):
 
 @implementer(IPublishTraverse)
 class DeleteTransition(Service):
-    """
-    Deletes a transition and cleans up references.
-    Endpoint: DELETE /@transitions/{workflow_id}/{transition_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -339,37 +318,37 @@ class DeleteTransition(Service):
 
     def reply(self):
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@transitions/{workflow_id}/{transition_id}"}
-            
+
         workflow_id = self.params[0]
         transition_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id, transition_id=transition_id)
 
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
         if not base.selected_transition:
             self.request.response.setStatus(404)
             return {"error": f"Transition '{transition_id}' in workflow '{workflow_id}' not found."}
 
         try:
             workflow = base.selected_workflow
-            
+
             base.actions.delete_rule_for(base.selected_transition)
-            
+
             for state in base.available_states:
                 current_transitions = list(getattr(state, 'transitions', ()))
                 if transition_id in current_transitions:
                     current_transitions.remove(transition_id)
                     state.transitions = tuple(current_transitions)
-            
+
             workflow.transitions.deleteTransitions([transition_id])
-            
+
             workflow._p_changed = True
 
             return {

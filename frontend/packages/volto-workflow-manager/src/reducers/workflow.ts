@@ -47,7 +47,6 @@ export default function workflow(
   action: AnyAction,
 ): WorkflowReduxState {
   switch (action.type) {
-    // Get Workflows
     case `${GET_WORKFLOWS}_PENDING`:
       return {
         ...state,
@@ -81,7 +80,6 @@ export default function workflow(
         },
       };
 
-    // Add Workflow
     case `${ADD_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -94,7 +92,6 @@ export default function workflow(
         lastCreatedWorkflowId: null,
       };
     case `${ADD_WORKFLOW}_SUCCESS`:
-      // Backend returns { status, workflow_id, message }
       const workflowId = action.result?.workflow_id;
       return {
         ...state,
@@ -105,7 +102,6 @@ export default function workflow(
           result: action.result,
         },
         lastCreatedWorkflowId: workflowId || null,
-        // Clear loaded state to force refresh after creation
         workflows: {
           ...state.workflows,
           loaded: false,
@@ -123,7 +119,6 @@ export default function workflow(
         lastCreatedWorkflowId: null,
       };
 
-    // Delete Workflow
     case `${DELETE_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -135,7 +130,6 @@ export default function workflow(
         },
       };
     case `${DELETE_WORKFLOW}_SUCCESS`:
-      // Use meta.workflowId from action creator instead of parsing path
       const deletedWorkflowId =
         action.meta?.workflowId || action.request?.path?.split('/').pop();
       return {
@@ -164,7 +158,6 @@ export default function workflow(
         },
       };
 
-    // Get Workflow
     case `${GET_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -198,7 +191,6 @@ export default function workflow(
         },
       };
 
-    // Update Workflow
     case `${UPDATE_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -228,7 +220,6 @@ export default function workflow(
         ...state,
         operation: { ...state.operation, loading: false, error: action.error },
       };
-    // Update Workflow Security
     case `${UPDATE_WORKFLOW_SECURITY}_PENDING`:
       return {
         ...state,
@@ -260,7 +251,6 @@ export default function workflow(
         },
       };
 
-    // Assign Workflow
     case `${ASSIGN_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -272,7 +262,6 @@ export default function workflow(
         },
       };
     case `${ASSIGN_WORKFLOW}_SUCCESS`:
-      // Backend returns { status, workflow, type, message }
       const assignResult = action.result;
       return {
         ...state,
@@ -282,12 +271,10 @@ export default function workflow(
           error: null,
           result: assignResult,
         },
-        // Update the assigned_types in the workflow items
         workflows: {
           ...state.workflows,
           items: state.workflows.items.map((workflow) => {
             if (workflow.id === assignResult?.workflow) {
-              // Only add if not already present
               const newType = assignResult.type;
               const alreadyAssigned = workflow.assigned_types.includes(newType);
               return {
@@ -312,7 +299,6 @@ export default function workflow(
         },
       };
 
-    // Validation (Sanity Check)
     case `${VALIDATE_WORKFLOW}_PENDING`:
       return {
         ...state,
@@ -345,10 +331,9 @@ export default function workflow(
       return {
         ...state,
         validation: {
-          ...initialState.validation, // Resets errors, error, and loading
+          ...initialState.validation,
         },
       };
-    // Clear last created workflow ID
     case CLEAR_LAST_CREATED_WORKFLOW:
       return {
         ...state,

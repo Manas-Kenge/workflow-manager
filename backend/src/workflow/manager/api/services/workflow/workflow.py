@@ -12,9 +12,9 @@ from zope.interface import Interface
 from zope.publisher.interfaces import IPublishTraverse
 
 def _serialize_workflow(workflow, base):
-    """Serializes a single workflow object into a dictionary."""
+
     workflow_base = Base(base.context, base.request, workflow_id=workflow.id)
-    
+
     return {
         "id": workflow.id,
         "title": workflow.title or workflow.id,
@@ -50,10 +50,6 @@ def _serialize_workflow(workflow, base):
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class GetWorkflows(Service):
-    """
-    Lists all available workflows with their detailed configuration.
-    Endpoint: GET /@workflows
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -61,7 +57,7 @@ class GetWorkflows(Service):
     def publishTraverse(self, request, name):
         self.params.append(name)
         return self
-    
+
     def reply(self):
         if self.params:
             workflow_id = self.params[0]
@@ -71,7 +67,7 @@ class GetWorkflows(Service):
             if not workflow:
                 self.request.response.setStatus(404)
                 return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
             return _serialize_workflow(workflow, base)
 
         else:
@@ -89,13 +85,9 @@ class GetWorkflows(Service):
 @implementer(IExpandableElement)
 @adapter(IWorkflowAware, Interface)
 class AddWorkflow(Service):
-    """
-    Adds a new workflow by cloning an existing one.
-    """
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         base = Base(self.context, self.request)
         body = json_body(self.request)
         workflow_title = body.get("workflow-name")
@@ -112,7 +104,7 @@ class AddWorkflow(Service):
         new_workflow = base.portal_workflow[workflow_id]
         new_workflow.title = workflow_title
         base.portal_workflow._p_changed = True
-        
+
         self.request.response.setStatus(201)
         return {
             "status": "success",
@@ -124,9 +116,6 @@ class AddWorkflow(Service):
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class DeleteWorkflow(Service):
-    """
-    Deletes a workflow and its associated transition rules.
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -136,13 +125,12 @@ class DeleteWorkflow(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if not self.params:
             self.request.response.setStatus(400)
             return {"error": "No workflow ID provided in URL"}
-            
+
         workflow_id = self.params[0]
         base = Base(self.context, self.request, workflow_id=workflow_id)
 
@@ -150,7 +138,6 @@ class DeleteWorkflow(Service):
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
 
-        # Safety Check: Prevent deletion if workflow is in use.
         assigned_types = base._get_assigned_types_for(workflow_id)
         if assigned_types:
             self.request.response.setStatus(400)
@@ -166,10 +153,6 @@ class DeleteWorkflow(Service):
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class UpdateWorkflow(Service):
-    """
-    Updates properties of a workflow.
-    Endpoint: PATCH /@workflows/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -202,17 +185,13 @@ class UpdateWorkflow(Service):
 
         if changed:
             workflow._p_changed = True
-        
+
         return _serialize_workflow(workflow, base)
 
 
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class UpdateSecuritySettings(Service):
-    """
-    Triggers a recursive update of role mappings on content objects.
-    Endpoint: POST /@workflows/{workflow_id}/@update-security
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -222,13 +201,12 @@ class UpdateSecuritySettings(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if not self.params:
             self.request.response.setStatus(400)
             return {"error": "No workflow ID provided in URL"}
-            
+
         workflow_id = self.params[0]
         base = Base(self.context, self.request, workflow_id=workflow_id)
 
@@ -249,10 +227,6 @@ class UpdateSecuritySettings(Service):
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class AssignWorkflow(Service):
-    """
-    Assigns a workflow to a specific content type.
-    Endpoint: POST /@workflow-assign/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -262,13 +236,12 @@ class AssignWorkflow(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if not self.params:
             self.request.response.setStatus(400)
             return {"error": "No workflow ID provided in URL"}
-            
+
         workflow_id = self.params[0]
         base = Base(self.context, self.request, workflow_id=workflow_id)
         body = json_body(self.request)
@@ -295,10 +268,6 @@ class AssignWorkflow(Service):
 @implementer(IPublishTraverse)
 @adapter(IWorkflowAware, Interface)
 class SanityCheck(Service):
-    """
-    Performs a sanity check on a workflow.
-    Endpoint: GET /@sanity-check/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -311,7 +280,7 @@ class SanityCheck(Service):
         if not self.params:
             self.request.response.setStatus(400)
             return {"error": "No workflow ID provided in URL"}
-            
+
         workflow_id = self.params[0]
         base = Base(self.context, self.request, workflow_id=workflow_id)
         workflow = base.selected_workflow
@@ -323,7 +292,7 @@ class SanityCheck(Service):
         states = list(workflow.states.objectValues())
         transitions = list(workflow.transitions.objectValues())
         state_ids = [s.id for s in states]
-        
+
         errors = {
             "state_errors": [],
             "transition_errors": [],
@@ -337,11 +306,11 @@ class SanityCheck(Service):
         for state in states:
             if state.id != workflow.initial_state and state.id not in all_destination_ids:
                 errors["state_errors"].append({
-                    "id": state.id, 
-                    "title": state.title, 
+                    "id": state.id,
+                    "title": state.title,
                     "error": "State is not reachable by any transition."
                 })
-        
+
         all_used_transition_ids = set()
         for state in states:
             for transition_id in getattr(state, 'transitions', ()):
@@ -354,7 +323,7 @@ class SanityCheck(Service):
                     "title": transition.title,
                     "error": f"Transition points to a non-existent state: '{transition.new_state_id}'."
                 })
-            
+
             if transition.id not in all_used_transition_ids:
                 errors["transition_errors"].append({
                     "id": transition.id,
@@ -364,10 +333,10 @@ class SanityCheck(Service):
 
         has_errors = any([
             errors["state_errors"],
-            errors["transition_errors"], 
+            errors["transition_errors"],
             errors["initial_state_error"]
         ])
-        
+
         return {
             "status": "success" if not has_errors else "error",
             "workflow": workflow.id,

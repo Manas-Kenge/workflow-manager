@@ -21,7 +21,6 @@ export default function transition(
   action: AnyAction,
 ): TransitionReduxState {
   switch (action.type) {
-    // LIST TRANSITIONS
     case `${LIST_TRANSITIONS}_PENDING`:
       return { ...state, list: { ...initialState.list, loading: true } };
     case `${LIST_TRANSITIONS}_SUCCESS`:
@@ -32,7 +31,6 @@ export default function transition(
     case `${LIST_TRANSITIONS}_FAIL`:
       return { ...state, list: { ...initialState.list, error: action.error } };
 
-    // GET TRANSITION
     case `${GET_TRANSITION}_PENDING`:
       return { ...state, get: { ...initialState.get, loading: true } };
     case `${GET_TRANSITION}_SUCCESS`:
@@ -43,7 +41,6 @@ export default function transition(
     case `${GET_TRANSITION}_FAIL`:
       return { ...state, get: { ...initialState.get, error: action.error } };
 
-    // ADD TRANSITION
     case `${ADD_TRANSITION}_PENDING`:
       return { ...state, add: { ...initialState.add, loading: true } };
     case `${ADD_TRANSITION}_SUCCESS`:
@@ -66,7 +63,6 @@ export default function transition(
     case `${ADD_TRANSITION}_FAIL`:
       return { ...state, add: { ...initialState.add, error: action.error } };
 
-    // UPDATE TRANSITION
     case `${UPDATE_TRANSITION}_PENDING`:
       return { ...state, update: { ...initialState.update, loading: true } };
     case `${UPDATE_TRANSITION}_SUCCESS`:
@@ -102,7 +98,6 @@ export default function transition(
         update: { ...initialState.update, error: action.error },
       };
 
-    // DELETE TRANSITION
     case `${DELETE_TRANSITION}_PENDING`:
       return { ...state, delete: { ...initialState.delete, loading: true } };
     case `${DELETE_TRANSITION}_SUCCESS`:
