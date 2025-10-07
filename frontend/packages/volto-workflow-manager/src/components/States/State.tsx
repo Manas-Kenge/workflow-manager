@@ -81,7 +81,6 @@ const State: React.FC<StateProps> = ({
     }
   }, [dispatch, workflowId]);
 
-  // Sync selectedStateId with selectedItem from graph
   useEffect(() => {
     if (selectedItem?.kind === 'state' && selectedItem.id !== selectedStateId) {
       setSelectedStateId(selectedItem.id);

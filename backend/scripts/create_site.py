@@ -3,7 +3,7 @@ from Products.CMFPlone.factory import _DEFAULT_PROFILE
 from Products.CMFPlone.factory import addPloneSite
 from Products.GenericSetup.tool import SetupTool
 from Testing.makerequest import makerequest
-from workflow.manager.interfaces import IBrowserLayer
+from workflow.manager.interfaces import IPloneWorkflowmanagerLayer
 from zope.interface import directlyProvidedBy
 from zope.interface import directlyProvides
 
@@ -35,7 +35,7 @@ app = makerequest(globals()["app"])
 
 request = app.REQUEST
 
-ifaces = [IBrowserLayer]
+ifaces = [IPloneWorkflowmanagerLayer]
 for iface in directlyProvidedBy(request):
     ifaces.append(iface)
 

@@ -13,12 +13,10 @@ from zope.publisher.interfaces import IPublishTraverse
 import re
 
 
-# Helper to serialize a state object to a dictionary for JSON responses.
 def serialize_state(state):
-    """Serializes a workflow state object to a dictionary."""
     if not state:
         return None
-    
+
     transitions = getattr(state, 'transitions', None)
     if transitions is None:
         transitions = []
@@ -26,7 +24,7 @@ def serialize_state(state):
         transitions = list(transitions) if transitions else []
     else:
         transitions = list(transitions)
-    
+
     permission_roles = getattr(state, 'permission_roles', None)
     if permission_roles is None:
         permission_roles = {}
@@ -42,7 +40,7 @@ def serialize_state(state):
         group_roles = dict(group_roles)
     else:
         group_roles = {}
-    
+
     return {
         'id': state.id,
         'title': getattr(state, 'title', ''),
@@ -54,10 +52,6 @@ def serialize_state(state):
 
 @implementer(IPublishTraverse)
 class EditState(Service):
-    """
-    Updates an existing state from a JSON payload.
-    Endpoint: PATCH /@states/{workflow_id}/{state_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -67,18 +61,17 @@ class EditState(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}/{state_id}"}
-        
+
         workflow_id = self.params[0]
         state_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id, state_id=state_id)
-        
+
         try:
             body = json_body(self.request)
         except Exception as e:
@@ -88,7 +81,7 @@ class EditState(Service):
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
         if not base.selected_state:
             self.request.response.setStatus(404)
             return {"error": f"State '{state_id}' in workflow '{workflow_id}' not found."}
@@ -118,10 +111,6 @@ class EditState(Service):
 
 @implementer(IPublishTraverse)
 class AddState(Service):
-    """
-    Creates a new state within a workflow from a JSON payload.
-    Endpoint: POST /@states/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -131,17 +120,16 @@ class AddState(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 1:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}"}
-            
+
         workflow_id = self.params[0]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id)
-        
+
         try:
             body = json_body(self.request)
         except Exception as e:
@@ -159,28 +147,28 @@ class AddState(Service):
 
         state_id = title.strip().replace(" ", "_").lower()
         state_id = re.sub(r'[^a-z0-9_]', '', state_id)
-        
+
         if not state_id:
             self.request.response.setStatus(400)
             return {"error": "Unable to generate valid state ID from title."}
-            
+
         if state_id in base.selected_workflow.states.objectIds():
             self.request.response.setStatus(409)
             return {"error": f"State with id '{state_id}' already exists."}
 
         try:
             workflow = base.selected_workflow
-            
+
             from Products.DCWorkflow.States import StateDefinition
             new_state = StateDefinition(state_id)
             new_state.title = title
-            
+
             if 'description' in body:
                 new_state.description = body['description']
-            
+
             workflow.states._setObject(state_id, new_state)
-            new_state = workflow.states[state_id]  
-            
+            new_state = workflow.states[state_id]
+
             if not hasattr(new_state, 'permission_roles'):
                 new_state.permission_roles = PersistentMapping()
             if not hasattr(new_state, 'group_roles'):
@@ -207,10 +195,6 @@ class AddState(Service):
 
 @implementer(IPublishTraverse)
 class DeleteState(Service):
-    """
-    Deletes a state, remapping content if necessary.
-    Endpoint: DELETE /@states/{workflow_id}/{state_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -220,30 +204,29 @@ class DeleteState(Service):
         return self
 
     def reply(self):
-        # Disable CSRF protection for REST API service
         alsoProvides(self.request, IDisableCSRFProtection)
-        
+
         if len(self.params) < 2:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}/{state_id}"}
-            
+
         workflow_id = self.params[0]
         state_id = self.params[1]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id, state_id=state_id)
 
         if not base.selected_workflow:
             self.request.response.setStatus(404)
             return {"error": f"Workflow '{workflow_id}' not found."}
-            
+
         if not base.selected_state:
             self.request.response.setStatus(404)
             return {"error": f"State '{state_id}' in workflow '{workflow_id}' not found."}
 
         workflow = base.selected_workflow
-        
+
         is_using_state = any(
-            getattr(t, 'new_state_id', None) == state_id 
+            getattr(t, 'new_state_id', None) == state_id
             for t in base.available_transitions
         )
 
@@ -253,7 +236,7 @@ class DeleteState(Service):
             except Exception as e:
                 self.request.response.setStatus(400)
                 return {"error": f"Invalid JSON payload: {str(e)}"}
-                
+
             replacement_id = body.get('replacement_state_id')
             if not replacement_id or replacement_id not in workflow.states.objectIds():
                 self.request.response.setStatus(400)
@@ -269,7 +252,7 @@ class DeleteState(Service):
                 remap_workflow(self.context, types_ids, (workflow_id,), {state_id: replacement_id})
 
         workflow.states.deleteStates([state_id])
-        
+
         return {
             "status": "success",
             "message": _("State deleted successfully")
@@ -278,10 +261,6 @@ class DeleteState(Service):
 
 @implementer(IPublishTraverse)
 class ListStates(Service):
-    """
-    Lists all states in a workflow.
-    Endpoint: GET /@states/{workflow_id}
-    """
     def __init__(self, context, request):
         super().__init__(context, request)
         self.params = []
@@ -294,9 +273,9 @@ class ListStates(Service):
         if len(self.params) < 1:
             self.request.response.setStatus(400)
             return {"error": "Invalid URL format. Expected: /@states/{workflow_id}"}
-            
+
         workflow_id = self.params[0]
-        
+
         base = Base(self.context, self.request, workflow_id=workflow_id)
 
         if not base.selected_workflow:
@@ -304,7 +283,7 @@ class ListStates(Service):
             return {"error": f"Workflow '{workflow_id}' not found."}
 
         states = [serialize_state(state) for state in base.available_states]
-        
+
         return {
             "workflow_id": workflow_id,
             "workflow_title": getattr(base.selected_workflow, 'title', workflow_id),

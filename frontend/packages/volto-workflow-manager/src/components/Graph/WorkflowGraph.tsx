@@ -123,7 +123,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
     (_event: React.MouseEvent, node: Node<NodeData>) => {
       const selected = { kind: 'state' as const, id: node.id };
       dispatch(selectWorkflowItem(selected));
-      dispatch(setSidebarTab(1)); // Switch to "States" tab
+      dispatch(setSidebarTab(1));
     },
     [dispatch],
   );
@@ -134,7 +134,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
       if (transitionId) {
         const selected = { kind: 'transition' as const, id: transitionId };
         dispatch(selectWorkflowItem(selected));
-        dispatch(setSidebarTab(2)); // Switch to "Transitions" tab
+        dispatch(setSidebarTab(2));
       }
     },
     [dispatch],
