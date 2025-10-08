@@ -1,17 +1,12 @@
-from AccessControl import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from plone.memoize.view import memoize
-from plone.protect.interfaces import IDisableCSRFProtection
 from workflow.manager.actionmanager import ActionManager
 from workflow.manager.permissions import (
     allowed_guard_permissions,
     managed_permissions,
 )
-from zope.component import getMultiAdapter
-from zope.interface import alsoProvides
-from zope.schema.interfaces import IVocabularyFactory
 from zope.component import getUtility
-import json
+from zope.schema.interfaces import IVocabularyFactory
 
 
 class Base:
@@ -85,51 +80,6 @@ class Base:
     def actions(self):
         return ActionManager()
 
-    def authorize(self):
-        authenticator = getMultiAdapter(
-            (self.context, self.request), name="authenticator"
-        )
-        if not authenticator.verify():
-            raise Unauthorized("CSRF token validation failed")
-
-    def disable_csrf_protection(self):
-        alsoProvides(self.request, IDisableCSRFProtection)
-
-    def get_csrf_token(self):
-        authenticator = getMultiAdapter(
-            (self.context, self.request), name="authenticator"
-        )
-        return authenticator.token()
-
-    def validate_csrf_token(self, token):
-        try:
-            authenticator = getMultiAdapter(
-                (self.context, self.request), name="authenticator"
-            )
-            original_token = self.request.form.get('_authenticator')
-            self.request.form['_authenticator'] = token
-
-            result = authenticator.verify()
-
-            if original_token is not None:
-                self.request.form['_authenticator'] = original_token
-            else:
-                self.request.form.pop('_authenticator', None)
-
-            return result
-        except Exception:
-            return False
-
-    def get_state(self, state_id):
-        if self.selected_workflow and state_id in self.selected_workflow.states.objectIds():
-            return self.selected_workflow.states[state_id]
-        return None
-
-    def get_transition(self, transition_id):
-        if self.selected_workflow and transition_id in self.selected_workflow.transitions.objectIds():
-            return self.selected_workflow.transitions[transition_id]
-        return None
-
     @property
     @memoize
     def managed_permissions(self):
@@ -143,16 +93,6 @@ class Base:
         if not self.selected_workflow:
             return []
         return allowed_guard_permissions(self.selected_workflow.getId())
-
-    @property
-    @memoize
-    def assignable_types(self):
-        vocab_factory = getUtility(IVocabularyFactory,
-            name="plone.app.vocabularies.ReallyUserFriendlyTypes")
-        return sorted(
-            [{"id": v.value, "title": v.title} for v in vocab_factory(self.context)],
-            key=lambda v: v['title']
-        )
 
     def get_assignable_types_for(self, workflow_id):
         assigned_types = self._get_assigned_types_for(workflow_id)
