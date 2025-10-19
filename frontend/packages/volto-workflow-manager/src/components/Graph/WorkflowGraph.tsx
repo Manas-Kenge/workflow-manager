@@ -10,6 +10,8 @@ import {
   reconnectEdge,
   useEdgesState,
   useNodesState,
+  ConnectionMode,
+  MarkerType,
   type Node,
   type Edge,
   type FitViewOptions,
@@ -27,9 +29,9 @@ import { setSidebarTab } from '@plone/volto/actions/sidebar/sidebar';
 const fitViewOptions: FitViewOptions = { padding: 0.2 };
 const defaultEdgeOptions: DefaultEdgeOptions = {
   animated: false,
-  type: 'custom',
+  type: 'bidirectional',
 };
-const edgeTypes = { custom: CustomEdge };
+const edgeTypes = { bidirectional: CustomEdge };
 const nodeTypes = { custom: CustomNode };
 
 interface WorkflowGraphProps {
@@ -82,13 +84,13 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
           id: `${state.id}-${transitionId}-${transition.new_state_id}`,
           source: state.id,
           target: transition.new_state_id,
-          type: 'custom',
+          type: 'bidirectional',
           data: {
             label: transition.title,
             transitionId: transition.id,
           },
           markerEnd: {
-            type: 'arrowclosed',
+            type: MarkerType.ArrowClosed,
             color: '#b1b1b7',
           },
         });
@@ -157,7 +159,7 @@ const WorkflowGraphInner: React.FC<WorkflowGraphProps> = ({ workflow }) => {
           fitView
           fitViewOptions={fitViewOptions}
           defaultEdgeOptions={defaultEdgeOptions}
-          connectionMode="strict"
+          connectionMode={ConnectionMode.Strict}
         >
           <Background />
           <Controls />
